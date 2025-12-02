@@ -1,0 +1,28 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(composer create-project:*)",
+      "Bash(dir:*)",
+      "Bash(php --version:*)",
+      "Bash(cat:*)",
+      "Bash(findstr:*)",
+      "Bash(composer install:*)",
+      "Bash(composer dump-autoload:*)",
+      "Bash(php -r:*)",
+      "Bash(composer config:*)",
+      "Bash(php artisan config:publish:*)",
+      "Bash(php artisan:*)",
+      "Bash(touch:*)",
+      "Bash(npm install:*)",
+      "Bash(\"/c/xampp/mysql/bin/mysql.exe\":*)",
+      "Bash(curl:*)",
+      "Bash(npm run build:*)",
+      "Bash(/c/xampp/mysql/bin/mysql.exe:*)",
+      "Bash(find:*)",
+      "Bash(mkdir:*)"
+    ],
+    "deny": [],
+    "ask": []
+  },
+  "outputStyle": "default"
+}
