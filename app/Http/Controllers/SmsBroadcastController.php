@@ -303,4 +303,232 @@ class SmsBroadcastController extends Controller
 
         return $query->select('id', 'first_name', 'last_name', 'phone')->get();
     }
+
+    /**
+     * Get SMS templates (AJAX endpoint).
+     */
+    public function getTemplates()
+    {
+        $templates = [
+            'birthday' => [
+                'name' => 'Birthday Greeting',
+                'message' => 'Happy Birthday {first_name}! May God bless you abundantly on your special day. Enjoy your celebration! - {church_name}',
+                'variables' => ['first_name', 'church_name']
+            ],
+            'welcome' => [
+                'name' => 'New Member Welcome',
+                'message' => 'Welcome to {church_name}, {first_name}! We are blessed to have you as part of our family. See you this Sunday!',
+                'variables' => ['first_name', 'church_name']
+            ],
+            'reminder' => [
+                'name' => 'Service Reminder',
+                'message' => 'Reminder: {service_name} today at {service_time}. Location: {church_address}. We look forward to seeing you!',
+                'variables' => ['service_name', 'service_time', 'church_address']
+            ],
+            'announcement' => [
+                'name' => 'General Announcement',
+                'message' => '{announcement_text} For more info, contact us at {contact_number}. God bless! - {church_name}',
+                'variables' => ['announcement_text', 'contact_number', 'church_name']
+            ],
+            'prayer' => [
+                'name' => 'Prayer Meeting',
+                'message' => 'Join us for prayer meeting {day} at {time}. "The prayer of a righteous person is powerful and effective." - James 5:16',
+                'variables' => ['day', 'time']
+            ],
+            'giving' => [
+                'name' => 'Giving Receipt',
+                'message' => 'Thank you {first_name} for your generous gift of GHS {amount}. "God loves a cheerful giver" - 2 Cor 9:7. Receipt: {receipt_number}',
+                'variables' => ['first_name', 'amount', 'receipt_number']
+            ],
+        ];
+
+        return response()->json([
+            'success' => true,
+            'templates' => $templates
+        ]);
+    }
+
+    /**
+     * Preview message with variable substitution (AJAX endpoint).
+     */
+    public function previewMessage(Request $request)
+    {
+        $validated = $request->validate([
+            'message' => 'required|string',
+            'sample_member_id' => 'nullable|exists:members,id'
+        ]);
+
+        $message = $validated['message'];
+        $sampleMember = null;
+
+        if (isset($validated['sample_member_id'])) {
+            $sampleMember = Member::find($validated['sample_member_id']);
+        } else {
+            // Use first active member as sample
+            $sampleMember = Member::where('member_status', 'active')->first();
+        }
+
+        // Substitute variables
+        $preview = $this->substituteVariables($message, $sampleMember);
+
+        // Calculate segments
+        $length = strlen($preview);
+        $segments = $length <= 160 ? 1 : ceil($length / 153);
+
+        return response()->json([
+            'success' => true,
+            'preview' => $preview,
+            'original' => $message,
+            'length' => $length,
+            'segments' => $segments,
+            'sample_member' => $sampleMember ? $sampleMember->full_name : null
+        ]);
+    }
+
+    /**
+     * Get delivery statistics (AJAX endpoint).
+     */
+    public function deliveryStats(Request $request)
+    {
+        $days = $request->input('days', 30);
+        $startDate = now()->subDays($days);
+
+        $stats = [
+            'total_sent' => SmsBroadcast::where('status', 'completed')
+                ->where('created_at', '>=', $startDate)
+                ->sum('sent_count'),
+            'total_failed' => SmsBroadcast::where('created_at', '>=', $startDate)
+                ->sum('failed_count'),
+            'total_cost' => SmsBroadcast::where('status', 'completed')
+                ->where('created_at', '>=', $startDate)
+                ->sum('actual_cost'),
+            'broadcasts_sent' => SmsBroadcast::where('status', 'completed')
+                ->where('created_at', '>=', $startDate)
+                ->count(),
+            'success_rate' => 0,
+        ];
+
+        $totalAttempted = $stats['total_sent'] + $stats['total_failed'];
+        if ($totalAttempted > 0) {
+            $stats['success_rate'] = round(($stats['total_sent'] / $totalAttempted) * 100, 2);
+        }
+
+        // Daily breakdown
+        $dailyStats = SmsBroadcast::where('created_at', '>=', $startDate)
+            ->selectRaw('DATE(created_at) as date, SUM(sent_count) as sent, SUM(failed_count) as failed')
+            ->groupBy('date')
+            ->orderBy('date')
+            ->get();
+
+        return response()->json([
+            'success' => true,
+            'stats' => $stats,
+            'daily_breakdown' => $dailyStats
+        ]);
+    }
+
+    /**
+     * Validate phone numbers (AJAX endpoint).
+     */
+    public function validatePhones(Request $request)
+    {
+        $validated = $request->validate([
+            'phone_numbers' => 'required|array',
+            'phone_numbers.*' => 'string'
+        ]);
+
+        $results = [];
+        foreach ($validated['phone_numbers'] as $phone) {
+            $results[] = [
+                'phone' => $phone,
+                'valid' => $this->isValidPhoneNumber($phone),
+                'formatted' => $this->formatPhoneNumber($phone)
+            ];
+        }
+
+        $validCount = collect($results)->where('valid', true)->count();
+
+        return response()->json([
+            'success' => true,
+            'results' => $results,
+            'valid_count' => $validCount,
+            'invalid_count' => count($results) - $validCount
+        ]);
+    }
+
+    /**
+     * Get character count and segment info (AJAX endpoint).
+     */
+    public function getMessageInfo(Request $request)
+    {
+        $validated = $request->validate([
+            'message' => 'required|string'
+        ]);
+
+        $message = $validated['message'];
+        $length = strlen($message);
+        $segments = $length <= 160 ? 1 : ceil($length / 153);
+        $remaining = $segments === 1 ? (160 - $length) : (($segments * 153) - $length);
+
+        return response()->json([
+            'success' => true,
+            'length' => $length,
+            'segments' => $segments,
+            'remaining' => $remaining,
+            'max_length' => 1600,
+            'warning' => $segments > 3 ? 'Long message may incur additional costs' : null
+        ]);
+    }
+
+    /**
+     * Substitute variables in message.
+     */
+    protected function substituteVariables(string $message, $member = null): string
+    {
+        if (!$member) {
+            return $message;
+        }
+
+        $variables = [
+            '{first_name}' => $member->first_name ?? '',
+            '{last_name}' => $member->last_name ?? '',
+            '{full_name}' => $member->full_name ?? '',
+            '{church_name}' => config('app.name', 'Our Church'),
+            '{church_address}' => config('church.address', ''),
+            '{contact_number}' => config('church.phone', ''),
+        ];
+
+        return str_replace(array_keys($variables), array_values($variables), $message);
+    }
+
+    /**
+     * Validate phone number format.
+     */
+    protected function isValidPhoneNumber(string $phone): bool
+    {
+        // Remove all non-numeric characters
+        $cleaned = preg_replace('/[^0-9]/', '', $phone);
+
+        // Check if it's a valid Ghana phone number (10 digits starting with 0, or with country code)
+        return preg_match('/^(0[0-9]{9}|233[0-9]{9}|\+233[0-9]{9})$/', $cleaned);
+    }
+
+    /**
+     * Format phone number to standard format.
+     */
+    protected function formatPhoneNumber(string $phone): string
+    {
+        $cleaned = preg_replace('/[^0-9]/', '', $phone);
+
+        // Convert to international format
+        if (strlen($cleaned) === 10 && $cleaned[0] === '0') {
+            return '+233' . substr($cleaned, 1);
+        } elseif (strlen($cleaned) === 12 && substr($cleaned, 0, 3) === '233') {
+            return '+' . $cleaned;
+        } elseif (strlen($cleaned) === 13 && $cleaned[0] === '+') {
+            return $cleaned;
+        }
+
+        return $phone;
+    }
 }

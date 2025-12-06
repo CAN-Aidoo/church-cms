@@ -62,6 +62,85 @@ class ReportController extends Controller
     }
 
     /**
+     * Preview report with current filters (AJAX endpoint).
+     */
+    public function previewReport(Request $request)
+    {
+        $validated = $request->validate([
+            'type' => 'required|in:membership,financial,attendance,program,custom',
+            'columns' => 'required|array',
+            'filters' => 'nullable|array',
+            'group_by' => 'nullable|string',
+            'calculations' => 'nullable|array',
+            'limit' => 'nullable|integer|max:100',
+        ]);
+
+        $previewData = $this->reportRepository->previewReport([
+            'type' => $validated['type'],
+            'columns' => $validated['columns'],
+            'filters' => $validated['filters'] ?? [],
+            'group_by' => $validated['group_by'] ?? null,
+            'calculations' => $validated['calculations'] ?? [],
+            'limit' => $validated['limit'] ?? 50,
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'data' => $previewData['rows'],
+            'total' => $previewData['total'],
+            'columns' => $previewData['columns'],
+            'statistics' => $previewData['statistics'] ?? [],
+        ]);
+    }
+
+    /**
+     * Get available fields for a report type (AJAX endpoint).
+     */
+    public function getAvailableFields(Request $request)
+    {
+        $type = $request->input('type');
+        $fields = CustomReport::getAvailableFields($type);
+
+        return response()->json([
+            'success' => true,
+            'fields' => $fields,
+        ]);
+    }
+
+    /**
+     * Get filter operators (AJAX endpoint).
+     */
+    public function getFilterOperators()
+    {
+        $operators = CustomReport::getFilterOperators();
+
+        return response()->json([
+            'success' => true,
+            'operators' => $operators,
+        ]);
+    }
+
+    /**
+     * Validate report configuration (AJAX endpoint).
+     */
+    public function validateReportConfig(Request $request)
+    {
+        $validated = $request->validate([
+            'type' => 'required|in:membership,financial,attendance,program,custom',
+            'columns' => 'required|array',
+            'filters' => 'nullable|array',
+        ]);
+
+        $validation = $this->reportRepository->validateReportConfig($validated);
+
+        return response()->json([
+            'success' => $validation['valid'],
+            'errors' => $validation['errors'] ?? [],
+            'warnings' => $validation['warnings'] ?? [],
+        ]);
+    }
+
+    /**
      * Store custom report.
      */
     public function storeCustomReport(Request $request)

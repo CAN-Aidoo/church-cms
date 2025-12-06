@@ -190,7 +190,7 @@ class MemberRepository
     {
         return Member::active()
             ->where(function ($query) {
-                $query->whereNull('photo_url')
+                $query->whereNull('profile_photo_url')
                     ->orWhereNull('date_of_birth')
                     ->orWhereNull('phone')
                     ->orWhereNull('address');

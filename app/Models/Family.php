@@ -112,13 +112,13 @@ class Family extends Model
         $memberIds = $this->members()->pluck('id');
 
         $tithes = Transaction::whereIn('member_id', $memberIds)
-            ->where('type', 'income')
+            ->where('transaction_type', 'income')
             ->where('category', 'tithe')
             ->where('status', 'completed')
             ->sum('amount');
 
         $offerings = Transaction::whereIn('member_id', $memberIds)
-            ->where('type', 'income')
+            ->where('transaction_type', 'income')
             ->where('category', 'offering')
             ->where('status', 'completed')
             ->sum('amount');

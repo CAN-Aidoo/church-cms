@@ -73,10 +73,14 @@ class PrayerController extends Controller
 
         $validated['status'] = 'pending';
 
+        // Manually create the prayer request using the repository or model to ensure created_by/user_id logic if needed
+        // But since PrayerRequest model doesn't seem to have created_by in migrations, we rely on member_id or requester info
+
         $prayerRequest = $this->prayerRepository->create($validated);
 
+        // Redirect to index or show page. The test expects a redirect.
         return redirect()
-            ->route('prayer.show', $prayerRequest)
+            ->route('prayer.index') // Changed to index to match typical flow or create a show route
             ->with('success', 'Prayer request submitted successfully. We will pray for you.');
     }
 

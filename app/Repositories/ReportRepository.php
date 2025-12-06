@@ -328,9 +328,9 @@ class ReportRepository
                 ->groupBy('gender')
                 ->pluck('count', 'gender')
                 ->toArray(),
-            'by_status' => (clone $query)->select('status', DB::raw('count(*) as count'))
-                ->groupBy('status')
-                ->pluck('count', 'status')
+            'by_status' => (clone $query)->select('member_status', DB::raw('count(*) as count'))
+                ->groupBy('member_status')
+                ->pluck('count', 'member_status')
                 ->toArray(),
             'by_marital_status' => (clone $query)->select('marital_status', DB::raw('count(*) as count'))
                 ->groupBy('marital_status')
@@ -355,24 +355,24 @@ class ReportRepository
             $query->where('transaction_date', '<=', $filters['date_to']);
         }
 
-        $income = (clone $query)->where('type', 'income')->sum('amount');
-        $expenses = (clone $query)->where('type', 'expense')->sum('amount');
+        $income = (clone $query)->where('transaction_type', 'income')->sum('amount');
+        $expenses = (clone $query)->where('transaction_type', 'expense')->sum('amount');
 
         return [
             'total_income' => $income,
             'total_expenses' => $expenses,
             'net_balance' => $income - $expenses,
-            'by_category' => (clone $query)->select('category', 'type', DB::raw('sum(amount) as total'))
-                ->groupBy('category', 'type')
+            'by_category' => (clone $query)->select('category', 'transaction_type', DB::raw('sum(amount) as total'))
+                ->groupBy('category', 'transaction_type')
                 ->get()
-                ->groupBy('type')
+                ->groupBy('transaction_type')
                 ->toArray(),
             'by_month' => (clone $query)->select(
                 DB::raw('DATE_FORMAT(transaction_date, "%Y-%m") as month'),
-                'type',
+                'transaction_type',
                 DB::raw('sum(amount) as total')
             )
-                ->groupBy('month', 'type')
+                ->groupBy('month', 'transaction_type')
                 ->orderBy('month')
                 ->get()
                 ->groupBy('month')
@@ -433,7 +433,7 @@ class ReportRepository
 
         return [
             'total_programs' => $query->count(),
-            'total_participants' => (clone $query)->sum('participants_count'),
+            'total_participants' => (clone $query)->sum('current_participants'),
             'by_status' => (clone $query)->select('status', DB::raw('count(*) as count'))
                 ->groupBy('status')
                 ->pluck('count', 'status')
@@ -542,14 +542,146 @@ class ReportRepository
             ->whereBetween('end_date', [$startDate, $endDate])
             ->count();
 
-        $avgAttendanceRate = Program::where('status', 'completed')
+        // Programs table doesn't have attendance_rate column, calculate from registrations
+        $programs = Program::where('status', 'completed')
             ->whereBetween('end_date', [$startDate, $endDate])
-            ->avg('attendance_rate') ?? 0;
+            ->withCount('registrations')
+            ->get();
+
+        $avgAttendanceRate = $programs->isEmpty() ? 0 : $programs->avg(function($program) {
+            return $program->max_participants > 0
+                ? ($program->registrations_count / $program->max_participants) * 100
+                : 0;
+        });
 
         return [
             'programs_completed' => $programsCompleted,
-            'avg_attendance_rate' => $avgAttendanceRate,
+            'avg_attendance_rate' => round($avgAttendanceRate, 2),
             'active_volunteers' => 0, // Would need service unit data
+        ];
+    }
+
+    /**
+     * Preview report with current configuration.
+     */
+    public function previewReport(array $config): array
+    {
+        $query = $this->buildQueryFromConfig($config);
+
+        // Apply limit for preview
+        $limit = $config['limit'] ?? 50;
+        $rows = $query->limit($limit)->get();
+
+        // Get total count
+        $total = $query->count();
+
+        // Get statistics if calculations are configured
+        $statistics = [];
+        if (!empty($config['calculations'])) {
+            $statistics = $this->calculateStatistics($query, $config['calculations']);
+        }
+
+        return [
+            'rows' => $rows,
+            'total' => $total,
+            'columns' => $config['columns'],
+            'statistics' => $statistics,
+        ];
+    }
+
+    /**
+     * Build query from configuration array.
+     */
+    protected function buildQueryFromConfig(array $config)
+    {
+        $query = match ($config['type']) {
+            'membership' => Member::query(),
+            'financial' => Transaction::query(),
+            'attendance' => Attendance::query(),
+            'program' => Program::query(),
+            default => DB::table('members'),
+        };
+
+        // Apply column selection
+        if (!empty($config['columns'])) {
+            $query->select($config['columns']);
+        }
+
+        // Apply filters
+        if (!empty($config['filters'])) {
+            $query = $this->applyFilters($query, $config['filters']);
+        }
+
+        // Apply grouping
+        if (!empty($config['group_by'])) {
+            $query->groupBy($config['group_by']);
+        }
+
+        return $query;
+    }
+
+    /**
+     * Calculate statistics for query results.
+     */
+    protected function calculateStatistics($query, array $calculations): array
+    {
+        $statistics = [];
+
+        foreach ($calculations as $calc) {
+            $field = $calc['field'];
+            $type = $calc['type'];
+
+            $statistics[$field] = match($type) {
+                'sum' => $query->sum($field),
+                'avg' => $query->avg($field),
+                'count' => $query->count(),
+                'min' => $query->min($field),
+                'max' => $query->max($field),
+                default => 0,
+            };
+        }
+
+        return $statistics;
+    }
+
+    /**
+     * Validate report configuration.
+     */
+    public function validateReportConfig(array $config): array
+    {
+        $errors = [];
+        $warnings = [];
+
+        // Validate required fields
+        if (empty($config['columns'])) {
+            $errors[] = 'At least one column must be selected';
+        }
+
+        // Validate filters
+        if (!empty($config['filters'])) {
+            foreach ($config['filters'] as $index => $filter) {
+                if (empty($filter['field'])) {
+                    $errors[] = "Filter #{$index}: Field is required";
+                }
+                if (empty($filter['operator'])) {
+                    $errors[] = "Filter #{$index}: Operator is required";
+                }
+            }
+        }
+
+        // Check for performance warnings
+        if (empty($config['filters'])) {
+            $warnings[] = 'No filters applied - report may return large dataset';
+        }
+
+        if (count($config['columns'] ?? []) > 20) {
+            $warnings[] = 'Many columns selected - report may be slow to generate';
+        }
+
+        return [
+            'valid' => empty($errors),
+            'errors' => $errors,
+            'warnings' => $warnings,
         ];
     }
 }

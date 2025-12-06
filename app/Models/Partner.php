@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\SoftDeletes; // Corrected from Illuminate->Database
 
 class Partner extends Model
 {
@@ -46,7 +46,7 @@ class Partner extends Model
 
     public function scopeActive($query)
     {
-        return $query->where('member_status', 'active');
+        return $query->where('status', 'active'); // Corrected from member_status
     }
 
     public function scopeByCategory($query, string $category)

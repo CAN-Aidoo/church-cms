@@ -17,16 +17,7 @@ return new class extends Migration
             $table->string('name');
             $table->text('description');
             $table->enum('type', ['conference', 'seminar', 'crusade', 'retreat', 'workshop', 'training', 'other'])->default('other');
-            $table->enum('category', [
-                'spiritual_development',
-                'leadership_training',
-                'youth_programs',
-                'marriage_enrichment',
-                'professional_development',
-                'evangelistic_outreach',
-                'children_programs',
-                'other',
-            ])->default('other');
+            $table->string('category')->default('other'); // Changed from enum to string
             $table->enum('status', ['draft', 'published', 'ongoing', 'completed', 'cancelled'])->default('draft');
             $table->date('start_date');
             $table->date('end_date');
@@ -43,6 +34,7 @@ return new class extends Migration
             $table->string('flyer_path')->nullable();
             $table->json('additional_info')->nullable();
             $table->foreignId('created_by')->constrained('users')->onDelete('cascade');
+            $table->foreignId('coordinator_id')->nullable()->constrained('users')->onDelete('set null');
             $table->timestamps();
             $table->softDeletes();
 

@@ -260,11 +260,11 @@ class EquipmentController extends Controller
         // Get equipment by category
         $equipmentByCategory = $this->equipmentRepository->getValueByCategory();
 
-        // Get condition breakdown
-        $conditionBreakdown = Equipment::selectRaw('condition, COUNT(*) as count')
-            ->groupBy('condition')
+        // Get status breakdown
+        $conditionBreakdown = Equipment::selectRaw('status, COUNT(*) as count')
+            ->groupBy('status')
             ->get()
-            ->pluck('count', 'condition');
+            ->pluck('count', 'status');
 
         // Get depreciation report
         $depreciationReport = $this->equipmentRepository->getDepreciationReport();

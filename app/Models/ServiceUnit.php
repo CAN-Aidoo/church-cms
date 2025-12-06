@@ -56,7 +56,7 @@ class ServiceUnit extends Model
      */
     public function activeMembers(): HasMany
     {
-        return $this->hasMany(ServiceUnitMember::class)->where('member_status', 'active');
+        return $this->hasMany(ServiceUnitMember::class)->where('status', 'active'); // Fixed: Changed member_status to status
     }
 
     /**
@@ -88,7 +88,7 @@ class ServiceUnit extends Model
      */
     public function scopeActive($query)
     {
-        return $query->where('member_status', 'active');
+        return $query->where('status', 'active'); // Fixed: Changed member_status to status
     }
 
     /**
@@ -155,7 +155,7 @@ class ServiceUnit extends Model
     {
         return $this->unitMembers()
             ->where('role', 'trainee')
-            ->where('member_status', 'active')
+            ->where('status', 'active') // Fixed: Changed member_status to status
             ->count();
     }
 }

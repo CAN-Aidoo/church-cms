@@ -25,16 +25,13 @@ class ConversationParticipant extends Model
     protected $casts = [
         'joined_at' => 'datetime',
         'last_read_at' => 'datetime',
-        'is_muted' => 'boolean',
         'muted_until' => 'datetime',
+        'left_at' => 'datetime',
+        'is_muted' => 'boolean',
         'notifications_enabled' => 'boolean',
         'is_active' => 'boolean',
-        'left_at' => 'datetime',
     ];
 
-    /**
-     * Relationships
-     */
     public function conversation()
     {
         return $this->belongsTo(Conversation::class);

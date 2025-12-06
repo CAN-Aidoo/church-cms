@@ -4,6 +4,7 @@ namespace App\Repositories;
 
 use App\Models\Partner;
 use App\Models\PartnershipAgreement;
+use App\Models\PartnershipFinancial;
 
 class PartnershipRepository
 {
@@ -41,7 +42,7 @@ class PartnershipRepository
             'total_partners' => Partner::active()->count(),
             'active_agreements' => PartnershipAgreement::active()->count(),
             'expiring_agreements' => PartnershipAgreement::expiring()->count(),
-            'total_contributions' => \App\Models\PartnershipFinancial::where('type', 'inflow')->sum('amount'),
+            'total_contributions' => PartnershipFinancial::where('type', 'inflow')->sum('amount'),
         ];
     }
 }

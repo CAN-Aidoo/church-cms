@@ -347,4 +347,465 @@ class MemberController extends Controller
             ->back()
             ->with('success', 'Photo deleted successfully.');
     }
+
+    // ========================================
+    // MEMBER PORTAL API ENDPOINTS
+    // ========================================
+
+    /**
+     * Get member's own profile (authenticated member).
+     */
+    public function getMyProfile(Request $request)
+    {
+        $user = $request->user();
+        $member = $user->member;
+
+        if (!$member) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No member profile found for this user.'
+            ], 404);
+        }
+
+        return response()->json([
+            'success' => true,
+            'member' => [
+                'id' => $member->id,
+                'member_id' => $member->member_id,
+                'first_name' => $member->first_name,
+                'last_name' => $member->last_name,
+                'full_name' => $member->full_name,
+                'email' => $member->email,
+                'phone' => $member->phone,
+                'date_of_birth' => $member->date_of_birth?->format('Y-m-d'),
+                'age' => $member->age,
+                'gender' => $member->gender,
+                'marital_status' => $member->marital_status,
+                'address' => $member->address,
+                'city' => $member->city,
+                'state' => $member->state,
+                'country' => $member->country,
+                'postal_code' => $member->postal_code,
+                'join_date' => $member->join_date->format('Y-m-d'),
+                'member_status' => $member->member_status,
+                'occupation' => $member->occupation,
+                'department' => $member->department,
+                'photo_url' => $member->photo_url ? asset('storage/' . $member->photo_url) : null,
+                'emergency_contact_name' => $member->emergency_contact_name,
+                'emergency_contact_phone' => $member->emergency_contact_phone,
+            ]
+        ]);
+    }
+
+    /**
+     * Update member's own profile (authenticated member).
+     */
+    public function updateMyProfile(Request $request)
+    {
+        $user = $request->user();
+        $member = $user->member;
+
+        if (!$member) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No member profile found for this user.'
+            ], 404);
+        }
+
+        // Members can only update limited fields
+        $validated = $request->validate([
+            'phone' => 'sometimes|string|max:20',
+            'address' => 'sometimes|string|max:255',
+            'city' => 'sometimes|string|max:100',
+            'state' => 'sometimes|string|max:100',
+            'postal_code' => 'sometimes|string|max:20',
+            'occupation' => 'sometimes|string|max:100',
+            'emergency_contact_name' => 'sometimes|string|max:100',
+            'emergency_contact_phone' => 'sometimes|string|max:20',
+        ]);
+
+        $member->update($validated);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Profile updated successfully.',
+            'member' => $member->fresh()
+        ]);
+    }
+
+    /**
+     * Get member's attendance history.
+     */
+    public function getMyAttendance(Request $request)
+    {
+        $user = $request->user();
+        $member = $user->member;
+
+        if (!$member) {
+            return response()->json(['success' => false, 'message' => 'No member profile found.'], 404);
+        }
+
+        $months = $request->input('months', 6);
+        $startDate = now()->subMonths($months);
+
+        $attendance = $member->attendance()
+            ->where('service_date', '>=', $startDate)
+            ->orderBy('service_date', 'desc')
+            ->get()
+            ->map(function ($record) {
+                return [
+                    'id' => $record->id,
+                    'service_date' => $record->service_date->format('Y-m-d'),
+                    'service_type' => $record->service_type,
+                    'check_in_time' => $record->check_in_time,
+                    'check_in_method' => $record->check_in_method,
+                ];
+            });
+
+        $stats = $member->getAttendanceStats();
+
+        return response()->json([
+            'success' => true,
+            'attendance' => $attendance,
+            'statistics' => [
+                'total_attendance' => $stats['total_attendance'],
+                'attendance_rate' => $stats['attendance_rate'],
+                'consecutive_attendance' => $stats['consecutive_attendance'],
+                'last_attendance' => $stats['last_attendance'],
+            ]
+        ]);
+    }
+
+    /**
+     * Get member's contribution history.
+     */
+    public function getMyContributions(Request $request)
+    {
+        $user = $request->user();
+        $member = $user->member;
+
+        if (!$member) {
+            return response()->json(['success' => false, 'message' => 'No member profile found.'], 404);
+        }
+
+        $months = $request->input('months', 12);
+        $startDate = now()->subMonths($months);
+
+        $contributions = $member->transactions()
+            ->where('transaction_type', 'income')
+            ->where('transaction_date', '>=', $startDate)
+            ->orderBy('transaction_date', 'desc')
+            ->get()
+            ->map(function ($transaction) {
+                return [
+                    'id' => $transaction->id,
+                    'transaction_date' => $transaction->transaction_date->format('Y-m-d'),
+                    'amount' => $transaction->amount,
+                    'category' => $transaction->category,
+                    'description' => $transaction->description,
+                    'payment_method' => $transaction->payment_method,
+                    'status' => $transaction->status,
+                ];
+            });
+
+        $summary = $member->getFinancialSummary();
+
+        return response()->json([
+            'success' => true,
+            'contributions' => $contributions,
+            'summary' => [
+                'total_giving' => $summary['total_giving'],
+                'this_year_giving' => $summary['this_year_giving'],
+                'last_contribution_date' => $summary['last_contribution_date'],
+                'giving_frequency' => $summary['giving_frequency'],
+            ]
+        ]);
+    }
+
+    /**
+     * Get member's program registrations.
+     */
+    public function getMyPrograms(Request $request)
+    {
+        $user = $request->user();
+        $member = $user->member;
+
+        if (!$member) {
+            return response()->json(['success' => false, 'message' => 'No member profile found.'], 404);
+        }
+
+        $registrations = $member->programRegistrations()
+            ->with('program')
+            ->orderBy('created_at', 'desc')
+            ->get()
+            ->map(function ($registration) {
+                return [
+                    'id' => $registration->id,
+                    'program' => [
+                        'id' => $registration->program->id,
+                        'program_code' => $registration->program->program_code,
+                        'title' => $registration->program->title,
+                        'start_date' => $registration->program->start_date->format('Y-m-d'),
+                        'end_date' => $registration->program->end_date?->format('Y-m-d'),
+                        'status' => $registration->program->status,
+                    ],
+                    'registration_date' => $registration->created_at->format('Y-m-d'),
+                    'status' => $registration->status,
+                    'checked_in' => $registration->checked_in,
+                    'check_in_time' => $registration->check_in_time,
+                ];
+            });
+
+        return response()->json([
+            'success' => true,
+            'registrations' => $registrations,
+            'total' => $registrations->count()
+        ]);
+    }
+
+    /**
+     * Get member's service units and ministry involvement.
+     */
+    public function getMyMinistry(Request $request)
+    {
+        $user = $request->user();
+        $member = $user->member;
+
+        if (!$member) {
+            return response()->json(['success' => false, 'message' => 'No member profile found.'], 404);
+        }
+
+        $serviceUnits = $member->serviceUnits()
+            ->with('leader')
+            ->get()
+            ->map(function ($unit) use ($member) {
+                $memberUnit = $unit->members()->where('member_id', $member->id)->first();
+
+                return [
+                    'id' => $unit->id,
+                    'unit_name' => $unit->unit_name,
+                    'description' => $unit->description,
+                    'leader' => $unit->leader ? [
+                        'id' => $unit->leader->id,
+                        'full_name' => $unit->leader->full_name,
+                    ] : null,
+                    'position' => $memberUnit->pivot->position ?? null,
+                    'joined_date' => $memberUnit->pivot->joined_date ?? null,
+                    'is_active' => $memberUnit->pivot->is_active ?? true,
+                ];
+            });
+
+        return response()->json([
+            'success' => true,
+            'service_units' => $serviceUnits,
+            'total' => $serviceUnits->count()
+        ]);
+    }
+
+    /**
+     * Get member's shepherd/pastoral care information.
+     */
+    public function getMyShepherd(Request $request)
+    {
+        $user = $request->user();
+        $member = $user->member;
+
+        if (!$member) {
+            return response()->json(['success' => false, 'message' => 'No member profile found.'], 404);
+        }
+
+        $shepherd = $member->shepherd;
+
+        if (!$shepherd) {
+            return response()->json([
+                'success' => true,
+                'shepherd' => null,
+                'message' => 'No shepherd assigned yet.'
+            ]);
+        }
+
+        return response()->json([
+            'success' => true,
+            'shepherd' => [
+                'id' => $shepherd->id,
+                'full_name' => $shepherd->full_name,
+                'email' => $shepherd->email,
+                'phone' => $shepherd->phone,
+                'flock_name' => $shepherd->flock_name,
+                'meeting_schedule' => $shepherd->meeting_schedule,
+            ]
+        ]);
+    }
+
+    /**
+     * Get member's family members.
+     */
+    public function getMyFamily(Request $request)
+    {
+        $user = $request->user();
+        $member = $user->member;
+
+        if (!$member) {
+            return response()->json(['success' => false, 'message' => 'No member profile found.'], 404);
+        }
+
+        $family = $member->family;
+
+        if (!$family) {
+            return response()->json([
+                'success' => true,
+                'family' => null,
+                'members' => [],
+                'message' => 'Not part of any family unit.'
+            ]);
+        }
+
+        $familyMembers = $family->members()
+            ->where('id', '!=', $member->id)
+            ->get()
+            ->map(function ($familyMember) {
+                return [
+                    'id' => $familyMember->id,
+                    'member_id' => $familyMember->member_id,
+                    'full_name' => $familyMember->full_name,
+                    'relationship' => $familyMember->pivot->relationship ?? 'family_member',
+                    'photo_url' => $familyMember->photo_url ? asset('storage/' . $familyMember->photo_url) : null,
+                ];
+            });
+
+        return response()->json([
+            'success' => true,
+            'family' => [
+                'id' => $family->id,
+                'family_name' => $family->family_name,
+                'head_of_family_id' => $family->head_of_family_id,
+            ],
+            'members' => $familyMembers,
+            'total_members' => $familyMembers->count() + 1 // +1 for the member themselves
+        ]);
+    }
+
+    /**
+     * Get member's documents.
+     */
+    public function getMyDocuments(Request $request)
+    {
+        $user = $request->user();
+        $member = $user->member;
+
+        if (!$member) {
+            return response()->json(['success' => false, 'message' => 'No member profile found.'], 404);
+        }
+
+        $documents = $member->documents()
+            ->orderBy('created_at', 'desc')
+            ->get()
+            ->map(function ($doc) {
+                return [
+                    'id' => $doc->id,
+                    'document_type' => $doc->document_type,
+                    'title' => $doc->title,
+                    'description' => $doc->description,
+                    'file_path' => $doc->file_path,
+                    'file_size' => $doc->file_size,
+                    'uploaded_at' => $doc->created_at->format('Y-m-d H:i:s'),
+                    'download_url' => route('api.member.documents.download', $doc->id),
+                ];
+            });
+
+        return response()->json([
+            'success' => true,
+            'documents' => $documents,
+            'total' => $documents->count()
+        ]);
+    }
+
+    /**
+     * Download member document.
+     */
+    public function downloadDocument(Request $request, $documentId)
+    {
+        $user = $request->user();
+        $member = $user->member;
+
+        if (!$member) {
+            return response()->json(['success' => false, 'message' => 'No member profile found.'], 404);
+        }
+
+        $document = $member->documents()->find($documentId);
+
+        if (!$document) {
+            return response()->json(['success' => false, 'message' => 'Document not found.'], 404);
+        }
+
+        $filePath = storage_path('app/private/member_documents/' . $document->file_path);
+
+        if (!file_exists($filePath)) {
+            return response()->json(['success' => false, 'message' => 'File not found on server.'], 404);
+        }
+
+        return response()->download($filePath, $document->title);
+    }
+
+    /**
+     * Get member's upcoming events and important dates.
+     */
+    public function getMyUpcomingEvents(Request $request)
+    {
+        $user = $request->user();
+        $member = $user->member;
+
+        if (!$member) {
+            return response()->json(['success' => false, 'message' => 'No member profile found.'], 404);
+        }
+
+        $events = [];
+
+        // Upcoming programs
+        $upcomingPrograms = \App\Models\Program::where('status', 'published')
+            ->where('start_date', '>', now())
+            ->orderBy('start_date')
+            ->limit(10)
+            ->get()
+            ->map(function ($program) {
+                return [
+                    'type' => 'program',
+                    'id' => $program->id,
+                    'title' => $program->title,
+                    'date' => $program->start_date->format('Y-m-d'),
+                    'time' => $program->start_time,
+                    'location' => $program->location,
+                ];
+            });
+
+        // Birthday
+        $nextBirthday = $member->date_of_birth
+            ? $member->date_of_birth->setYear(now()->year)
+            : null;
+
+        if ($nextBirthday && $nextBirthday < now()) {
+            $nextBirthday = $nextBirthday->setYear(now()->year + 1);
+        }
+
+        if ($nextBirthday) {
+            $events[] = [
+                'type' => 'birthday',
+                'title' => 'Your Birthday',
+                'date' => $nextBirthday->format('Y-m-d'),
+                'time' => null,
+            ];
+        }
+
+        // Merge and sort all events
+        $allEvents = collect($events)->merge($upcomingPrograms)
+            ->sortBy('date')
+            ->values()
+            ->all();
+
+        return response()->json([
+            'success' => true,
+            'events' => $allEvents,
+            'total' => count($allEvents)
+        ]);
+    }
 }

@@ -51,11 +51,11 @@ class PartnershipAgreement extends Model
 
     public function scopeActive($query)
     {
-        return $query->where('member_status', 'active');
+        return $query->where('status', 'active'); // Corrected from member_status
     }
 
     public function scopeExpiring($query, int $days = 30)
     {
-        return $query->where('end_date', '<=', now()->addDays($days))->where('member_status', 'active');
+        return $query->where('end_date', '<=', now()->addDays($days))->where('status', 'active'); // Corrected from member_status
     }
 }

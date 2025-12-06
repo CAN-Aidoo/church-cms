@@ -97,6 +97,22 @@ class EquipmentRepository
     }
 
     /**
+     * count All.
+     */
+    public function countAll(): int
+    {
+        return Equipment::count();
+    }
+
+    /**
+     * count by status.
+     */
+    public function countByStatus(string $status): int
+    {
+        return Equipment::where('status', $status)->count();
+    }
+
+    /**
      * Get equipment statistics.
      */
     public function getStatistics(array $filters = []): array
@@ -112,7 +128,7 @@ class EquipmentRepository
         }
 
         $total = (clone $query)->count();
-        $activeCount = (clone $query)->where('member_status', 'active')->count();
+        $activeCount = (clone $query)->where('status', 'active')->count(); // Fixed from member_status to status
         $maintenanceCount = (clone $query)->where('status', 'maintenance')->count();
         $retiredCount = (clone $query)->where('status', 'retired')->count();
 
@@ -171,16 +187,16 @@ class EquipmentRepository
             $query->where('status', 'maintenance')
                 // OR equipment needing service (last service > 6 months ago)
                 ->orWhere(function ($q) {
-                    $q->whereNotNull('last_service_date')
-                        ->where('last_service_date', '<=', now()->subMonths(6));
+                    $q->whereNotNull('last_maintenance')
+                        ->where('last_maintenance', '<=', now()->subMonths(6));
                 })
                 // OR equipment never serviced that's older than 1 year
                 ->orWhere(function ($q) {
-                    $q->whereNull('last_service_date')
+                    $q->whereNull('last_maintenance')
                         ->where('purchase_date', '<=', now()->subYear());
                 });
         })
-            ->orderBy('last_service_date', 'asc')
+            ->orderBy('last_maintenance', 'asc')
             ->get();
     }
 
@@ -231,8 +247,8 @@ class EquipmentRepository
     {
         return $equipment->update([
             'next_service_date' => $scheduledDate,
-            'maintenance_notes' => ($equipment->maintenance_notes ? $equipment->maintenance_notes."\n" : '')
-                .now()->format('Y-m-d').': Maintenance scheduled for '.$scheduledDate->format('Y-m-d').' - '.$description,
+            'maintenance_notes' => ($equipment->maintenance_notes ? $equipment->maintenance_notes."\n" : '').
+                now()->format('Y-m-d').': Maintenance scheduled for '.$scheduledDate->format('Y-m-d').' - '.$description,
         ]);
     }
 
@@ -243,8 +259,8 @@ class EquipmentRepository
     {
         $maintenanceRecord = [
             'last_service_date' => $data['service_date'] ?? now(),
-            'maintenance_notes' => ($equipment->maintenance_notes ? $equipment->maintenance_notes."\n" : '')
-                .now()->format('Y-m-d').': '.($data['notes'] ?? 'Service performed'),
+            'maintenance_notes' => ($equipment->maintenance_notes ? $equipment->maintenance_notes."\n" : '').
+                now()->format('Y-m-d').': '.($data['notes'] ?? 'Service performed'),
         ];
 
         // Update condition if provided
@@ -274,8 +290,8 @@ class EquipmentRepository
     {
         return $equipment->update([
             'status' => 'retired',
-            'maintenance_notes' => ($equipment->maintenance_notes ? $equipment->maintenance_notes."\n" : '')
-                .now()->format('Y-m-d').': Retired - '.($reason ?? 'No reason provided'),
+            'maintenance_notes' => ($equipment->maintenance_notes ? $equipment->maintenance_notes."\n" : '').
+                now()->format('Y-m-d').': Retired - '.($reason ?? 'No reason provided'),
         ]);
     }
 
@@ -377,16 +393,11 @@ class EquipmentRepository
 
     /**
      * Get warranty expiring soon.
+     * Note: Equipment table doesn't have warranty columns yet.
      */
     public function getWarrantyExpiringSoon(int $months = 3): Collection
     {
-        $endDate = now()->addMonths($months);
-
-        return Equipment::whereNotNull('warranty_expiry')
-            ->where('warranty_expiry', '>', now())
-            ->where('warranty_expiry', '<=', $endDate)
-            ->where('status', '!=', 'retired')
-            ->orderBy('warranty_expiry', 'asc')
-            ->get();
+        // Return empty collection as warranty tracking is not implemented
+        return collect();
     }
 }

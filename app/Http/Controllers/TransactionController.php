@@ -398,4 +398,393 @@ class TransactionController extends Controller
             ->back()
             ->with('success', 'Receipt deleted successfully.');
     }
+
+    // ========================================
+    // FINANCIAL DASHBOARD API ENDPOINTS
+    // ========================================
+
+    /**
+     * Get financial dashboard summary (API endpoint).
+     */
+    public function getDashboardSummary(Request $request)
+    {
+        $period = $request->input('period', 'month'); // month, quarter, year, custom
+        $dateFrom = $request->input('date_from');
+        $dateTo = $request->input('date_to');
+
+        // Calculate date range based on period
+        switch ($period) {
+            case 'month':
+                $startDate = now()->startOfMonth();
+                $endDate = now()->endOfMonth();
+                break;
+            case 'quarter':
+                $startDate = now()->startOfQuarter();
+                $endDate = now()->endOfQuarter();
+                break;
+            case 'year':
+                $startDate = now()->startOfYear();
+                $endDate = now()->endOfYear();
+                break;
+            case 'custom':
+                $startDate = $dateFrom ? Carbon::parse($dateFrom) : now()->startOfMonth();
+                $endDate = $dateTo ? Carbon::parse($dateTo) : now()->endOfMonth();
+                break;
+            default:
+                $startDate = now()->startOfMonth();
+                $endDate = now()->endOfMonth();
+        }
+
+        $summary = $this->transactionRepository->getFinancialSummary($startDate, $endDate);
+        $incomeBreakdown = $this->transactionRepository->getIncomeBreakdown($startDate, $endDate);
+        $expenseBreakdown = $this->transactionRepository->getExpenseBreakdown($startDate, $endDate);
+
+        // Calculate vs previous period
+        $previousStartDate = $startDate->copy()->subMonth();
+        $previousEndDate = $endDate->copy()->subMonth();
+        $previousSummary = $this->transactionRepository->getFinancialSummary($previousStartDate, $previousEndDate);
+
+        $changes = [
+            'income_change' => $previousSummary['total_income'] > 0
+                ? (($summary['total_income'] - $previousSummary['total_income']) / $previousSummary['total_income'] * 100)
+                : 0,
+            'expense_change' => $previousSummary['total_expense'] > 0
+                ? (($summary['total_expense'] - $previousSummary['total_expense']) / $previousSummary['total_expense'] * 100)
+                : 0,
+        ];
+
+        return response()->json([
+            'success' => true,
+            'period' => $period,
+            'date_range' => [
+                'from' => $startDate->format('Y-m-d'),
+                'to' => $endDate->format('Y-m-d'),
+            ],
+            'summary' => $summary,
+            'income_breakdown' => $incomeBreakdown,
+            'expense_breakdown' => $expenseBreakdown,
+            'changes' => $changes,
+        ]);
+    }
+
+    /**
+     * Get cash flow analysis (API endpoint).
+     */
+    public function getCashFlow(Request $request)
+    {
+        $months = $request->input('months', 12);
+        $trends = $this->transactionRepository->getMonthlyTrends($months);
+
+        $cashFlow = [];
+        $cumulativeBalance = 0;
+
+        foreach ($trends as $trend) {
+            $monthlyBalance = $trend->income - $trend->expense;
+            $cumulativeBalance += $monthlyBalance;
+
+            $cashFlow[] = [
+                'month' => $trend->month,
+                'income' => (float) $trend->income,
+                'expense' => (float) $trend->expense,
+                'net' => $monthlyBalance,
+                'cumulative' => $cumulativeBalance,
+            ];
+        }
+
+        return response()->json([
+            'success' => true,
+            'months' => $months,
+            'cash_flow' => $cashFlow,
+            'current_balance' => $cumulativeBalance,
+        ]);
+    }
+
+    /**
+     * Get budget analysis (API endpoint).
+     */
+    public function getBudgetAnalysis(Request $request)
+    {
+        $year = $request->input('year', now()->year);
+
+        // Define annual budgets (this should come from a budgets table in production)
+        $annualBudgets = [
+            'tithe' => 120000,
+            'offering' => 80000,
+            'special_offering' => 40000,
+            'salaries' => 60000,
+            'utilities' => 24000,
+            'maintenance' => 36000,
+            'ministry_programs' => 48000,
+            'outreach' => 30000,
+        ];
+
+        $startDate = Carbon::createFromDate($year, 1, 1)->startOfYear();
+        $endDate = Carbon::createFromDate($year, 12, 31)->endOfYear();
+
+        $actualIncome = $this->transactionRepository->getIncomeBreakdown($startDate, $endDate);
+        $actualExpense = $this->transactionRepository->getExpenseBreakdown($startDate, $endDate);
+
+        $budgetAnalysis = [];
+
+        // Income categories
+        foreach ($actualIncome as $item) {
+            $category = $item->category;
+            $actual = (float) $item->total;
+            $budget = $annualBudgets[$category] ?? 0;
+
+            if ($budget > 0) {
+                $budgetAnalysis[] = [
+                    'type' => 'income',
+                    'category' => $category,
+                    'budget' => $budget,
+                    'actual' => $actual,
+                    'variance' => $actual - $budget,
+                    'variance_percent' => ($actual / $budget * 100) - 100,
+                    'status' => $actual >= $budget ? 'on_track' : 'below',
+                ];
+            }
+        }
+
+        // Expense categories
+        foreach ($actualExpense as $item) {
+            $category = $item->category;
+            $actual = (float) $item->total;
+            $budget = $annualBudgets[$category] ?? 0;
+
+            if ($budget > 0) {
+                $budgetAnalysis[] = [
+                    'type' => 'expense',
+                    'category' => $category,
+                    'budget' => $budget,
+                    'actual' => $actual,
+                    'variance' => $budget - $actual, // For expenses, under budget is good
+                    'variance_percent' => 100 - ($actual / $budget * 100),
+                    'status' => $actual <= $budget ? 'on_track' : 'over_budget',
+                ];
+            }
+        }
+
+        return response()->json([
+            'success' => true,
+            'year' => $year,
+            'budget_analysis' => $budgetAnalysis,
+        ]);
+    }
+
+    /**
+     * Get giving analytics (API endpoint).
+     */
+    public function getGivingAnalytics(Request $request)
+    {
+        $months = $request->input('months', 12);
+        $startDate = now()->subMonths($months);
+
+        // Top donors
+        $topDonors = $this->transactionRepository->getTopDonors(10, $startDate, now());
+
+        // Giving frequency analysis
+        $givingFrequency = Transaction::where('transaction_type', 'income')
+            ->where('transaction_date', '>=', $startDate)
+            ->where('status', 'completed')
+            ->whereNotNull('member_id')
+            ->selectRaw('member_id, COUNT(*) as transaction_count, SUM(amount) as total_amount')
+            ->groupBy('member_id')
+            ->get()
+            ->groupBy(function ($item) {
+                if ($item->transaction_count >= 40) return 'weekly';
+                if ($item->transaction_count >= 10) return 'bi_weekly';
+                if ($item->transaction_count >= 6) return 'monthly';
+                return 'occasional';
+            })
+            ->map(function ($group) {
+                return [
+                    'count' => $group->count(),
+                    'total_amount' => $group->sum('total_amount'),
+                ];
+            });
+
+        // Giving methods breakdown
+        $givingMethods = Transaction::where('transaction_type', 'income')
+            ->where('transaction_date', '>=', $startDate)
+            ->where('status', 'completed')
+            ->selectRaw('payment_method, COUNT(*) as count, SUM(amount) as total')
+            ->groupBy('payment_method')
+            ->get()
+            ->map(function ($item) {
+                return [
+                    'method' => $item->payment_method,
+                    'count' => $item->count,
+                    'total' => (float) $item->total,
+                    'percentage' => 0, // Will be calculated below
+                ];
+            });
+
+        $totalGiving = $givingMethods->sum('total');
+        $givingMethods = $givingMethods->map(function ($item) use ($totalGiving) {
+            $item['percentage'] = $totalGiving > 0 ? ($item['total'] / $totalGiving * 100) : 0;
+            return $item;
+        });
+
+        // Average giving per member
+        $avgGivingPerMember = Transaction::where('transaction_type', 'income')
+            ->where('transaction_date', '>=', $startDate)
+            ->where('status', 'completed')
+            ->whereNotNull('member_id')
+            ->selectRaw('AVG(amount) as average')
+            ->value('average') ?? 0;
+
+        return response()->json([
+            'success' => true,
+            'months' => $months,
+            'top_donors' => $topDonors,
+            'giving_frequency' => $givingFrequency,
+            'giving_methods' => $givingMethods->values(),
+            'average_giving_per_member' => (float) $avgGivingPerMember,
+            'total_giving' => $totalGiving,
+        ]);
+    }
+
+    /**
+     * Get expense analytics (API endpoint).
+     */
+    public function getExpenseAnalytics(Request $request)
+    {
+        $months = $request->input('months', 12);
+        $startDate = now()->subMonths($months);
+
+        // Expense by category
+        $expenseByCategory = $this->transactionRepository->getExpenseBreakdown($startDate, now());
+
+        // Monthly expense trend
+        $monthlyExpenses = Transaction::where('transaction_type', 'expense')
+            ->where('transaction_date', '>=', $startDate)
+            ->where('status', 'completed')
+            ->selectRaw('DATE_FORMAT(transaction_date, "%Y-%m") as month, category, SUM(amount) as total')
+            ->groupBy('month', 'category')
+            ->orderBy('month')
+            ->get()
+            ->groupBy('month')
+            ->map(function ($monthGroup) {
+                $categories = [];
+                foreach ($monthGroup as $item) {
+                    $categories[$item->category] = (float) $item->total;
+                }
+                return [
+                    'total' => $monthGroup->sum('total'),
+                    'categories' => $categories,
+                ];
+            });
+
+        // Largest expenses
+        $largestExpenses = Transaction::where('transaction_type', 'expense')
+            ->where('transaction_date', '>=', $startDate)
+            ->where('status', 'completed')
+            ->orderBy('amount', 'desc')
+            ->limit(10)
+            ->get()
+            ->map(function ($transaction) {
+                return [
+                    'date' => $transaction->transaction_date->format('Y-m-d'),
+                    'category' => $transaction->category,
+                    'amount' => (float) $transaction->amount,
+                    'description' => $transaction->description,
+                ];
+            });
+
+        // Expense by payment method
+        $expenseByMethod = Transaction::where('transaction_type', 'expense')
+            ->where('transaction_date', '>=', $startDate)
+            ->where('status', 'completed')
+            ->selectRaw('payment_method, COUNT(*) as count, SUM(amount) as total')
+            ->groupBy('payment_method')
+            ->get();
+
+        return response()->json([
+            'success' => true,
+            'months' => $months,
+            'expense_by_category' => $expenseByCategory,
+            'monthly_expenses' => $monthlyExpenses,
+            'largest_expenses' => $largestExpenses,
+            'expense_by_method' => $expenseByMethod,
+        ]);
+    }
+
+    /**
+     * Get financial forecasting (API endpoint).
+     */
+    public function getForecasting(Request $request)
+    {
+        $months = $request->input('forecast_months', 6);
+        $basedOnMonths = $request->input('based_on_months', 12);
+
+        $historicalData = $this->transactionRepository->getMonthlyTrends($basedOnMonths);
+
+        if ($historicalData->count() < 3) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Insufficient historical data for forecasting. Need at least 3 months of data.',
+            ], 400);
+        }
+
+        // Calculate averages and growth rates
+        $avgIncome = $historicalData->avg('income');
+        $avgExpense = $historicalData->avg('expense');
+
+        // Simple linear growth calculation
+        $incomeGrowth = $this->calculateGrowthRate($historicalData, 'income');
+        $expenseGrowth = $this->calculateGrowthRate($historicalData, 'expense');
+
+        $forecasts = [];
+        $lastDate = now();
+
+        for ($i = 1; $i <= $months; $i++) {
+            $forecastDate = $lastDate->copy()->addMonths($i);
+            $projectedIncome = $avgIncome * (1 + ($incomeGrowth * $i / 100));
+            $projectedExpense = $avgExpense * (1 + ($expenseGrowth * $i / 100));
+
+            $forecasts[] = [
+                'month' => $forecastDate->format('Y-m'),
+                'projected_income' => round($projectedIncome, 2),
+                'projected_expense' => round($projectedExpense, 2),
+                'projected_net' => round($projectedIncome - $projectedExpense, 2),
+                'confidence' => max(90 - ($i * 10), 50), // Confidence decreases over time
+            ];
+        }
+
+        return response()->json([
+            'success' => true,
+            'forecast_months' => $months,
+            'based_on_months' => $basedOnMonths,
+            'historical_averages' => [
+                'income' => round($avgIncome, 2),
+                'expense' => round($avgExpense, 2),
+            ],
+            'growth_rates' => [
+                'income' => round($incomeGrowth, 2),
+                'expense' => round($expenseGrowth, 2),
+            ],
+            'forecasts' => $forecasts,
+        ]);
+    }
+
+    /**
+     * Calculate growth rate from historical data.
+     */
+    protected function calculateGrowthRate($historicalData, $field)
+    {
+        if ($historicalData->count() < 2) {
+            return 0;
+        }
+
+        $first = $historicalData->first()->$field;
+        $last = $historicalData->last()->$field;
+        $periods = $historicalData->count() - 1;
+
+        if ($first == 0) {
+            return 0;
+        }
+
+        // Calculate compound monthly growth rate
+        return (pow($last / $first, 1 / $periods) - 1) * 100;
+    }
 }

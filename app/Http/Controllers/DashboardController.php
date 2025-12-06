@@ -446,4 +446,115 @@ class DashboardController extends Controller
         return redirect()->route('profile')
             ->with('success', 'Profile updated successfully.');
     }
+
+    /**
+     * Get real-time dashboard stats (API endpoint for AJAX polling).
+     */
+    public function stats(Request $request)
+    {
+        $now = Carbon::now();
+
+        return response()->json([
+            'total_members' => Member::where('member_status', 'active')->count(),
+            'todays_attendance' => Attendance::whereDate('service_date', $now)->count(),
+            'todays_income' => Transaction::where('transaction_type', 'income')
+                ->where('status', 'completed')
+                ->whereDate('transaction_date', $now)
+                ->sum('amount'),
+            'todays_visitors' => Visitor::whereDate('created_at', $now)->count(),
+            'pending_approvals' => Transaction::where('status', 'pending')->count(),
+            'active_programs' => \App\Models\Program::where('status', 'ongoing')->count(),
+            'timestamp' => $now->toISOString(),
+        ]);
+    }
+
+    /**
+     * Get chart data (API endpoint for dynamic chart updates).
+     */
+    public function charts(Request $request)
+    {
+        $type = $request->input('type', 'all');
+        $now = Carbon::now();
+
+        $charts = $this->getChartData($now);
+
+        if ($type !== 'all' && isset($charts[$type])) {
+            return response()->json([$type => $charts[$type]]);
+        }
+
+        return response()->json($charts);
+    }
+
+    /**
+     * Get recent activity feed (API endpoint).
+     */
+    public function recentActivity(Request $request)
+    {
+        $limit = $request->input('limit', 20);
+
+        // Get recent activities from multiple sources
+        $activities = collect();
+
+        // Recent check-ins
+        $checkIns = Attendance::with('member:id,first_name,last_name')
+            ->whereDate('service_date', Carbon::today())
+            ->orderBy('check_in_time', 'desc')
+            ->take($limit)
+            ->get()
+            ->map(function ($attendance) {
+                return [
+                    'type' => 'check_in',
+                    'icon' => 'check-circle',
+                    'color' => 'green',
+                    'title' => ($attendance->member->first_name ?? '') . ' ' . ($attendance->member->last_name ?? '') . ' checked in',
+                    'description' => 'via ' . ($attendance->check_in_method ?? 'manual'),
+                    'timestamp' => $attendance->created_at,
+                ];
+            });
+
+        // Recent transactions
+        $transactions = Transaction::with('member:id,first_name,last_name')
+            ->where('status', 'completed')
+            ->whereDate('transaction_date', Carbon::today())
+            ->orderBy('created_at', 'desc')
+            ->take($limit)
+            ->get()
+            ->map(function ($transaction) {
+                return [
+                    'type' => 'transaction',
+                    'icon' => $transaction->transaction_type === 'income' ? 'arrow-down' : 'arrow-up',
+                    'color' => $transaction->transaction_type === 'income' ? 'green' : 'red',
+                    'title' => $transaction->transaction_type === 'income' ? 'Income received' : 'Expense recorded',
+                    'description' => 'GHS ' . number_format($transaction->amount, 2) . ' - ' . $transaction->category,
+                    'timestamp' => $transaction->created_at,
+                ];
+            });
+
+        // Recent member registrations
+        $newMembers = Member::orderBy('created_at', 'desc')
+            ->whereDate('created_at', Carbon::today())
+            ->take($limit)
+            ->get()
+            ->map(function ($member) {
+                return [
+                    'type' => 'member_registered',
+                    'icon' => 'user-plus',
+                    'color' => 'blue',
+                    'title' => 'New member registered',
+                    'description' => $member->first_name . ' ' . $member->last_name,
+                    'timestamp' => $member->created_at,
+                ];
+            });
+
+        // Merge and sort by timestamp
+        $activities = $activities
+            ->concat($checkIns)
+            ->concat($transactions)
+            ->concat($newMembers)
+            ->sortByDesc('timestamp')
+            ->take($limit)
+            ->values();
+
+        return response()->json($activities);
+    }
 }

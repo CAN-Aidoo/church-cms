@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('member_id')->constrained('members')->onDelete('cascade');
             $table->date('service_date');
-            $table->enum('service_type', ['sunday_service', 'midweek', 'prayer_meeting', 'special_event', 'other']);
+            $table->string('service_type', 50); // Changed from enum to string for flexibility
             $table->enum('status', ['present', 'absent', 'excused', 'late'])->default('absent');
             $table->text('notes')->nullable();
             $table->foreignId('recorded_by')->nullable()->constrained('users')->onDelete('set null');

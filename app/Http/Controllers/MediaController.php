@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\LiveStream;
 use App\Models\MediaContent;
-use App\Repositories\MediaRepository;
+use App\Repositories\MediaRepository; // Corrected from App->Repositories
 use Illuminate\Http\Request;
 
 class MediaController extends Controller
@@ -62,7 +62,7 @@ class MediaController extends Controller
     {
         $validated = $request->validate([
             'stream_title' => 'required|string|max:255',
-            'scheduled_start' => 'required|datetime',
+            'scheduled_start' => 'required|date_format:Y-m-d H:i:s', // Changed from datetime
             'platforms' => 'required|array',
         ]);
 

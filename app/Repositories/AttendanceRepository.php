@@ -245,13 +245,16 @@ class AttendanceRepository
     public function getTrends(int $weeks = 12): array
     {
         $trends = [];
-        $startDate = now()->subWeeks($weeks);
-
+        // Use current time as end point, look back $weeks
         for ($i = $weeks - 1; $i >= 0; $i--) {
             $weekStart = now()->subWeeks($i)->startOfWeek();
             $weekEnd = now()->subWeeks($i)->endOfWeek();
 
-            $weekAttendance = Attendance::whereBetween('service_date', [$weekStart, $weekEnd])->get();
+            // Using whereBetween on date string column might need care with time components if datetime, but service_date is date
+            $weekAttendance = Attendance::whereBetween('service_date', [
+                $weekStart->format('Y-m-d'),
+                $weekEnd->format('Y-m-d')
+            ])->get();
 
             $total = $weekAttendance->count();
             $present = $weekAttendance->where('status', 'present')->count();

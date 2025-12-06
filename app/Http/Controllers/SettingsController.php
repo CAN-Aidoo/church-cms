@@ -108,7 +108,7 @@ class SettingsController extends Controller
         }
 
         $logs = $query->paginate(50);
-        $users = \App\Models\User::orderBy('name')->get();
+        $users = \App\Models\User::orderBy('full_name')->get();
 
         return view('settings.audit-logs', compact('logs', 'users'));
     }

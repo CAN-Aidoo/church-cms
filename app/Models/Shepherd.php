@@ -73,7 +73,7 @@ class Shepherd extends Model
      */
     public function scopeActive($query)
     {
-        return $query->where('member_status', 'active');
+        return $query->where('status', 'active'); // Fixed: Changed member_status to status
     }
 
     /**

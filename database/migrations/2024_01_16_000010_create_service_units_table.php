@@ -48,7 +48,11 @@ return new class extends Migration
             $table->timestamps();
 
             // Unique constraint - one member can be in a unit only once
-            $table->unique(['service_unit_id', 'member_id', 'status']);
+            // We need to remove status from unique constraint or allow only one active status
+            // To avoid duplicates with different statuses, just unique member and unit might be safer,
+            // or ensure app logic handles re-joining.
+            // Let's relax to member_id and service_unit_id
+            $table->unique(['service_unit_id', 'member_id']); 
             $table->index(['service_unit_id', 'status']);
             $table->index(['member_id', 'status']);
         });

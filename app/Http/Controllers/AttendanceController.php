@@ -143,11 +143,8 @@ class AttendanceController extends Controller
         $results = $this->attendanceService->bulkMarkAttendance($attendanceRecords);
 
         if ($results['created'] > 0) {
-            $message = "{$results['created']} attendance record(s) marked successfully.";
-            if ($results['skipped'] > 0) {
-                $message .= " {$results['skipped']} record(s) were skipped (already exists).";
-            }
-
+            $message = "{$results['created']} attendance record(s) marked/updated successfully.";
+            
             return redirect()
                 ->route('attendance.index')
                 ->with('success', $message);
@@ -233,13 +230,13 @@ class AttendanceController extends Controller
         );
 
         // Get service type analysis
-        $serviceTypeAnalysis = $this->attendanceService->getServiceTypeAnalysis(
+        $serviceTypeAnalysis = $this->attendanceRepository->getAverageByServiceType(
             Carbon::parse($dateFrom),
             Carbon::parse($dateTo)
         );
 
         // Get attendance trends (last 12 weeks)
-        $trends = $this->attendanceService->getAttendanceTrends(12);
+        $trends = $this->attendanceRepository->getTrends(12);
 
         // Get top attenders
         $topAttenders = $this->attendanceService->getTopAttenders(
@@ -322,5 +319,65 @@ class AttendanceController extends Controller
         );
 
         return view('attendance.leaderboard', compact('leaderboard', 'dateFrom', 'dateTo'));
+    }
+
+    /**
+     * Show live attendance dashboard.
+     */
+    public function live(Request $request)
+    {
+        $serviceDate = $request->input('date', now()->format('Y-m-d'));
+        $serviceType = $request->input('type', 'sunday_first');
+
+        // Get today's attendance
+        $todayCount = $this->attendanceRepository->getByService($serviceDate, $serviceType)->count();
+
+        // Get QR check-ins count
+        $qrCheckinsCount = \App\Models\Attendance::whereDate('service_date', $serviceDate)
+            ->where('service_type', $serviceType)
+            ->whereIn('check_in_method', ['qr_code', 'qr_code_service', 'qr_code_family'])
+            ->count();
+
+        // Get manual check-ins count
+        $manualCheckinsCount = \App\Models\Attendance::whereDate('service_date', $serviceDate)
+            ->where('service_type', $serviceType)
+            ->where(function($query) {
+                $query->whereNull('check_in_method')
+                      ->orWhere('check_in_method', 'manual');
+            })
+            ->count();
+
+        // Get mobile check-ins count
+        $mobileCheckinsCount = \App\Models\Attendance::whereDate('service_date', $serviceDate)
+            ->where('service_type', $serviceType)
+            ->where('check_in_method', 'mobile')
+            ->count();
+
+        // Get first timers count (visitors who checked in)
+        $firstTimersCount = \App\Models\Visitor::whereDate('first_visit_date', $serviceDate)->count();
+
+        // Calculate attendance rate (compared to total active members)
+        $totalActiveMembers = \App\Models\Member::active()->count();
+        $attendanceRate = $totalActiveMembers > 0 ? round(($todayCount / $totalActiveMembers) * 100, 1) : 0;
+
+        // Get recent attendance (last 20)
+        $recentAttendance = \App\Models\Attendance::with('member')
+            ->whereDate('service_date', $serviceDate)
+            ->where('service_type', $serviceType)
+            ->orderBy('check_in_time', 'desc')
+            ->take(20)
+            ->get();
+
+        return view('attendance.live', compact(
+            'serviceDate',
+            'serviceType',
+            'todayCount',
+            'qrCheckinsCount',
+            'manualCheckinsCount',
+            'mobileCheckinsCount',
+            'firstTimersCount',
+            'attendanceRate',
+            'recentAttendance'
+        ));
     }
 }

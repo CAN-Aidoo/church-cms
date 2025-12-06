@@ -148,7 +148,7 @@ class WelfareProgram extends Model
      */
     public function scopeActive($query)
     {
-        return $query->where('member_status', 'active')
+        return $query->where('status', 'active') // Changed from member_status to status
             ->where(function ($q) {
                 $q->whereNull('end_date')
                     ->orWhere('end_date', '>=', today());

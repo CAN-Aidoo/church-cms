@@ -127,6 +127,14 @@ class User extends Authenticatable
     }
 
     /**
+     * Get the media team member profile associated with this user.
+     */
+    public function mediaTeamMember()
+    {
+        return $this->hasOne(MediaTeamMember::class);
+    }
+
+    /**
      * Get transactions created by this user.
      */
     public function transactionsCreated()
