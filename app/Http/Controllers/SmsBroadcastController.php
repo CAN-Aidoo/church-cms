@@ -65,10 +65,10 @@ class SmsBroadcastController extends Controller
                 ->whereMonth('date_of_birth', today()->month)
                 ->where('member_status', 'active')
                 ->count(),
-            'birthdays_this_week' => Member::whereBetween('date_of_birth', function ($query) {
-                $query->selectRaw('DATE_FORMAT(?, "%m-%d")', [today()->startOfWeek()])
-                    ->selectRaw('DATE_FORMAT(?, "%m-%d")', [today()->endOfWeek()]);
-            })->where('member_status', 'active')->count(),
+            'birthdays_this_week' => Member::whereRaw("DATE_FORMAT(date_of_birth, '%m-%d') BETWEEN ? AND ?", [
+                today()->startOfWeek()->format('m-d'),
+                today()->endOfWeek()->format('m-d')
+            ])->where('member_status', 'active')->count(),
         ];
 
         // Get unique values for custom filters

@@ -232,4 +232,58 @@ class NotificationService
 
         return $now;
     }
+
+    /**
+     * Notify admin of new mobile registration.
+     */
+    public function notifyAdminOfNewMobileRegistration($member): void
+    {
+        $admins = User::where('role', 'admin')->get();
+
+        foreach ($admins as $admin) {
+            $this->send($admin, [
+                'title' => 'New Mobile Registration',
+                'message' => "{$member->first_name} {$member->last_name} registered via mobile app and needs verification.",
+                'type' => 'mobile_registration',
+                'icon' => '📱',
+                'priority' => 'normal',
+                'action_url' => route('members.show', $member->id),
+            ]);
+        }
+    }
+
+    /**
+     * Notify of new visitor.
+     */
+    public function notifyOfNewVisitor($visitor): void
+    {
+        $pastors = User::whereIn('role', ['admin', 'pastor'])->get();
+
+        foreach ($pastors as $pastor) {
+            $this->send($pastor, [
+                'title' => 'New Visitor',
+                'message' => "{$visitor->first_name} {$visitor->last_name} visited for the first time via QR self-registration.",
+                'type' => 'new_visitor',
+                'icon' => '👋',
+                'priority' => 'normal',
+                'action_url' => route('visitors.show', $visitor->id),
+            ]);
+        }
+    }
+
+    /**
+     * Notify payment initiated.
+     */
+    public function notifyPaymentInitiated($transaction, $member): void
+    {
+        if ($member->user) {
+            $this->send($member->user, [
+                'title' => 'Payment Initiated',
+                'message' => "Your payment of GHS {$transaction->amount} for {$transaction->category} has been initiated.",
+                'type' => 'payment_initiated',
+                'icon' => '💳',
+                'priority' => 'normal',
+            ]);
+        }
+    }
 }

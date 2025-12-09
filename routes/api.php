@@ -24,8 +24,14 @@ use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\VisitorController;
 use App\Http\Controllers\WelfareController;
 use App\Http\Controllers\Mobile\MobileCheckInController;
-use App\Http\Controllers\Mobile\MobileRegistrationController;
+use App\Http\Controllers\Mobile\MobileChildrensController;
+use App\Http\Controllers\Mobile\MobileContentController;
+use App\Http\Controllers\Mobile\MobileEquipmentController;
 use App\Http\Controllers\Mobile\MobilePaymentController;
+use App\Http\Controllers\Mobile\MobileRegistrationController;
+use App\Http\Controllers\Mobile\MobileServiceUnitController;
+use App\Http\Controllers\Mobile\MobileShepherdController;
+use App\Http\Controllers\QrCodeController;
 use App\Http\Middleware\CheckRole;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -309,13 +315,81 @@ Route::prefix('v1')->middleware('auth:sanctum')->group(function () {
 
 // Mobile API Routes
 Route::prefix('mobile/v1')->group(function () {
-    // Public mobile routes
+    // PUBLIC MOBILE ROUTES (No Authentication Required)
+
+    // Mobile Registration & Authentication
+    Route::post('/register/member', [MobileRegistrationController::class, 'registerMember']);
+    Route::post('/register/visitor', [MobileRegistrationController::class, 'registerVisitor']);
+    Route::post('/verify-otp', [MobileRegistrationController::class, 'verifyOtp']);
+    Route::post('/resend-otp', [MobileRegistrationController::class, 'resendOtp']);
+
+    // QR Code Check-in (Public)
     Route::post('/check-in/member', [MobileCheckInController::class, 'memberCheckIn']);
     Route::post('/check-in/service', [MobileCheckInController::class, 'serviceCheckIn']);
     Route::post('/check-in/family', [MobileCheckInController::class, 'familyCheckIn']);
 
-    // Authenticated mobile routes
+    // AUTHENTICATED MOBILE ROUTES (Requires Token)
     Route::middleware(['auth:sanctum'])->group(function () {
+        // Registration Status
+        Route::get('/registration/status', [MobileRegistrationController::class, 'checkStatus']);
+
+        // QR Code Generation
         Route::get('/qr-code/personal', [MobileCheckInController::class, 'generatePersonalQr']);
+
+        // Mobile Payment
+        Route::post('/payment/initiate', [MobilePaymentController::class, 'initiatePayment']);
+        Route::post('/payment/verify', [MobilePaymentController::class, 'verifyPayment']);
+        Route::get('/payment/qr-details', [MobilePaymentController::class, 'getPaymentQrDetails']);
+        Route::post('/payment/recurring/setup', [MobilePaymentController::class, 'setupRecurringPayment']);
+        Route::get('/payment/history', [MobilePaymentController::class, 'paymentHistory']);
+
+        // Equipment Management (Mobile)
+        Route::get('/equipment/scan/{qrCode}', [MobileEquipmentController::class, 'scanEquipment']);
+        Route::post('/equipment/checkout', [MobileEquipmentController::class, 'checkoutEquipment']);
+        Route::post('/equipment/return', [MobileEquipmentController::class, 'returnEquipment']);
+        Route::get('/equipment/my-checkouts', [MobileEquipmentController::class, 'myCheckouts']);
+        Route::post('/equipment/report-issue', [MobileEquipmentController::class, 'reportIssue']);
+
+        // Shepherd Mobile Tools
+        Route::prefix('shepherd')->group(function () {
+            Route::get('/flock', [MobileShepherdController::class, 'getMyFlock']);
+            Route::post('/visit/record', [MobileShepherdController::class, 'recordVisit']);
+            Route::get('/visit/history', [MobileShepherdController::class, 'visitHistory']);
+            Route::post('/flock/message', [MobileShepherdController::class, 'messageFlock']);
+            Route::get('/performance', [MobileShepherdController::class, 'getPerformanceDashboard']);
+        });
+
+    // Service Unit Leader Routes
+    Route::prefix('service-unit')->group(function () {
+        Route::get('/my-units', [MobileServiceUnitController::class, 'getMyUnits']);
+        
+        // Leader Management Routes
+        Route::get('/{serviceUnit}/details', [MobileServiceUnitController::class, 'show']);
+        Route::get('/{serviceUnit}/members', [MobileServiceUnitController::class, 'getMembers']);
+        Route::post('/{serviceUnit}/members', [MobileServiceUnitController::class, 'addMember']);
+        Route::get('/{serviceUnit}/rosters', [MobileServiceUnitController::class, 'getRosters']);
+        Route::post('/{serviceUnit}/rosters', [MobileServiceUnitController::class, 'createRoster']);
     });
+
+    // Children's Ministry Mobile
+    Route::prefix('children')->group(function () {
+            Route::post('/check-in', [MobileChildrensController::class, 'checkIn']);
+            Route::post('/check-out', [MobileChildrensController::class, 'checkOut']);
+            Route::get('/my-children', [MobileChildrensController::class, 'getMyChildren']);
+            Route::post('/security-code/generate', [MobileChildrensController::class, 'generateSecurityCode']);
+            Route::post('/incident/report', [MobileChildrensController::class, 'reportIncident']);
+            Route::get('/attendance-history', [MobileChildrensController::class, 'getChildAttendanceHistory']);
+        });
+
+        // Announcements & Public Info
+        Route::get('/announcements', [MobileContentController::class, 'getAnnouncements']);
+        Route::get('/service-times', [MobileContentController::class, 'getServiceTimes']);
+        Route::get('/church-info', [MobileContentController::class, 'getChurchInfo']);
+        Route::get('/events/upcoming', [MobileContentController::class, 'getUpcomingEvents']);
+        Route::get('/events/{eventId}', [MobileContentController::class, 'getEventDetails']);
+        Route::get('/search', [MobileContentController::class, 'search']);
+    });
+
+    // Payment Callback (Webhook from Payment Gateway)
+    Route::post('/payment/callback', [MobilePaymentController::class, 'paymentCallback'])->name('api.mobile.payment.callback');
 });

@@ -99,7 +99,7 @@
         <div class="flex flex-wrap gap-2">
             <a href="{{ route('service-units.index') }}"
                class="px-4 py-2 rounded-lg border transition {{ !request('category') ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50' }}">
-                All Units ({{ $stats['total_units'] }})
+                All Units ({{ $stats['total'] }})
             </a>
             @foreach(['music', 'technical', 'hospitality', 'security', 'admin', 'children', 'media', 'other'] as $category)
             <a href="{{ route('service-units.index', ['category' => $category]) }}"

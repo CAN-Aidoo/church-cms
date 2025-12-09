@@ -97,7 +97,7 @@
         <div class="flex flex-wrap gap-2">
             <a href="<?php echo e(route('service-units.index')); ?>"
                class="px-4 py-2 rounded-lg border transition <?php echo e(!request('category') ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'); ?>">
-                All Units (<?php echo e($stats['total_units']); ?>)
+                All Units (<?php echo e($stats['total']); ?>)
             </a>
             <?php $__currentLoopData = ['music', 'technical', 'hospitality', 'security', 'admin', 'children', 'media', 'other']; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $category): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
             <a href="<?php echo e(route('service-units.index', ['category' => $category])); ?>"
