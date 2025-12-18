@@ -38,13 +38,13 @@
         
         try {
              // Load Unit Name
-            const unitRes = await app.api.get(`/mobile/v1/service-unit/${unitId}/details`);
+            const unitRes = await ChurchApp.apiCall(`/api/mobile/v1/service-unit/${unitId}/details`, 'GET');
             if (unitRes.success) {
                 document.getElementById('unit-name').textContent = unitRes.data.unit.name + ' Roster';
             }
 
             // Load Rosters
-            const res = await app.api.get(`/mobile/v1/service-unit/${unitId}/rosters`);
+            const res = await ChurchApp.apiCall(`/api/mobile/v1/service-unit/${unitId}/rosters`, 'GET');
             if (res.success && res.data.length > 0) {
                 renderRosters(res.data);
             } else {
@@ -57,7 +57,7 @@
 
         } catch (error) {
              console.error('Failed to load rosters:', error);
-             app.showToast('Failed to load rosters', 'error');
+             ChurchApp.showToast('Failed to load rosters', 'error');
         }
 
         function renderRosters(rosters) {

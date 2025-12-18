@@ -311,6 +311,37 @@ Route::prefix('v1')->middleware('auth:sanctum')->group(function () {
         Route::get('/system-info', [SettingsController::class, 'systemInfo']);
         Route::post('/clear-cache', [SettingsController::class, 'clearCache']);
     });
+
+    // QR Code Management API - Admin and Pastor only
+    Route::middleware([CheckRole::class.':admin,pastor'])->prefix('qr-management')->group(function () {
+        Route::get('/dashboard', [App\Http\Controllers\QRManagementController::class, 'dashboard']);
+        Route::get('/', [App\Http\Controllers\QRManagementController::class, 'index']);
+        Route::get('/create', [App\Http\Controllers\QRManagementController::class, 'create']);
+        Route::post('/', [App\Http\Controllers\QRManagementController::class, 'store']);
+        Route::get('/{id}', [App\Http\Controllers\QRManagementController::class, 'show']);
+        Route::post('/{id}/revoke', [App\Http\Controllers\QRManagementController::class, 'revoke']);
+        Route::post('/{id}/extend', [App\Http\Controllers\QRManagementController::class, 'extend']);
+        Route::get('/analytics/overview', [App\Http\Controllers\QRManagementController::class, 'analytics']);
+        Route::get('/{id}/analytics', [App\Http\Controllers\QRManagementController::class, 'getAnalytics']);
+        Route::get('/{id}/scan-logs', [App\Http\Controllers\QRManagementController::class, 'scanLogs']);
+        Route::get('/settings/view', [App\Http\Controllers\QRManagementController::class, 'settings']);
+        Route::put('/settings/update', [App\Http\Controllers\QRManagementController::class, 'updateSettings']);
+        Route::get('/print/preview', [App\Http\Controllers\QRManagementController::class, 'printPreview']);
+        Route::get('/export/analytics', [App\Http\Controllers\QRManagementController::class, 'exportAnalytics']);
+        Route::post('/batch/generate', [App\Http\Controllers\QRManagementController::class, 'generateBatch']);
+    });
+
+    // QR Code Scan API - All authenticated users
+    Route::prefix('qr-scan')->group(function () {
+        Route::post('/scan', [App\Http\Controllers\API\QRScanController::class, 'scan']);
+        Route::post('/validate', [App\Http\Controllers\API\QRScanController::class, 'validateQr']);
+        Route::get('/history', [App\Http\Controllers\API\QRScanController::class, 'history']);
+        Route::post('/sync-offline', [App\Http\Controllers\API\QRScanController::class, 'syncOffline']);
+        Route::get('/{id}/info', [App\Http\Controllers\API\QRScanController::class, 'info']);
+        Route::get('/{id}/has-scanned', [App\Http\Controllers\API\QRScanController::class, 'hasScanned']);
+        Route::get('/active-service', [App\Http\Controllers\API\QRScanController::class, 'activeService']);
+        Route::post('/{id}/report', [App\Http\Controllers\API\QRScanController::class, 'report']);
+    });
 });
 
 // Mobile API Routes

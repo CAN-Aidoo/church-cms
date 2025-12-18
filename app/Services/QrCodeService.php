@@ -239,12 +239,46 @@ class QrCodeService
     }
 
     /**
-     * Generate QR code image URL (placeholder - will use actual QR library when available).
+     * Generate QR code image data URL.
      */
     public function generateQrImageUrl(string $data): string
     {
-        // For now, return a placeholder URL
-        // When SimpleSoftware QR Code package is installed, this will generate actual QR images
-        return "https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=" . urlencode($data);
+        try {
+            $qrCode = \SimpleSoftwareIO\QrCode\Facades\QrCode::format('png')
+                ->size(300)
+                ->errorCorrection('H')
+                ->generate($data);
+
+            return 'data:image/png;base64,' . base64_encode($qrCode);
+        } catch (\Exception $e) {
+            \Log::warning('QR generation failed', ['error' => $e->getMessage()]);
+            return "https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=" . urlencode($data);
+        }
+    }
+
+    /**
+     * Generate QR code image binary.
+     */
+    public function generateQrImage(string $data, int $size = 300): string
+    {
+        return \SimpleSoftwareIO\QrCode\Facades\QrCode::format('png')
+            ->size($size)
+            ->errorCorrection('H')
+            ->generate($data);
+    }
+
+    /**
+     * Generate QR code with custom styling.
+     */
+    public function generateStyledQrImage(string $data, array $options = []): string
+    {
+        $size = $options['size'] ?? 300;
+        $margin = $options['margin'] ?? 1;
+
+        return \SimpleSoftwareIO\QrCode\Facades\QrCode::format('png')
+            ->size($size)
+            ->margin($margin)
+            ->errorCorrection('H')
+            ->generate($data);
     }
 }

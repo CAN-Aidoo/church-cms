@@ -662,7 +662,7 @@ Route::middleware('auth')->group(function () {
         Route::post('agreements/{agreement}/activate', [PartnershipController::class, 'activateAgreement'])->name('agreements.activate');
     });
 
-    // QR Code Management Routes
+    // QR Code Management Routes (Basic)
     Route::prefix('qr-codes')->name('qr-codes.')->group(function () {
         Route::get('/', [QrCodeController::class, 'index'])->name('index');
         Route::get('/service', [QrCodeController::class, 'serviceQrCode'])->name('service');
@@ -675,14 +675,105 @@ Route::middleware('auth')->group(function () {
         Route::post('/bulk-download', [QrCodeController::class, 'bulkDownload'])->name('bulk-download');
     });
 
-    // Mobile Public Routes (accessible from QR scan)
-    Route::prefix('mobile')->name('mobile.')->group(function () {
-        Route::get('/checkin', function() { return view('mobile.checkin'); })->name('checkin');
-        Route::get('/service-checkin', function() { return view('mobile.service-checkin'); })->name('service-checkin');
-        Route::get('/visitor-register', function() { return view('mobile.visitor-register'); })->name('visitor-register');
-        Route::get('/member-register', function() { return view('mobile.member-register'); })->name('member-register');
-        Route::get('/payment', function() { return view('mobile.payment'); })->name('payment');
-        Route::get('/equipment/{id}', function($id) { return view('mobile.equipment', ['id' => $id]); })->name('equipment');
-        Route::get('/program-register/{program}', function($program) { return view('mobile.program-register', ['program' => $program]); })->name('program-register');
+    // QR Code Management System (Comprehensive) - Admin and Pastor only
+    Route::middleware([CheckRole::class.':admin,pastor'])->prefix('qr-management')->name('qr-management.')->group(function () {
+        // Dashboard
+        Route::get('/dashboard', [App\Http\Controllers\QRManagementController::class, 'dashboard'])->name('dashboard');
+
+        // QR Code CRUD
+        Route::get('/', [App\Http\Controllers\QRManagementController::class, 'index'])->name('index');
+        Route::get('/create', [App\Http\Controllers\QRManagementController::class, 'create'])->name('create');
+        Route::get('/{id}', [App\Http\Controllers\QRManagementController::class, 'show'])->name('show');
+
+        // Analytics
+        Route::get('/analytics/overview', [App\Http\Controllers\QRManagementController::class, 'analytics'])->name('analytics');
+
+        // Settings
+        Route::get('/settings/view', [App\Http\Controllers\QRManagementController::class, 'settings'])->name('settings');
+
+        // Print
+        Route::get('/print/preview', [App\Http\Controllers\QRManagementController::class, 'printPreview'])->name('print');
+
+        // Image endpoints
+        Route::get('/{id}/image', [App\Http\Controllers\QRManagementController::class, 'displayImage'])->name('image');
+        Route::get('/{id}/download', [App\Http\Controllers\QRManagementController::class, 'downloadImage'])->name('download');
+    });
+
+});
+
+// ============================================================================
+// MOBILE PWA ROUTES (OUTSIDE AUTH MIDDLEWARE)
+// ============================================================================
+
+// Mobile Public Routes (NO authentication required - accessible to everyone)
+Route::prefix('mobile')->name('mobile.')->group(function () {
+    // Authentication pages
+    Route::get('/login', function() { return view('mobile.login'); })->name('login');
+    Route::get('/register', function() { return view('mobile.register'); })->name('register');
+
+    // Public registration and check-in (QR Code accessible)
+    Route::get('/checkin', function() { return view('mobile.checkin'); })->name('checkin');
+    Route::get('/service-checkin', function() { return view('mobile.service-checkin'); })->name('service-checkin');
+    Route::get('/visitor-register', function() { return view('mobile.visitor-register'); })->name('visitor-register');
+    Route::get('/member-register', function() { return view('mobile.member-register'); })->name('member-register');
+
+    // Public giving and payment
+    Route::get('/give', function() { return view('mobile.give'); })->name('give');
+    Route::get('/payment', function() { return view('mobile.payment'); })->name('payment');
+    Route::get('/payment-success', function() { return view('mobile.payment-success'); })->name('payment-success');
+
+    // Public equipment and program pages
+    Route::get('/equipment/{id}', function($id) { return view('mobile.equipment', ['id' => $id]); })->name('equipment');
+    Route::get('/program-register/{program}', function($program) { return view('mobile.program-register', ['program' => $program]); })->name('program-register');
+
+    // Public church info
+    Route::get('/church-info', function() { return view('mobile.church-info'); })->name('church-info');
+});
+
+// Mobile Authenticated Routes (authentication required)
+Route::prefix('mobile')->name('mobile.')->middleware(['auth:sanctum'])->group(function () {
+    // Core member features
+    Route::get('/dashboard', function() { return view('mobile.dashboard'); })->name('dashboard');
+    Route::get('/profile', function() { return view('mobile.profile'); })->name('profile');
+    Route::get('/profile-edit', function() { return view('mobile.profile-edit'); })->name('profile-edit');
+    Route::get('/settings', function() { return view('mobile.settings'); })->name('settings');
+
+    // Giving features (authenticated)
+    Route::get('/giving', function() { return view('mobile.giving'); })->name('giving');
+    Route::get('/giving-history', function() { return view('mobile.giving-history'); })->name('giving-history');
+
+    // Events & Programs
+    Route::get('/events', function() { return view('mobile.events'); })->name('events');
+    Route::get('/event-details/{id}', function($id) { return view('mobile.event-details', ['id' => $id]); })->name('event-details');
+    Route::get('/event-register/{id}', function($id) { return view('mobile.event-register', ['id' => $id]); })->name('event-register');
+
+    // Announcements
+    Route::get('/announcements', function() { return view('mobile.announcements'); })->name('announcements');
+
+    // Attendance
+    Route::get('/attendance', function() { return view('mobile.attendance'); })->name('attendance');
+    Route::get('/attendance-history', function() { return view('mobile.attendance-history'); })->name('attendance-history');
+
+    // Children's Ministry
+    Route::get('/children-ministry', function() { return view('mobile.children-ministry'); })->name('children-ministry');
+
+    // Equipment Management
+    Route::get('/equipment-management', function() { return view('mobile.equipment-management'); })->name('equipment-management');
+
+    // Shepherd Tools (Pastor and Shepherds only)
+    Route::middleware([CheckRole::class.':admin,pastor'])->prefix('shepherd')->name('shepherd.')->group(function () {
+        Route::get('/dashboard', function() { return view('mobile.shepherd.dashboard'); })->name('dashboard');
+        Route::get('/record-visit', function() { return view('mobile.shepherd.record-visit'); })->name('record-visit');
+        Route::get('/visit-history', function() { return view('mobile.shepherd.visit-history'); })->name('visit-history');
+        Route::get('/message-flock', function() { return view('mobile.shepherd.message-flock'); })->name('message-flock');
+        Route::get('/performance', function() { return view('mobile.shepherd.performance'); })->name('performance');
+    });
+
+    // Service Unit Tools (Staff and above)
+    Route::middleware([CheckRole::class.':admin,pastor,staff'])->prefix('service-unit')->name('service-unit.')->group(function () {
+        Route::get('/dashboard', function() { return view('mobile.service-unit.dashboard'); })->name('dashboard');
+        Route::get('/manage', function() { return view('mobile.service-unit.manage'); })->name('manage');
+        Route::get('/roster', function() { return view('mobile.service-unit.roster'); })->name('roster');
+        Route::get('/duty-tasks', function() { return view('mobile.service-unit.duty-tasks'); })->name('duty-tasks');
     });
 });

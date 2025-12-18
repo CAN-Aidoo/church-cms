@@ -38,6 +38,22 @@ class Kernel extends ConsoleKernel
             ->weeklyOn(0, '03:00')
             ->timezone('Africa/Accra');
 
+        // QR Code Generation - Generate service QR codes automatically
+        // Sunday services - Generate at 6:00 AM (1 hour before first service)
+        $schedule->command('qr:generate-scheduled')
+            ->weeklyOn(0, '06:00')
+            ->timezone('Africa/Accra');
+
+        // Wednesday service - Generate at 4:00 PM (4 hours before service)
+        $schedule->command('qr:generate-scheduled')
+            ->weeklyOn(3, '16:00')
+            ->timezone('Africa/Accra');
+
+        // Friday service - Generate at 4:00 PM (4 hours before service)
+        $schedule->command('qr:generate-scheduled')
+            ->weeklyOn(5, '16:00')
+            ->timezone('Africa/Accra');
+
         // Queue work - Process queued jobs
         // Note: In production, use supervisor or systemd to keep queue worker running
         // This is a fallback for development

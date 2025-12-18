@@ -107,24 +107,24 @@
         
         try {
             // Load Unit Details
-            const res = await app.api.get(`/mobile/v1/service-unit/${unitId}/details`);
+            const res = await ChurchApp.apiCall(`/api/mobile/v1/service-unit/${unitId}/details`, 'GET');
             if (res.success) {
                 const { unit, stats } = res.data;
                 document.getElementById('unit-name').textContent = unit.name;
                 document.getElementById('member-count').textContent = stats.total_members;
                 document.getElementById('upcoming-duties').textContent = stats.upcoming_duties;
-                
+
                 loadMembers(unitId);
             }
         } catch (error) {
             console.error('Failed to load unit:', error);
-            app.showToast('Failed to load details', 'error');
+            ChurchApp.showToast('Failed to load details', 'error');
         }
 
         async function loadMembers(id) {
             const list = document.getElementById('members-list');
             try {
-                const res = await app.api.get(`/mobile/v1/service-unit/${id}/members`);
+                const res = await ChurchApp.apiCall(`/api/mobile/v1/service-unit/${id}/members`, 'GET');
                 if (res.success) {
                     list.innerHTML = res.data.map(m => `
                         <div class="bg-white p-4 rounded-xl border border-gray-100 flex items-center justify-between">
@@ -169,15 +169,15 @@
             const data = Object.fromEntries(formData);
             
             try {
-                const res = await app.api.post(`/mobile/v1/service-unit/${unitId}/members`, data);
+                const res = await ChurchApp.apiCall(`/api/mobile/v1/service-unit/${unitId}/members`, 'POST', data);
                 if (res.success) {
-                    app.showToast('Member added successfully', 'success');
+                    ChurchApp.showToast('Member added successfully', 'success');
                     hideAddMemberModal();
                     loadMembers(unitId);
                     e.target.reset();
                 }
             } catch (error) {
-                app.showToast(error.message || 'Failed to add member', 'error');
+                ChurchApp.showToast(error.message || 'Failed to add member', 'error');
             }
         });
     });

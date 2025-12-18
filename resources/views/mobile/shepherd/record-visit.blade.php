@@ -93,7 +93,7 @@
 
         // Load Members
         try {
-            const res = await app.api.get('/mobile/v1/shepherd/flock');
+            const res = await ChurchApp.apiCall('/api/mobile/v1/shepherd/flock', 'GET');
             if (res.success) {
                 const members = res.data.data;
                 members.forEach(member => {
@@ -110,15 +110,15 @@
             }
         } catch (error) {
             console.error('Failed to load members:', error);
-            app.showToast('Failed to load member list', 'error');
+            ChurchApp.showToast('Failed to load member list', 'error');
         }
 
         // Handle Submission
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
-            
+
             if (!select.value) {
-                app.showToast('Please select a member', 'error');
+                ChurchApp.showToast('Please select a member', 'error');
                 return;
             }
 
@@ -144,17 +144,17 @@
                     }
                 }
 
-                const res = await app.api.post('/mobile/v1/shepherd/visit', data);
-                
+                const res = await ChurchApp.apiCall('/api/mobile/v1/shepherd/visit/record', 'POST', data);
+
                 if (res.success) {
-                    app.showToast('Visitation recorded successfully!', 'success');
+                    ChurchApp.showToast('Visitation recorded successfully!', 'success');
                     setTimeout(() => window.location.href = '/mobile/shepherd', 1500);
                 } else {
                     throw new Error(res.message || 'Failed to record');
                 }
             } catch (error) {
                 console.error('Submission error:', error);
-                app.showToast(error.message || 'Failed to record visitation', 'error');
+                ChurchApp.showToast(error.message || 'Failed to record visitation', 'error');
                 submitBtn.disabled = false;
                 submitBtn.innerHTML = originalBtnContent;
             }

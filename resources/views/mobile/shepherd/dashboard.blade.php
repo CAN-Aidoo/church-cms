@@ -116,7 +116,7 @@
         
         try {
             // Load Dashboard Stats
-            const dashboardRes = await app.api.get('/mobile/v1/shepherd/dashboard');
+            const dashboardRes = await ChurchApp.apiCall('/api/mobile/v1/shepherd/performance', 'GET');
             if (dashboardRes.success) {
                 const stats = dashboardRes.data.statistics;
                 document.getElementById('total-members').textContent = stats.total_flock_size || 0;
@@ -125,16 +125,16 @@
             }
 
             // Load Flock List
-            const flockRes = await app.api.get('/mobile/v1/shepherd/flock');
+            const flockRes = await ChurchApp.apiCall('/api/mobile/v1/shepherd/flock', 'GET');
             if (flockRes.success) {
                 const members = flockRes.data.data; // Paginated response
                 renderFlockList(members);
-                
+
                 // Search functionality
                 searchInput.addEventListener('input', (e) => {
                     const term = e.target.value.toLowerCase();
-                    const filtered = members.filter(m => 
-                        m.first_name.toLowerCase().includes(term) || 
+                    const filtered = members.filter(m =>
+                        m.first_name.toLowerCase().includes(term) ||
                         m.last_name.toLowerCase().includes(term)
                     );
                     renderFlockList(filtered);
@@ -142,7 +142,7 @@
             }
         } catch (error) {
             console.error('Failed to load shepherd data:', error);
-            app.showToast('Failed to load data', 'error');
+            ChurchApp.showToast('Failed to load data', 'error');
         }
 
         function renderFlockList(members) {
@@ -163,8 +163,8 @@
                     <div class="flex-1">
                         <div class="flex justify-between items-start">
                             <h3 class="font-bold text-gray-900">${member.first_name} ${member.last_name}</h3>
-                            <span class="text-xs px-2 py-0.5 rounded-full ${getStatusColor(member.status)}">
-                                ${member.status}
+                            <span class="text-xs px-2 py-0.5 rounded-full ${getEngagementColor(member.engagement_status)}">
+                                ${member.engagement_status || 'Regular'}
                             </span>
                         </div>
                         <p class="text-sm text-gray-500 truncate">${member.phone || 'No phone'}</p>
@@ -184,11 +184,13 @@
             `).join('');
         }
 
-        function getStatusColor(status) {
+        function getEngagementColor(status) {
             switch(status) {
-                case 'active': return 'bg-green-100 text-green-700';
-                case 'inactive': return 'bg-gray-100 text-gray-700';
-                case 'archived': return 'bg-red-100 text-red-700';
+                case 'Engaged': return 'bg-green-100 text-green-700';
+                case 'Committed': return 'bg-blue-100 text-blue-700';
+                case 'Regular': return 'bg-yellow-100 text-yellow-700';
+                case 'At Risk': return 'bg-red-100 text-red-700';
+                case 'Inactive': return 'bg-gray-100 text-gray-700';
                 default: return 'bg-blue-100 text-blue-700';
             }
         }

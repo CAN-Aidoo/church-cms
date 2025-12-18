@@ -37,6 +37,14 @@ class VisitorController extends Controller
         // Get statistics
         $statistics = $this->visitorRepository->getStatistics($filters);
 
+        if ($request->wantsJson()) {
+            return response()->json([
+                'visitors' => $visitors,
+                'statistics' => $statistics,
+                'filters' => $filters,
+            ]);
+        }
+
         return view('visitors.index', compact(
             'visitors',
             'statistics',
@@ -100,16 +108,14 @@ class VisitorController extends Controller
             }
         }
 
-        // Ensure defaults for repository/model compatibility
-        if (isset($validated['visit_date'])) {
-            // Pass as first_visit_date if repository still expects it,
-            // but we should ideally fix repository.
-            // For now, we pass both or rely on model fillable.
-            // The repository sets 'first_visit_date' from input.
-            // We'll fix repository next.
-        }
-
         $visitor = $this->visitorRepository->create($validated);
+
+        if ($request->wantsJson()) {
+            return response()->json([
+                'message' => 'Visitor registered successfully.',
+                'visitor' => $visitor,
+            ], 201);
+        }
 
         return redirect()
             ->route('visitors.show', $visitor)
@@ -125,6 +131,13 @@ class VisitorController extends Controller
 
         // Check if eligible for conversion
         $eligibleForConversion = $visitor->visit_count >= 5 && ! $visitor->converted_member_id;
+
+        if (request()->wantsJson()) {
+            return response()->json([
+                'visitor' => $visitor,
+                'eligible_for_conversion' => $eligibleForConversion,
+            ]);
+        }
 
         return view('visitors.show', compact('visitor', 'eligibleForConversion'));
     }
@@ -151,6 +164,9 @@ class VisitorController extends Controller
     {
         // Don't allow updating converted visitors
         if ($visitor->converted_member_id) {
+            if ($request->wantsJson()) {
+                return response()->json(['error' => 'Cannot update converted visitors.'], 403);
+            }
             return redirect()
                 ->route('visitors.show', $visitor)
                 ->with('error', 'Cannot update converted visitors.');
@@ -206,6 +222,13 @@ class VisitorController extends Controller
 
         $this->visitorRepository->update($visitor, $validated);
 
+        if ($request->wantsJson()) {
+            return response()->json([
+                'message' => 'Visitor updated successfully.',
+                'visitor' => $visitor->fresh(),
+            ]);
+        }
+
         return redirect()
             ->route('visitors.show', $visitor)
             ->with('success', 'Visitor updated successfully.');
@@ -218,17 +241,27 @@ class VisitorController extends Controller
     {
         // Only admin can delete
         if (! Auth::user()->hasRole('admin')) {
+            if (request()->wantsJson()) {
+                return response()->json(['error' => 'You do not have permission to delete visitors.'], 403);
+            }
             abort(403, 'You do not have permission to delete visitors.');
         }
 
         // Don't allow deleting converted visitors
         if ($visitor->converted_member_id) {
+            if (request()->wantsJson()) {
+                return response()->json(['error' => 'Cannot delete converted visitors.'], 403);
+            }
             return redirect()
                 ->route('visitors.index')
                 ->with('error', 'Cannot delete converted visitors.');
         }
 
         $this->visitorRepository->delete($visitor);
+
+        if (request()->wantsJson()) {
+            return response()->json(['message' => 'Visitor deleted successfully.']);
+        }
 
         return redirect()
             ->route('visitors.index')
@@ -250,9 +283,23 @@ class VisitorController extends Controller
 
         // Check if now eligible for conversion
         if ($visitor->fresh()->visit_count >= 5) {
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'message' => 'Visit recorded! This visitor is now eligible for conversion to member.',
+                    'visitor' => $visitor->fresh(),
+                    'eligible_for_conversion' => true,
+                ]);
+            }
             return redirect()
                 ->route('visitors.show', $visitor)
                 ->with('success', 'Visit recorded! This visitor is now eligible for conversion to member.');
+        }
+
+        if ($request->wantsJson()) {
+            return response()->json([
+                'message' => 'Visit recorded successfully.',
+                'visitor' => $visitor->fresh(),
+            ]);
         }
 
         return redirect()
@@ -288,12 +335,18 @@ class VisitorController extends Controller
     {
         // Check eligibility
         if ($visitor->visit_count < 5) {
+            if ($request->wantsJson()) {
+                return response()->json(['error' => 'Visitor must have at least 5 visits to convert.'], 400);
+            }
             return redirect()
                 ->route('visitors.show', $visitor)
                 ->with('error', 'Visitor must have at least 5 visits to convert.');
         }
 
         if ($visitor->converted_member_id) {
+            if ($request->wantsJson()) {
+                return response()->json(['error' => 'Visitor already converted.'], 400);
+            }
             return redirect()
                 ->route('visitors.show', $visitor)
                 ->with('error', 'Visitor already converted.');
@@ -346,6 +399,14 @@ class VisitorController extends Controller
         });
 
         $visitor->refresh();
+
+        if ($request->wantsJson()) {
+            return response()->json([
+                'message' => 'Visitor successfully converted to member!',
+                'visitor' => $visitor,
+                'member_id' => $visitor->convertedMember->id,
+            ]);
+        }
 
         return redirect()
             ->route('members.show', $visitor->convertedMember)
