@@ -5,8 +5,8 @@
 
 class ChurchMobileApp {
     constructor() {
-        this.apiBase = '/api/v1';
-        this.mobileApiBase = '/api/mobile/v1';
+        this.apiBase = window.API_BASE_URL || '/api/v1';
+        this.mobileApiBase = window.MOBILE_API_BASE_URL || '/api/mobile/v1';
         this.token = localStorage.getItem('auth_token');
         this.user = JSON.parse(localStorage.getItem('user') || 'null');
         this.isOnline = navigator.onLine;
@@ -162,10 +162,10 @@ class ChurchMobileApp {
     }
 
     // Authentication
-    async login(phone, password) {
+    async login(email, password) {
         try {
-            const result = await this.apiCall('/api/v1/login', 'POST', {
-                phone,
+            const result = await this.apiCall(`${this.apiBase}/login`, 'POST', {
+                email,
                 password
             }, false);
 
@@ -229,6 +229,11 @@ class ChurchMobileApp {
 
     isAuthenticated() {
         return !!this.token && !!this.user;
+    }
+
+    refreshAuth() {
+        this.token = localStorage.getItem('auth_token');
+        this.user = JSON.parse(localStorage.getItem('user') || 'null');
     }
 
     // Check-in methods

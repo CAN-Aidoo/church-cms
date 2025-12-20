@@ -49,6 +49,11 @@
     <div id="toast-container" class="fixed top-4 left-4 right-4 z-50 flex flex-col gap-2 pointer-events-none"></div>
 
     <!-- Scripts -->
+    <script>
+        // Set API base URLs from Laravel
+        window.API_BASE_URL = '{{ url('/api/v1') }}';
+        window.MOBILE_API_BASE_URL = '{{ url('/api/mobile/v1') }}';
+    </script>
     <script src="{{ asset('js/mobile-app.js') }}"></script>
     <script>
         // Initialize Mobile App

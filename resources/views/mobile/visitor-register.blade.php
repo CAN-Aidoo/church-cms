@@ -135,7 +135,7 @@
             };
 
             try {
-                const response = await fetch('/api/v1/visitors', {
+                const response = await fetch('{{ url('/api/mobile/v1/register/visitor') }}', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',

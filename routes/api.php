@@ -32,7 +32,6 @@ use App\Http\Controllers\Mobile\MobileRegistrationController;
 use App\Http\Controllers\Mobile\MobileServiceUnitController;
 use App\Http\Controllers\Mobile\MobileShepherdController;
 use App\Http\Controllers\QrCodeController;
-use App\Http\Middleware\CheckRole;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -50,7 +49,7 @@ use Illuminate\Support\Facades\Route;
 // Public API Routes (No Authentication)
 Route::prefix('v1')->group(function () {
     // Authentication
-    Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:5,1');
+    Route::post('/login', [AuthController::class, 'apiLogin'])->middleware('throttle:5,1');
     Route::post('/register', [AuthController::class, 'register'])->middleware('throttle:3,1');
     Route::post('/forgot-password', [AuthController::class, 'sendResetLink'])->middleware('throttle:3,1');
     Route::post('/reset-password', [AuthController::class, 'resetPassword'])->middleware('throttle:3,1');
@@ -97,7 +96,7 @@ Route::prefix('v1')->middleware('auth:sanctum')->group(function () {
     });
 
     // Members API - Staff and above
-    Route::middleware([CheckRole::class.':admin,pastor,staff'])->prefix('members')->group(function () {
+    Route::middleware(['role:admin,pastor,staff'])->prefix('members')->group(function () {
         Route::get('/', [MemberController::class, 'index']);
         Route::post('/', [MemberController::class, 'store']);
         Route::get('/search', [MemberController::class, 'search']);
@@ -112,7 +111,7 @@ Route::prefix('v1')->middleware('auth:sanctum')->group(function () {
     });
 
     // Attendance API - Staff and above
-    Route::middleware([CheckRole::class.':admin,pastor,staff'])->prefix('attendance')->group(function () {
+    Route::middleware(['role:admin,pastor,staff'])->prefix('attendance')->group(function () {
         Route::get('/', [AttendanceController::class, 'index']);
         Route::post('/', [AttendanceController::class, 'store']);
         Route::post('/bulk', [AttendanceController::class, 'bulkStore']);
@@ -125,17 +124,17 @@ Route::prefix('v1')->middleware('auth:sanctum')->group(function () {
     });
 
     // Transactions API - Staff and above
-    Route::middleware([CheckRole::class.':admin,pastor,staff'])->prefix('transactions')->group(function () {
+    Route::middleware(['role:admin,pastor,staff'])->prefix('transactions')->group(function () {
         Route::get('/', [TransactionController::class, 'index']);
         Route::post('/', [TransactionController::class, 'store']);
         Route::get('/reports', [TransactionController::class, 'reports']);
         Route::get('/export', [TransactionController::class, 'export']);
-        Route::get('/pending', [TransactionController::class, 'pending'])->middleware([CheckRole::class.':admin,pastor']);
+        Route::get('/pending', [TransactionController::class, 'pending'])->middleware(['role:admin,pastor']);
         Route::get('/{transaction}', [TransactionController::class, 'show']);
         Route::put('/{transaction}', [TransactionController::class, 'update']);
-        Route::post('/{transaction}/approve', [TransactionController::class, 'approve'])->middleware([CheckRole::class.':admin,pastor']);
-        Route::post('/{transaction}/reject', [TransactionController::class, 'reject'])->middleware([CheckRole::class.':admin,pastor']);
-        Route::delete('/{transaction}', [TransactionController::class, 'destroy'])->middleware([CheckRole::class.':admin']);
+        Route::post('/{transaction}/approve', [TransactionController::class, 'approve'])->middleware(['role:admin,pastor']);
+        Route::post('/{transaction}/reject', [TransactionController::class, 'reject'])->middleware(['role:admin,pastor']);
+        Route::delete('/{transaction}', [TransactionController::class, 'destroy'])->middleware(['role:admin']);
 
         // Financial Dashboard Analytics
         Route::get('/analytics/dashboard-summary', [TransactionController::class, 'getDashboardSummary']);
@@ -147,7 +146,7 @@ Route::prefix('v1')->middleware('auth:sanctum')->group(function () {
     });
 
     // Visitors API - Staff and above
-    Route::middleware([CheckRole::class.':admin,pastor,staff'])->prefix('visitors')->group(function () {
+    Route::middleware(['role:admin,pastor,staff'])->prefix('visitors')->group(function () {
         Route::get('/', [VisitorController::class, 'index']);
         Route::post('/', [VisitorController::class, 'store']);
         Route::get('/eligible', [VisitorController::class, 'eligible']);
@@ -161,7 +160,7 @@ Route::prefix('v1')->middleware('auth:sanctum')->group(function () {
     });
 
     // SMS Broadcast API - Staff and above
-    Route::middleware([CheckRole::class.':admin,pastor,staff'])->prefix('sms')->group(function () {
+    Route::middleware(['role:admin,pastor,staff'])->prefix('sms')->group(function () {
         Route::get('/', [SmsBroadcastController::class, 'index']);
         Route::post('/', [SmsBroadcastController::class, 'store']);
         Route::get('/{broadcast}', [SmsBroadcastController::class, 'show']);
@@ -177,7 +176,7 @@ Route::prefix('v1')->middleware('auth:sanctum')->group(function () {
     });
 
     // Programs API - Staff and above
-    Route::middleware([CheckRole::class.':admin,pastor,staff'])->prefix('programs')->group(function () {
+    Route::middleware(['role:admin,pastor,staff'])->prefix('programs')->group(function () {
         Route::get('/', [ProgramController::class, 'index']);
         Route::post('/', [ProgramController::class, 'store']);
         Route::get('/{program}', [ProgramController::class, 'show']);
@@ -206,7 +205,7 @@ Route::prefix('v1')->middleware('auth:sanctum')->group(function () {
         Route::delete('/{prayerRequest}', [PrayerController::class, 'destroy']);
 
         // Staff and above
-        Route::middleware([CheckRole::class.':admin,pastor,staff'])->group(function () {
+        Route::middleware(['role:admin,pastor,staff'])->group(function () {
             Route::get('/', [PrayerController::class, 'index']);
             Route::get('/analytics', [PrayerController::class, 'analytics']);
             Route::post('/{prayerRequest}/assign', [PrayerController::class, 'assign']);
@@ -217,7 +216,7 @@ Route::prefix('v1')->middleware('auth:sanctum')->group(function () {
     });
 
     // Birthdays API - Staff and above
-    Route::middleware([CheckRole::class.':admin,pastor,staff'])->prefix('birthdays')->group(function () {
+    Route::middleware(['role:admin,pastor,staff'])->prefix('birthdays')->group(function () {
         Route::get('/', [BirthdayController::class, 'index']);
         Route::get('/calendar', [BirthdayController::class, 'calendar']);
         Route::get('/history', [BirthdayController::class, 'history']);
@@ -234,14 +233,14 @@ Route::prefix('v1')->middleware('auth:sanctum')->group(function () {
         Route::get('/recognition-suggestions', [BirthdayController::class, 'recognitionSuggestions']);
 
         // Admin only
-        Route::middleware([CheckRole::class.':admin'])->group(function () {
+        Route::middleware(['role:admin'])->group(function () {
             Route::post('/process', [BirthdayController::class, 'processBirthdays']);
             Route::post('/retry-failed', [BirthdayController::class, 'retryFailed']);
         });
     });
 
     // Reports API - Staff and above
-    Route::middleware([CheckRole::class.':admin,pastor,staff'])->prefix('reports')->group(function () {
+    Route::middleware(['role:admin,pastor,staff'])->prefix('reports')->group(function () {
         Route::get('/', [ReportController::class, 'index']);
         Route::get('/analytics', [ReportController::class, 'analytics']);
         Route::post('/custom', [ReportController::class, 'storeCustomReport']);
@@ -277,7 +276,7 @@ Route::prefix('v1')->middleware('auth:sanctum')->group(function () {
     });
 
     // Shepherds API - Pastor and Admin only
-    Route::middleware([CheckRole::class.':admin,pastor'])->prefix('shepherds')->group(function () {
+    Route::middleware(['role:admin,pastor'])->prefix('shepherds')->group(function () {
         Route::get('/', [ShepherdController::class, 'index']);
         Route::post('/', [ShepherdController::class, 'store']);
         Route::get('/analytics', [ShepherdController::class, 'analytics']);
@@ -290,7 +289,7 @@ Route::prefix('v1')->middleware('auth:sanctum')->group(function () {
     });
 
     // Service Units API - Staff and above
-    Route::middleware([CheckRole::class.':admin,pastor,staff'])->prefix('service-units')->group(function () {
+    Route::middleware(['role:admin,pastor,staff'])->prefix('service-units')->group(function () {
         Route::get('/', [ServiceUnitController::class, 'index']);
         Route::post('/', [ServiceUnitController::class, 'store']);
         Route::get('/analytics', [ServiceUnitController::class, 'analytics']);
@@ -302,7 +301,7 @@ Route::prefix('v1')->middleware('auth:sanctum')->group(function () {
     });
 
     // Settings API - Admin only
-    Route::middleware([CheckRole::class.':admin'])->prefix('settings')->group(function () {
+    Route::middleware(['role:admin'])->prefix('settings')->group(function () {
         Route::get('/', [SettingsController::class, 'index']);
         Route::put('/general', [SettingsController::class, 'updateGeneral']);
         Route::get('/email-templates', [SettingsController::class, 'emailTemplates']);
@@ -313,7 +312,7 @@ Route::prefix('v1')->middleware('auth:sanctum')->group(function () {
     });
 
     // QR Code Management API - Admin and Pastor only
-    Route::middleware([CheckRole::class.':admin,pastor'])->prefix('qr-management')->group(function () {
+    Route::middleware(['role:admin,pastor'])->prefix('qr-management')->group(function () {
         Route::get('/dashboard', [App\Http\Controllers\QRManagementController::class, 'dashboard']);
         Route::get('/', [App\Http\Controllers\QRManagementController::class, 'index']);
         Route::get('/create', [App\Http\Controllers\QRManagementController::class, 'create']);

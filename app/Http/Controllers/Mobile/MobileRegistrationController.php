@@ -205,7 +205,7 @@ class MobileRegistrationController extends Controller
         try {
             // Check if visitor already exists
             $existingVisitor = Visitor::where('phone', $validated['phone'])
-                ->where('converted_to_member', false)
+                ->whereNull('converted_member_id')
                 ->first();
 
             if ($existingVisitor) {
@@ -238,13 +238,13 @@ class MobileRegistrationController extends Controller
                 'phone' => $validated['phone'],
                 'email' => $validated['email'] ?? null,
                 'address' => $validated['address'] ?? null,
-                'how_they_heard' => $validated['how_heard'] ?? null,
-                'prayer_request' => $validated['prayer_request'] ?? null,
-                'first_visit_date' => now(),
-                'last_visit' => now(),
+                'how_heard' => $validated['how_heard'] ?? null,
+                'visit_date' => now()->toDateString(),
+                'service_type' => $validated['service_type'] ?? 'main_service',
                 'visit_count' => 1,
-                'status' => 'active',
-                'source' => 'qr_self_registration',
+                'follow_up_required' => true,
+                'follow_up_status' => 'pending',
+                'notes' => $validated['prayer_request'] ?? null,
             ]);
 
             // Send welcome SMS

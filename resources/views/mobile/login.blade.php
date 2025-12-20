@@ -19,16 +19,17 @@
         <div class="w-full max-w-sm">
             <form id="loginForm" class="space-y-4">
                 <div>
-                    <label class="block text-white text-sm font-medium mb-2">Phone Number</label>
+                    <label class="block text-white text-sm font-medium mb-2">Email Address</label>
                     <div class="relative">
                         <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                             <svg class="w-5 h-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
-                                <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z"/>
+                                <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z"/>
+                                <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z"/>
                             </svg>
                         </div>
-                        <input type="tel" id="phone" name="phone"
+                        <input type="email" id="email" name="email"
                                class="pl-10 w-full px-4 py-3 rounded-lg bg-white/10 border border-white/20 text-white placeholder-blue-200 focus:outline-none focus:ring-2 focus:ring-white/50"
-                               placeholder="+233 XX XXX XXXX" required>
+                               placeholder="your@email.com" required>
                     </div>
                 </div>
 
@@ -101,13 +102,13 @@
 document.getElementById('loginForm').addEventListener('submit', async (e) => {
     e.preventDefault();
 
-    const phone = document.getElementById('phone').value;
+    const email = document.getElementById('email').value;
     const password = document.getElementById('password').value;
 
     ChurchApp.showLoading(true);
 
     try {
-        const result = await ChurchApp.login(phone, password);
+        const result = await ChurchApp.login(email, password);
 
         if (result.success) {
             ChurchApp.showToast('Login successful!', 'success');

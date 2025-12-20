@@ -24,7 +24,6 @@ use App\Http\Controllers\SmsBroadcastController;
 use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\VisitorController;
 use App\Http\Controllers\WelfareController;
-use App\Http\Middleware\CheckRole;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -77,7 +76,7 @@ Route::middleware('auth')->group(function () {
     Route::put('notifications/preferences', [NotificationController::class, 'updatePreferences'])->name('notifications.update-preferences');
 
     // Member Routes - Staff and above
-    Route::middleware([CheckRole::class.':admin,pastor,staff'])->group(function () {
+    Route::middleware(['role:admin,pastor,staff'])->group(function () {
         // Member statistics and export
         Route::get('members/statistics', [MemberController::class, 'statistics'])->name('members.statistics');
         Route::get('members/export', [MemberController::class, 'export'])->name('members.export');
@@ -92,7 +91,7 @@ Route::middleware('auth')->group(function () {
     });
 
     // Attendance Routes - Staff and above
-    Route::middleware([CheckRole::class.':admin,pastor,staff'])->group(function () {
+    Route::middleware(['role:admin,pastor,staff'])->group(function () {
         // Attendance list and reports
         Route::get('attendance', [AttendanceController::class, 'index'])->name('attendance.index');
         Route::get('attendance/mark', [AttendanceController::class, 'mark'])->name('attendance.mark');
@@ -112,7 +111,7 @@ Route::middleware('auth')->group(function () {
     });
 
     // Finance/Transaction Routes - Staff and above
-    Route::middleware([CheckRole::class.':admin,pastor,staff'])->group(function () {
+    Route::middleware(['role:admin,pastor,staff'])->group(function () {
         // Transaction list and reports
         Route::get('transactions', [TransactionController::class, 'index'])->name('transactions.index');
         Route::get('transactions/reports', [TransactionController::class, 'reports'])->name('transactions.reports');
@@ -128,19 +127,19 @@ Route::middleware('auth')->group(function () {
     });
 
     // Transaction Approval & Admin - Pastor and Admin only
-    Route::middleware([CheckRole::class.':admin,pastor'])->group(function () {
+    Route::middleware(['role:admin,pastor'])->group(function () {
         Route::get('transactions/pending', [TransactionController::class, 'pending'])->name('transactions.pending');
         Route::post('transactions/{transaction}/approve', [TransactionController::class, 'approve'])->name('transactions.approve');
         Route::post('transactions/{transaction}/reject', [TransactionController::class, 'reject'])->name('transactions.reject');
     });
 
     // Transaction Delete - Admin only
-    Route::middleware([CheckRole::class.':admin'])->group(function () {
+    Route::middleware(['role:admin'])->group(function () {
         Route::delete('transactions/{transaction}', [TransactionController::class, 'destroy'])->name('transactions.destroy');
     });
 
     // Visitor Routes - Staff and above
-    Route::middleware([CheckRole::class.':admin,pastor,staff'])->group(function () {
+    Route::middleware(['role:admin,pastor,staff'])->group(function () {
         // Visitor list and special views
         Route::get('visitors', [VisitorController::class, 'index'])->name('visitors.index');
         Route::get('visitors/eligible', [VisitorController::class, 'eligible'])->name('visitors.eligible');
@@ -165,7 +164,7 @@ Route::middleware('auth')->group(function () {
     });
 
     // SMS Broadcast Routes - Staff and above
-    Route::middleware([CheckRole::class.':admin,pastor,staff'])->group(function () {
+    Route::middleware(['role:admin,pastor,staff'])->group(function () {
         Route::get('sms', [SmsBroadcastController::class, 'index'])->name('sms.index');
         Route::get('sms/create', [SmsBroadcastController::class, 'create'])->name('sms.create');
         Route::post('sms', [SmsBroadcastController::class, 'store'])->name('sms.store');
@@ -175,7 +174,7 @@ Route::middleware('auth')->group(function () {
     });
 
     // Equipment Routes - Staff and above
-    Route::middleware([CheckRole::class.':admin,pastor,staff'])->group(function () {
+    Route::middleware(['role:admin,pastor,staff'])->group(function () {
         // Equipment list and reports
         Route::get('equipment', [EquipmentController::class, 'index'])->name('equipment.index');
         Route::get('equipment/maintenance', [EquipmentController::class, 'maintenance'])->name('equipment.maintenance');
@@ -197,7 +196,7 @@ Route::middleware('auth')->group(function () {
     });
 
     // Shepherd/Small Groups Routes - Pastor and Admin only
-    Route::middleware([CheckRole::class.':admin,pastor'])->group(function () {
+    Route::middleware(['role:admin,pastor'])->group(function () {
         // Shepherd list and analytics
         Route::get('shepherds', [ShepherdController::class, 'index'])->name('shepherds.index');
         Route::get('shepherds/analytics', [ShepherdController::class, 'analytics'])->name('shepherds.analytics');
@@ -232,7 +231,7 @@ Route::middleware('auth')->group(function () {
     });
 
     // Service Units Routes - Staff and above
-    Route::middleware([CheckRole::class.':admin,pastor,staff'])->group(function () {
+    Route::middleware(['role:admin,pastor,staff'])->group(function () {
         // Service unit list and analytics
         Route::get('service-units', [ServiceUnitController::class, 'index'])->name('service-units.index');
         Route::get('service-units/analytics', [ServiceUnitController::class, 'analytics'])->name('service-units.analytics');
@@ -259,7 +258,7 @@ Route::middleware('auth')->group(function () {
     });
 
     // Programs Module - Staff and above
-    Route::middleware([CheckRole::class.':admin,pastor,staff'])->group(function () {
+    Route::middleware(['role:admin,pastor,staff'])->group(function () {
         // Program listing and viewing
         Route::get('programs', [ProgramController::class, 'index'])->name('programs.index');
         Route::get('programs/create', [ProgramController::class, 'create'])->name('programs.create');
@@ -295,7 +294,7 @@ Route::middleware('auth')->group(function () {
     Route::get('programs/registrations/{registration}/success', [ProgramController::class, 'registrationSuccess'])->name('programs.registration-success');
 
     // Service Planning Module - Staff and above
-    Route::middleware([CheckRole::class.':admin,pastor,staff'])->group(function () {
+    Route::middleware(['role:admin,pastor,staff'])->group(function () {
         // Service schedule listing and calendar
         Route::get('services', [ServicePlanningController::class, 'index'])->name('services.index');
         Route::get('services/calendar', [ServicePlanningController::class, 'calendar'])->name('services.calendar');
@@ -334,7 +333,7 @@ Route::middleware('auth')->group(function () {
     });
 
     // Prayer Request System - Staff and above
-    Route::middleware([CheckRole::class.':admin,pastor,staff'])->group(function () {
+    Route::middleware(['role:admin,pastor,staff'])->group(function () {
         // Prayer dashboard and management
         Route::get('prayer', [PrayerController::class, 'index'])->name('prayer.index');
         Route::get('prayer/analytics', [PrayerController::class, 'analytics'])->name('prayer.analytics');
@@ -364,7 +363,7 @@ Route::middleware('auth')->group(function () {
     Route::get('prayer/testimonies/wall', [PrayerController::class, 'testimoniesWall'])->name('prayer.testimonies-wall');
 
     // Birthday & Anniversary Automation - Staff and above
-    Route::middleware([CheckRole::class.':admin,pastor,staff'])->group(function () {
+    Route::middleware(['role:admin,pastor,staff'])->group(function () {
         // Dashboard and main views
         Route::get('birthdays', [BirthdayController::class, 'index'])->name('birthdays.index');
         Route::get('birthdays/calendar', [BirthdayController::class, 'calendar'])->name('birthdays.calendar');
@@ -377,7 +376,7 @@ Route::middleware('auth')->group(function () {
         Route::post('birthdays/announcements/{announcement}/display', [BirthdayController::class, 'markAnnouncementDisplayed'])->name('birthdays.mark-announcement-displayed');
 
         // Settings (Admin only)
-        Route::middleware([CheckRole::class.':admin'])->group(function () {
+        Route::middleware(['role:admin'])->group(function () {
             Route::get('birthdays/settings', [BirthdayController::class, 'settings'])->name('birthdays.settings');
             Route::put('birthdays/settings/{eventType}', [BirthdayController::class, 'updateSettings'])->name('birthdays.update-settings');
             Route::post('birthdays/process', [BirthdayController::class, 'processBirthdays'])->name('birthdays.process');
@@ -386,7 +385,7 @@ Route::middleware('auth')->group(function () {
     });
 
     // Reports Routes - Staff and above
-    Route::middleware([CheckRole::class.':admin,pastor,staff'])->group(function () {
+    Route::middleware(['role:admin,pastor,staff'])->group(function () {
         // Main dashboard
         Route::get('reports', [ReportController::class, 'index'])->name('reports.index');
 
@@ -439,7 +438,7 @@ Route::middleware('auth')->group(function () {
     });
 
     // Children's Ministry Routes - Staff and above
-    Route::middleware([CheckRole::class.':admin,pastor,staff'])->group(function () {
+    Route::middleware(['role:admin,pastor,staff'])->group(function () {
         // Dashboard
         Route::get('childrens-ministry', [ChildrensMinistryController::class, 'index'])->name('childrens-ministry.index');
 
@@ -478,7 +477,7 @@ Route::middleware('auth')->group(function () {
     });
 
     // Settings Routes - Admin only
-    Route::middleware([CheckRole::class.':admin'])->group(function () {
+    Route::middleware(['role:admin'])->group(function () {
         // Main settings dashboard
         Route::get('settings', [SettingsController::class, 'index'])->name('settings.index');
 
@@ -507,7 +506,7 @@ Route::middleware('auth')->group(function () {
     });
 
     // Counselling Routes - Pastor and above
-    Route::middleware([CheckRole::class.':admin,pastor'])->group(function () {
+    Route::middleware(['role:admin,pastor'])->group(function () {
         // Dashboard
         Route::get('counselling', [CounsellingController::class, 'index'])->name('counselling.index');
 
@@ -556,7 +555,7 @@ Route::middleware('auth')->group(function () {
     });
 
     // Welfare Routes - Pastor and above
-    Route::middleware([CheckRole::class.':admin,pastor'])->group(function () {
+    Route::middleware(['role:admin,pastor'])->group(function () {
         // Dashboard
         Route::get('welfare', [WelfareController::class, 'index'])->name('welfare.index');
 
@@ -642,7 +641,7 @@ Route::middleware('auth')->group(function () {
     });
 
     // Media Team Routes - Staff and above
-    Route::middleware([CheckRole::class.':admin,pastor,staff'])->prefix('media')->name('media.')->group(function () {
+    Route::middleware(['role:admin,pastor,staff'])->prefix('media')->name('media.')->group(function () {
         Route::get('/', [MediaController::class, 'index'])->name('index');
         Route::get('content', [MediaController::class, 'content'])->name('content');
         Route::post('content', [MediaController::class, 'storeContent'])->name('content.store');
@@ -653,7 +652,7 @@ Route::middleware('auth')->group(function () {
     });
 
     // Partnerships Routes - Pastor and above
-    Route::middleware([CheckRole::class.':admin,pastor'])->prefix('partnerships')->name('partnerships.')->group(function () {
+    Route::middleware(['role:admin,pastor'])->prefix('partnerships')->name('partnerships.')->group(function () {
         Route::get('/', [PartnershipController::class, 'index'])->name('index');
         Route::get('partners', [PartnershipController::class, 'partners'])->name('partners');
         Route::post('partners', [PartnershipController::class, 'storePartner'])->name('partners.store');
@@ -676,14 +675,17 @@ Route::middleware('auth')->group(function () {
     });
 
     // QR Code Management System (Comprehensive) - Admin and Pastor only
-    Route::middleware([CheckRole::class.':admin,pastor'])->prefix('qr-management')->name('qr-management.')->group(function () {
+    Route::middleware(['role:admin,pastor'])->prefix('qr-management')->name('qr-management.')->group(function () {
         // Dashboard
         Route::get('/dashboard', [App\Http\Controllers\QRManagementController::class, 'dashboard'])->name('dashboard');
 
         // QR Code CRUD
         Route::get('/', [App\Http\Controllers\QRManagementController::class, 'index'])->name('index');
         Route::get('/create', [App\Http\Controllers\QRManagementController::class, 'create'])->name('create');
+        Route::post('/', [App\Http\Controllers\QRManagementController::class, 'store'])->name('store');
         Route::get('/{id}', [App\Http\Controllers\QRManagementController::class, 'show'])->name('show');
+        Route::post('/{id}/revoke', [App\Http\Controllers\QRManagementController::class, 'revoke'])->name('revoke');
+        Route::post('/{id}/extend', [App\Http\Controllers\QRManagementController::class, 'extend'])->name('extend');
 
         // Analytics
         Route::get('/analytics/overview', [App\Http\Controllers\QRManagementController::class, 'analytics'])->name('analytics');
@@ -707,6 +709,9 @@ Route::middleware('auth')->group(function () {
 
 // Mobile Public Routes (NO authentication required - accessible to everyone)
 Route::prefix('mobile')->name('mobile.')->group(function () {
+    // Mobile home - redirects based on auth status
+    Route::get('/', function() { return view('mobile.home'); })->name('home');
+
     // Authentication pages
     Route::get('/login', function() { return view('mobile.login'); })->name('login');
     Route::get('/register', function() { return view('mobile.register'); })->name('register');
@@ -730,8 +735,8 @@ Route::prefix('mobile')->name('mobile.')->group(function () {
     Route::get('/church-info', function() { return view('mobile.church-info'); })->name('church-info');
 });
 
-// Mobile Authenticated Routes (authentication required)
-Route::prefix('mobile')->name('mobile.')->middleware(['auth:sanctum'])->group(function () {
+// Mobile Authenticated Routes (authentication checked in JavaScript via token)
+Route::prefix('mobile')->name('mobile.')->group(function () {
     // Core member features
     Route::get('/dashboard', function() { return view('mobile.dashboard'); })->name('dashboard');
     Route::get('/profile', function() { return view('mobile.profile'); })->name('profile');
@@ -761,7 +766,7 @@ Route::prefix('mobile')->name('mobile.')->middleware(['auth:sanctum'])->group(fu
     Route::get('/equipment-management', function() { return view('mobile.equipment-management'); })->name('equipment-management');
 
     // Shepherd Tools (Pastor and Shepherds only)
-    Route::middleware([CheckRole::class.':admin,pastor'])->prefix('shepherd')->name('shepherd.')->group(function () {
+    Route::middleware(['role:admin,pastor'])->prefix('shepherd')->name('shepherd.')->group(function () {
         Route::get('/dashboard', function() { return view('mobile.shepherd.dashboard'); })->name('dashboard');
         Route::get('/record-visit', function() { return view('mobile.shepherd.record-visit'); })->name('record-visit');
         Route::get('/visit-history', function() { return view('mobile.shepherd.visit-history'); })->name('visit-history');
@@ -770,7 +775,7 @@ Route::prefix('mobile')->name('mobile.')->middleware(['auth:sanctum'])->group(fu
     });
 
     // Service Unit Tools (Staff and above)
-    Route::middleware([CheckRole::class.':admin,pastor,staff'])->prefix('service-unit')->name('service-unit.')->group(function () {
+    Route::middleware(['role:admin,pastor,staff'])->prefix('service-unit')->name('service-unit.')->group(function () {
         Route::get('/dashboard', function() { return view('mobile.service-unit.dashboard'); })->name('dashboard');
         Route::get('/manage', function() { return view('mobile.service-unit.manage'); })->name('manage');
         Route::get('/roster', function() { return view('mobile.service-unit.roster'); })->name('roster');

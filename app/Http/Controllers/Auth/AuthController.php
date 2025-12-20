@@ -103,6 +103,84 @@ class AuthController extends Controller
     }
 
     /**
+     * Handle API/Mobile login request.
+     */
+    public function apiLogin(Request $request)
+    {
+        $request->validate([
+            'email' => 'required|email',
+            'password' => 'required',
+        ]);
+
+        $email = $request->email;
+        $lockoutKey = "login_attempts:{$email}";
+
+        // Check for account lockout
+        $failedAttempts = Cache::get($lockoutKey, 0);
+        if ($failedAttempts >= 5) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Too many login attempts. Please try again in 15 minutes.',
+            ], 429);
+        }
+
+        $user = User::where('email', $email)->first();
+
+        // Check credentials
+        if (! $user || ! Hash::check($request->password, $user->password)) {
+            Cache::put($lockoutKey, $failedAttempts + 1, now()->addMinutes(15));
+
+            return response()->json([
+                'success' => false,
+                'message' => 'The provided credentials are incorrect.',
+            ], 401);
+        }
+
+        // Check if user is active
+        if (! $user->is_active) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Your account has been deactivated. Please contact the administrator.',
+            ], 403);
+        }
+
+        // Clear failed attempts
+        Cache::forget($lockoutKey);
+
+        // Create API token
+        $token = $user->createToken('mobile-app')->plainTextToken;
+
+        // Update last login
+        $user->updateLastLogin();
+
+        // Log successful login
+        AuditLog::create([
+            'user_id' => $user->id,
+            'action' => 'api_login',
+            'table_name' => 'users',
+            'record_id' => $user->id,
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Login successful',
+            'data' => [
+                'access_token' => $token,
+                'token_type' => 'Bearer',
+                'user' => [
+                    'id' => $user->id,
+                    'full_name' => $user->full_name,
+                    'email' => $user->email,
+                    'role' => $user->role,
+                    'avatar_url' => $user->avatar_url,
+                ],
+            ],
+        ]);
+    }
+
+    /**
      * Show the registration form.
      */
     public function showRegisterForm()

@@ -244,7 +244,7 @@ document.getElementById('resendOtp').addEventListener('click', async () => {
     ChurchApp.showLoading(true);
 
     try {
-        const result = await ChurchApp.apiCall('/api/mobile/v1/resend-otp', 'POST', {
+        const result = await ChurchApp.apiCall(`${ChurchApp.mobileApiBase}/resend-otp`, 'POST', {
             phone: phoneNumber
         }, false);
 

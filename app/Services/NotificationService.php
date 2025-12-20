@@ -262,8 +262,8 @@ class NotificationService
         foreach ($pastors as $pastor) {
             $this->send($pastor, [
                 'title' => 'New Visitor',
-                'message' => "{$visitor->first_name} {$visitor->last_name} visited for the first time via QR self-registration.",
-                'type' => 'new_visitor',
+                'message' => "{$visitor->first_name} {$visitor->last_name} visited for the first time via mobile registration.",
+                'type' => 'general',
                 'icon' => '👋',
                 'priority' => 'normal',
                 'action_url' => route('visitors.show', $visitor->id),
