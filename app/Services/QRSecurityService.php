@@ -12,8 +12,27 @@ class QRSecurityService
 
     public function __construct()
     {
-        $this->encryptionKey = QRCodeSetting::get('encryption_key', config('app.key'));
-        $this->signingKey = QRCodeSetting::get('signing_key', config('app.key'));
+        $this->encryptionKey = $this->resolveKey('encryption_key');
+        $this->signingKey = $this->resolveKey('signing_key');
+    }
+
+    /**
+     * Resolve key from settings or config, handling base64 format.
+     */
+    private function resolveKey(string $settingName): string
+    {
+        $key = QRCodeSetting::get($settingName);
+        
+        if (empty($key)) {
+            $key = config('app.key');
+        }
+
+        if (is_string($key) && str_starts_with($key, 'base64:')) {
+            $binary = base64_decode(substr($key, 7));
+            return bin2hex($binary);
+        }
+
+        return $key;
     }
 
     /**

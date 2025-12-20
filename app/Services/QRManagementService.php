@@ -82,7 +82,7 @@ class QRManagementService
             'activation_time' => $qrCode->activation_time,
             'expiration_time' => $qrCode->expiration_time,
             'status' => $qrCode->status,
-            'url' => route('qr.scan', ['code' => $qrCode->id]),
+            // 'url' => route('qr.scan', ['code' => $qrCode->id]), // Route not defined
         ];
     }
 
@@ -170,10 +170,10 @@ class QRManagementService
      */
     private function processAttendanceScan(QRCode $qrCode, array $scanData): array
     {
-        $member = Member::find($scanData['user_id']);
+        $member = Member::where('user_id', $scanData['user_id'])->first();
 
         if (!$member) {
-            throw new \Exception('Member not found');
+            throw new \Exception('Member profile not found for this user');
         }
 
         // Check for existing attendance
@@ -225,7 +225,11 @@ class QRManagementService
             throw new \Exception('Program not found');
         }
 
-        $member = Member::find($scanData['user_id']);
+        $member = Member::where('user_id', $scanData['user_id'])->first();
+        
+        if (!$member) {
+            throw new \Exception('Member profile not found');
+        }
 
         // Register for program
         DB::table('program_registrations')->insert([
@@ -257,7 +261,11 @@ class QRManagementService
             throw new \Exception('Payment amount required');
         }
 
-        $member = Member::find($scanData['user_id']);
+        $member = Member::where('user_id', $scanData['user_id'])->first();
+        
+        if (!$member) {
+            throw new \Exception('Member profile not found');
+        }
 
         // Record transaction
         $transaction = Transaction::create([
@@ -288,7 +296,11 @@ class QRManagementService
      */
     private function processCheckIn(QRCode $qrCode, array $scanData): array
     {
-        $member = Member::find($scanData['user_id']);
+        $member = Member::where('user_id', $scanData['user_id'])->first();
+
+        if (!$member) {
+            throw new \Exception('Member profile not found');
+        }
 
         return [
             'type' => 'CHECK_IN_SUCCESS',

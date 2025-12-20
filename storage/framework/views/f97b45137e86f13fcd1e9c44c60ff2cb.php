@@ -155,6 +155,9 @@ document.getElementById('greeting').textContent = greeting;
 
 // Load user profile
 async function loadProfile() {
+    // Refresh auth state from localStorage
+    ChurchApp.refreshAuth();
+
     if (!ChurchApp.isAuthenticated()) {
         window.location.href = '/mobile/login';
         return;

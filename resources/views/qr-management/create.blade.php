@@ -238,11 +238,11 @@ document.getElementById('qrGenerationForm').addEventListener('submit', async fun
     data.offline_allowed = document.getElementById('offline_allowed').checked;
 
     try {
-        const response = await fetch('/api/v1/qr-management', {
+        const response = await fetch('{{ route('qr-management.store') }}', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${localStorage.getItem('token')}`
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
             },
             body: JSON.stringify(data)
         });
@@ -319,11 +319,11 @@ async function generateBatch() {
         data.offline_allowed = document.getElementById('offline_allowed').checked;
 
         try {
-            const response = await fetch('/api/v1/qr-management/batch/generate', {
+            const response = await fetch('{{ route('qr-management.store') }}', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
                 },
                 body: JSON.stringify(data)
             });

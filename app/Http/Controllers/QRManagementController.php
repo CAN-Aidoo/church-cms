@@ -13,7 +13,8 @@ class QRManagementController extends Controller
         private QRManagementService $qrService,
         private QRCodeRepository $repository
     ) {
-        $this->middleware(['auth:sanctum', 'check.role:admin,pastor']);
+        // Use sanctum for API routes, session auth for web routes
+        $this->middleware(['auth', 'role:admin,pastor']);
     }
 
     /**
