@@ -3,36 +3,60 @@
 namespace App\Services;
 
 use App\Models\QRCodeSetting;
-use Illuminate\Support\Facades\Crypt;
 
 class QRSecurityService
 {
-    private string $encryptionKey;
-    private string $signingKey;
+    private ?string $encryptionKey = null;
 
-    public function __construct()
-    {
-        $this->encryptionKey = $this->resolveKey('encryption_key');
-        $this->signingKey = $this->resolveKey('signing_key');
-    }
+    private ?string $signingKey = null;
 
     /**
      * Resolve key from settings or config, handling base64 format.
      */
     private function resolveKey(string $settingName): string
     {
-        $key = QRCodeSetting::get($settingName);
-        
+        try {
+            $key = QRCodeSetting::get($settingName);
+        } catch (\Exception $e) {
+            // Database not available (e.g., during build), use app key
+            $key = null;
+        }
+
         if (empty($key)) {
             $key = config('app.key');
         }
 
         if (is_string($key) && str_starts_with($key, 'base64:')) {
             $binary = base64_decode(substr($key, 7));
+
             return bin2hex($binary);
         }
 
         return $key;
+    }
+
+    /**
+     * Get encryption key (lazy-loaded).
+     */
+    private function getEncryptionKey(): string
+    {
+        if ($this->encryptionKey === null) {
+            $this->encryptionKey = $this->resolveKey('encryption_key');
+        }
+
+        return $this->encryptionKey;
+    }
+
+    /**
+     * Get signing key (lazy-loaded).
+     */
+    private function getSigningKey(): string
+    {
+        if ($this->signingKey === null) {
+            $this->signingKey = $this->resolveKey('signing_key');
+        }
+
+        return $this->signingKey;
     }
 
     /**
@@ -42,7 +66,7 @@ class QRSecurityService
     {
         $json = json_encode($data);
         $nonce = random_bytes(12); // 96-bit nonce for GCM
-        $key = hex2bin($this->encryptionKey);
+        $key = hex2bin($this->getEncryptionKey());
 
         $ciphertext = openssl_encrypt(
             $json,
@@ -54,7 +78,7 @@ class QRSecurityService
         );
 
         // Combine nonce + tag + ciphertext
-        $encrypted = base64_encode($nonce . $tag . $ciphertext);
+        $encrypted = base64_encode($nonce.$tag.$ciphertext);
 
         return $encrypted;
     }
@@ -65,7 +89,7 @@ class QRSecurityService
     public function decrypt(string $encrypted): array
     {
         $decoded = base64_decode($encrypted);
-        $key = hex2bin($this->encryptionKey);
+        $key = hex2bin($this->getEncryptionKey());
 
         // Extract components
         $nonce = substr($decoded, 0, 12);
@@ -94,7 +118,7 @@ class QRSecurityService
     public function sign(array $data): string
     {
         $message = json_encode($data);
-        $signature = hash_hmac('sha256', $message, hex2bin($this->signingKey));
+        $signature = hash_hmac('sha256', $message, hex2bin($this->getSigningKey()));
 
         return $signature;
     }
@@ -137,19 +161,19 @@ class QRSecurityService
         $data = $this->decrypt($qrData);
 
         // Extract and verify signature
-        if (!isset($data['signature'])) {
+        if (! isset($data['signature'])) {
             throw new \Exception('QR code missing signature');
         }
 
         $signature = $data['signature'];
         unset($data['signature']);
 
-        if (!$this->verify($data, $signature)) {
+        if (! $this->verify($data, $signature)) {
             throw new \Exception('Invalid QR code signature');
         }
 
         // Check timestamp (prevent replay attacks beyond reasonable time)
-        if (!isset($data['timestamp'])) {
+        if (! isset($data['timestamp'])) {
             throw new \Exception('QR code missing timestamp');
         }
 
@@ -261,7 +285,7 @@ class QRSecurityService
         $requiredFields = ['device_id', 'device_type', 'ip_address'];
 
         foreach ($requiredFields as $field) {
-            if (!isset($deviceData[$field])) {
+            if (! isset($deviceData[$field])) {
                 return false;
             }
         }
@@ -273,7 +297,7 @@ class QRSecurityService
 
         // Validate device type
         $validTypes = ['ios', 'android', 'web'];
-        if (!in_array($deviceData['device_type'], $validTypes)) {
+        if (! in_array($deviceData['device_type'], $validTypes)) {
             return false;
         }
 
