@@ -58,17 +58,26 @@ class QRCode extends Model
 
     // QR Code Types
     const TYPE_SERVICE_ATTENDANCE = 'SERVICE_ATTENDANCE';
+
     const TYPE_EVENT_REGISTRATION = 'EVENT_REGISTRATION';
+
     const TYPE_PAYMENT = 'PAYMENT';
+
     const TYPE_CHECK_IN = 'CHECK_IN';
+
     const TYPE_VISITOR_REGISTRATION = 'VISITOR_REGISTRATION';
+
     const TYPE_EQUIPMENT_CHECKOUT = 'EQUIPMENT_CHECKOUT';
+
     const TYPE_VERIFICATION = 'VERIFICATION';
 
     // Statuses
     const STATUS_PENDING = 'PENDING';
+
     const STATUS_ACTIVE = 'ACTIVE';
+
     const STATUS_EXPIRED = 'EXPIRED';
+
     const STATUS_REVOKED = 'REVOKED';
 
     /**

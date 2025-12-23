@@ -26,14 +26,15 @@ class SendTransactionReceipt implements ShouldQueue
             $transaction = $event->transaction;
 
             // Only send receipt for income transactions with a member
-            if ($transaction->type !== 'income' || !$transaction->member_id) {
+            if ($transaction->type !== 'income' || ! $transaction->member_id) {
                 return;
             }
 
             $member = $transaction->member;
 
-            if (!$member->user_id) {
+            if (! $member->user_id) {
                 Log::info("Skipping receipt for transaction {$transaction->id}: Member has no user account");
+
                 return;
             }
 
@@ -41,7 +42,7 @@ class SendTransactionReceipt implements ShouldQueue
                 userId: $member->user_id,
                 type: 'transaction_receipt',
                 title: 'Transaction Receipt',
-                message: "Thank you for your {$transaction->category} of GHS " . number_format($transaction->amount, 2),
+                message: "Thank you for your {$transaction->category} of GHS ".number_format($transaction->amount, 2),
                 channels: ['email', 'in_app'],
                 data: [
                     'transaction_id' => $transaction->id,
@@ -49,7 +50,7 @@ class SendTransactionReceipt implements ShouldQueue
                     'category' => $transaction->category,
                     'amount' => $transaction->amount,
                     'transaction_date' => $transaction->transaction_date->format('Y-m-d'),
-                    'reference_number' => $transaction->reference_number
+                    'reference_number' => $transaction->reference_number,
                 ]
             );
 

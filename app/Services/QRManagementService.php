@@ -29,12 +29,12 @@ class QRManagementService
     public function generateQRCode(array $config): array
     {
         // Permission check
-        if (!$this->hasGeneratePermission()) {
+        if (! $this->hasGeneratePermission()) {
             throw new \Exception('Unauthorized: Admin or Pastor access required for QR generation');
         }
 
         // Rate limit check
-        if (!$this->securityService->checkGenerationRateLimit(Auth::id())) {
+        if (! $this->securityService->checkGenerationRateLimit(Auth::id())) {
             throw new \Exception('Rate limit exceeded: Too many QR codes generated');
         }
 
@@ -100,7 +100,7 @@ class QRManagementService
             // Get QR code from database
             $qrCode = $this->repository->findById($decoded['id']);
 
-            if (!$qrCode) {
+            if (! $qrCode) {
                 return $this->logFailedScan(null, $scanData, 'INVALID_QR', $startTime);
             }
 
@@ -172,7 +172,7 @@ class QRManagementService
     {
         $member = Member::where('user_id', $scanData['user_id'])->first();
 
-        if (!$member) {
+        if (! $member) {
             throw new \Exception('Member profile not found for this user');
         }
 
@@ -215,19 +215,19 @@ class QRManagementService
     {
         $programId = $qrCode->metadata['program_id'] ?? null;
 
-        if (!$programId) {
+        if (! $programId) {
             throw new \Exception('Program information missing');
         }
 
         $program = Program::find($programId);
 
-        if (!$program) {
+        if (! $program) {
             throw new \Exception('Program not found');
         }
 
         $member = Member::where('user_id', $scanData['user_id'])->first();
-        
-        if (!$member) {
+
+        if (! $member) {
             throw new \Exception('Member profile not found');
         }
 
@@ -257,13 +257,13 @@ class QRManagementService
         $amount = $scanData['amount'] ?? $qrCode->metadata['amount'] ?? null;
         $category = $qrCode->metadata['category'] ?? 'offering';
 
-        if (!$amount) {
+        if (! $amount) {
             throw new \Exception('Payment amount required');
         }
 
         $member = Member::where('user_id', $scanData['user_id'])->first();
-        
-        if (!$member) {
+
+        if (! $member) {
             throw new \Exception('Member profile not found');
         }
 
@@ -275,7 +275,7 @@ class QRManagementService
             'category' => $category,
             'amount' => $amount,
             'payment_method' => $scanData['payment_method'] ?? 'mobile_money',
-            'reference' => 'QR-' . strtoupper(uniqid()),
+            'reference' => 'QR-'.strtoupper(uniqid()),
             'status' => 'completed',
             'recorded_by' => $member->user_id,
             'approved_by' => null,
@@ -298,7 +298,7 @@ class QRManagementService
     {
         $member = Member::where('user_id', $scanData['user_id'])->first();
 
-        if (!$member) {
+        if (! $member) {
             throw new \Exception('Member profile not found');
         }
 
@@ -330,7 +330,7 @@ class QRManagementService
         return [
             'type' => 'VISITOR_REGISTERED',
             'visitor_id' => $visitor->id,
-            'name' => $visitor->first_name . ' ' . $visitor->last_name,
+            'name' => $visitor->first_name.' '.$visitor->last_name,
         ];
     }
 
@@ -341,13 +341,13 @@ class QRManagementService
     {
         $equipmentId = $qrCode->metadata['equipment_id'] ?? null;
 
-        if (!$equipmentId) {
+        if (! $equipmentId) {
             throw new \Exception('Equipment information missing');
         }
 
         $equipment = Equipment::find($equipmentId);
 
-        if (!$equipment) {
+        if (! $equipment) {
             throw new \Exception('Equipment not found');
         }
 
@@ -398,7 +398,7 @@ class QRManagementService
             throw new \Exception(QRCode::ERROR_NOT_ACTIVE);
         }
 
-        if (!$qrCode->isActive()) {
+        if (! $qrCode->isActive()) {
             throw new \Exception(QRCode::ERROR_NOT_ACTIVE);
         }
     }
@@ -408,8 +408,8 @@ class QRManagementService
      */
     private function validateLocation(QRCode $qrCode, ?array $location): void
     {
-        if (!$location || !isset($location['latitude'], $location['longitude'])) {
-            throw new \Exception(QRCode::ERROR_GPS_FAILED . ': Location data missing');
+        if (! $location || ! isset($location['latitude'], $location['longitude'])) {
+            throw new \Exception(QRCode::ERROR_GPS_FAILED.': Location data missing');
         }
 
         $distance = $this->calculateDistance(
@@ -423,7 +423,7 @@ class QRManagementService
         $maxDistance = $qrCode->location_radius / 1000;
 
         if ($distance > $maxDistance) {
-            throw new \Exception(QRCode::ERROR_GPS_FAILED . ': Outside allowed radius');
+            throw new \Exception(QRCode::ERROR_GPS_FAILED.': Outside allowed radius');
         }
     }
 
@@ -462,18 +462,18 @@ class QRManagementService
     private function performSecurityChecks(QRCode $qrCode, array $scanData): void
     {
         // Device fingerprint validation
-        if (!$this->securityService->validateDeviceFingerprint($scanData)) {
+        if (! $this->securityService->validateDeviceFingerprint($scanData)) {
             throw new \Exception('Invalid device fingerprint');
         }
 
         // Rate limiting
-        if (!$this->securityService->checkScanRateLimit($scanData['device_id'])) {
+        if (! $this->securityService->checkScanRateLimit($scanData['device_id'])) {
             throw new \Exception('Rate limit exceeded: Too many scans');
         }
 
         // Anomaly detection
         $anomalies = $this->securityService->detectAnomalies($scanData);
-        if (!empty($anomalies)) {
+        if (! empty($anomalies)) {
             // Log anomalies but don't block (for now)
             \Log::warning('QR scan anomalies detected', [
                 'qr_id' => $qrCode->id,
@@ -575,11 +575,12 @@ class QRManagementService
                 ->generate($data);
 
             // Return as base64 data URL for easy embedding
-            return 'data:image/png;base64,' . base64_encode($qrCode);
+            return 'data:image/png;base64,'.base64_encode($qrCode);
         } catch (\Exception $e) {
             // Fallback to external API if generation fails
             \Log::warning('QR generation failed, using fallback', ['error' => $e->getMessage()]);
-            return "https://api.qrserver.com/v1/create-qr-code/?size=" . $size . "x" . $size . "&data=" . urlencode($data);
+
+            return 'https://api.qrserver.com/v1/create-qr-code/?size='.$size.'x'.$size.'&data='.urlencode($data);
         }
     }
 
@@ -590,7 +591,7 @@ class QRManagementService
     {
         $qrCode = $this->repository->findById($qrId);
 
-        if (!$qrCode) {
+        if (! $qrCode) {
             throw new \Exception('QR code not found');
         }
 
@@ -617,7 +618,7 @@ class QRManagementService
 
         // For service attendance, activate 30 minutes before service
         if ($config['type'] === QRCode::TYPE_SERVICE_ATTENDANCE && isset($config['service_time'])) {
-            return Carbon::parse($config['service_date'] . ' ' . $config['service_time'])
+            return Carbon::parse($config['service_date'].' '.$config['service_time'])
                 ->subMinutes(30);
         }
 
@@ -636,7 +637,7 @@ class QRManagementService
 
         // For service attendance, expire 2 hours after service start
         if ($config['type'] === QRCode::TYPE_SERVICE_ATTENDANCE && isset($config['service_time'])) {
-            return Carbon::parse($config['service_date'] . ' ' . $config['service_time'])
+            return Carbon::parse($config['service_date'].' '.$config['service_time'])
                 ->addHours(2);
         }
 
@@ -651,7 +652,7 @@ class QRManagementService
     {
         $user = Auth::user();
 
-        if (!$user) {
+        if (! $user) {
             return false;
         }
 
@@ -673,7 +674,7 @@ class QRManagementService
     {
         $analytics = $this->repository->getAnalytics($qrId, $date);
 
-        if (!$analytics) {
+        if (! $analytics) {
             // Generate if not exists
             $analytics = $this->repository->generateAnalytics($qrId, $date ?? today());
         }
@@ -688,7 +689,7 @@ class QRManagementService
     {
         $qrCode = $this->repository->findById($qrId);
 
-        if (!$qrCode) {
+        if (! $qrCode) {
             throw new \Exception('QR code not found');
         }
 
@@ -704,7 +705,7 @@ class QRManagementService
     {
         $qrCode = $this->repository->findById($qrId);
 
-        if (!$qrCode) {
+        if (! $qrCode) {
             throw new \Exception('QR code not found');
         }
 

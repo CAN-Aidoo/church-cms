@@ -85,7 +85,7 @@ class SendBulkSms implements ShouldQueue
                 'sent_count' => $successCount,
                 'failed_count' => $failCount,
                 'sent_at' => now(),
-                'failed_recipients' => $failCount > 0 ? json_encode($failedNumbers) : null
+                'failed_recipients' => $failCount > 0 ? json_encode($failedNumbers) : null,
             ]);
 
             Log::info("SMS broadcast completed: {$this->broadcast->id}. Success: {$successCount}, Failed: {$failCount}");

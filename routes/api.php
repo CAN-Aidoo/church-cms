@@ -3,26 +3,9 @@
 use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\BirthdayController;
-use App\Http\Controllers\ChildrensMinistryController;
-use App\Http\Controllers\CounsellingController;
 use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\EquipmentController;
-use App\Http\Controllers\MediaController;
 use App\Http\Controllers\MemberController;
 use App\Http\Controllers\MessagingController;
-use App\Http\Controllers\NotificationController;
-use App\Http\Controllers\PartnershipController;
-use App\Http\Controllers\PrayerController;
-use App\Http\Controllers\ProgramController;
-use App\Http\Controllers\ReportController;
-use App\Http\Controllers\ServicePlanningController;
-use App\Http\Controllers\ServiceUnitController;
-use App\Http\Controllers\SettingsController;
-use App\Http\Controllers\ShepherdController;
-use App\Http\Controllers\SmsBroadcastController;
-use App\Http\Controllers\TransactionController;
-use App\Http\Controllers\VisitorController;
-use App\Http\Controllers\WelfareController;
 use App\Http\Controllers\Mobile\MobileCheckInController;
 use App\Http\Controllers\Mobile\MobileChildrensController;
 use App\Http\Controllers\Mobile\MobileContentController;
@@ -31,7 +14,16 @@ use App\Http\Controllers\Mobile\MobilePaymentController;
 use App\Http\Controllers\Mobile\MobileRegistrationController;
 use App\Http\Controllers\Mobile\MobileServiceUnitController;
 use App\Http\Controllers\Mobile\MobileShepherdController;
-use App\Http\Controllers\QrCodeController;
+use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\PrayerController;
+use App\Http\Controllers\ProgramController;
+use App\Http\Controllers\ReportController;
+use App\Http\Controllers\ServiceUnitController;
+use App\Http\Controllers\SettingsController;
+use App\Http\Controllers\ShepherdController;
+use App\Http\Controllers\SmsBroadcastController;
+use App\Http\Controllers\TransactionController;
+use App\Http\Controllers\VisitorController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -389,20 +381,20 @@ Route::prefix('mobile/v1')->group(function () {
             Route::get('/performance', [MobileShepherdController::class, 'getPerformanceDashboard']);
         });
 
-    // Service Unit Leader Routes
-    Route::prefix('service-unit')->group(function () {
-        Route::get('/my-units', [MobileServiceUnitController::class, 'getMyUnits']);
-        
-        // Leader Management Routes
-        Route::get('/{serviceUnit}/details', [MobileServiceUnitController::class, 'show']);
-        Route::get('/{serviceUnit}/members', [MobileServiceUnitController::class, 'getMembers']);
-        Route::post('/{serviceUnit}/members', [MobileServiceUnitController::class, 'addMember']);
-        Route::get('/{serviceUnit}/rosters', [MobileServiceUnitController::class, 'getRosters']);
-        Route::post('/{serviceUnit}/rosters', [MobileServiceUnitController::class, 'createRoster']);
-    });
+        // Service Unit Leader Routes
+        Route::prefix('service-unit')->group(function () {
+            Route::get('/my-units', [MobileServiceUnitController::class, 'getMyUnits']);
 
-    // Children's Ministry Mobile
-    Route::prefix('children')->group(function () {
+            // Leader Management Routes
+            Route::get('/{serviceUnit}/details', [MobileServiceUnitController::class, 'show']);
+            Route::get('/{serviceUnit}/members', [MobileServiceUnitController::class, 'getMembers']);
+            Route::post('/{serviceUnit}/members', [MobileServiceUnitController::class, 'addMember']);
+            Route::get('/{serviceUnit}/rosters', [MobileServiceUnitController::class, 'getRosters']);
+            Route::post('/{serviceUnit}/rosters', [MobileServiceUnitController::class, 'createRoster']);
+        });
+
+        // Children's Ministry Mobile
+        Route::prefix('children')->group(function () {
             Route::post('/check-in', [MobileChildrensController::class, 'checkIn']);
             Route::post('/check-out', [MobileChildrensController::class, 'checkOut']);
             Route::get('/my-children', [MobileChildrensController::class, 'getMyChildren']);

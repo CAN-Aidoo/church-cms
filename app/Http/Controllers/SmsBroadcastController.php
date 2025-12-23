@@ -67,7 +67,7 @@ class SmsBroadcastController extends Controller
                 ->count(),
             'birthdays_this_week' => Member::whereRaw("DATE_FORMAT(date_of_birth, '%m-%d') BETWEEN ? AND ?", [
                 today()->startOfWeek()->format('m-d'),
-                today()->endOfWeek()->format('m-d')
+                today()->endOfWeek()->format('m-d'),
             ])->where('member_status', 'active')->count(),
         ];
 
@@ -313,38 +313,38 @@ class SmsBroadcastController extends Controller
             'birthday' => [
                 'name' => 'Birthday Greeting',
                 'message' => 'Happy Birthday {first_name}! May God bless you abundantly on your special day. Enjoy your celebration! - {church_name}',
-                'variables' => ['first_name', 'church_name']
+                'variables' => ['first_name', 'church_name'],
             ],
             'welcome' => [
                 'name' => 'New Member Welcome',
                 'message' => 'Welcome to {church_name}, {first_name}! We are blessed to have you as part of our family. See you this Sunday!',
-                'variables' => ['first_name', 'church_name']
+                'variables' => ['first_name', 'church_name'],
             ],
             'reminder' => [
                 'name' => 'Service Reminder',
                 'message' => 'Reminder: {service_name} today at {service_time}. Location: {church_address}. We look forward to seeing you!',
-                'variables' => ['service_name', 'service_time', 'church_address']
+                'variables' => ['service_name', 'service_time', 'church_address'],
             ],
             'announcement' => [
                 'name' => 'General Announcement',
                 'message' => '{announcement_text} For more info, contact us at {contact_number}. God bless! - {church_name}',
-                'variables' => ['announcement_text', 'contact_number', 'church_name']
+                'variables' => ['announcement_text', 'contact_number', 'church_name'],
             ],
             'prayer' => [
                 'name' => 'Prayer Meeting',
                 'message' => 'Join us for prayer meeting {day} at {time}. "The prayer of a righteous person is powerful and effective." - James 5:16',
-                'variables' => ['day', 'time']
+                'variables' => ['day', 'time'],
             ],
             'giving' => [
                 'name' => 'Giving Receipt',
                 'message' => 'Thank you {first_name} for your generous gift of GHS {amount}. "God loves a cheerful giver" - 2 Cor 9:7. Receipt: {receipt_number}',
-                'variables' => ['first_name', 'amount', 'receipt_number']
+                'variables' => ['first_name', 'amount', 'receipt_number'],
             ],
         ];
 
         return response()->json([
             'success' => true,
-            'templates' => $templates
+            'templates' => $templates,
         ]);
     }
 
@@ -355,7 +355,7 @@ class SmsBroadcastController extends Controller
     {
         $validated = $request->validate([
             'message' => 'required|string',
-            'sample_member_id' => 'nullable|exists:members,id'
+            'sample_member_id' => 'nullable|exists:members,id',
         ]);
 
         $message = $validated['message'];
@@ -381,7 +381,7 @@ class SmsBroadcastController extends Controller
             'original' => $message,
             'length' => $length,
             'segments' => $segments,
-            'sample_member' => $sampleMember ? $sampleMember->full_name : null
+            'sample_member' => $sampleMember ? $sampleMember->full_name : null,
         ]);
     }
 
@@ -423,7 +423,7 @@ class SmsBroadcastController extends Controller
         return response()->json([
             'success' => true,
             'stats' => $stats,
-            'daily_breakdown' => $dailyStats
+            'daily_breakdown' => $dailyStats,
         ]);
     }
 
@@ -434,7 +434,7 @@ class SmsBroadcastController extends Controller
     {
         $validated = $request->validate([
             'phone_numbers' => 'required|array',
-            'phone_numbers.*' => 'string'
+            'phone_numbers.*' => 'string',
         ]);
 
         $results = [];
@@ -442,7 +442,7 @@ class SmsBroadcastController extends Controller
             $results[] = [
                 'phone' => $phone,
                 'valid' => $this->isValidPhoneNumber($phone),
-                'formatted' => $this->formatPhoneNumber($phone)
+                'formatted' => $this->formatPhoneNumber($phone),
             ];
         }
 
@@ -452,7 +452,7 @@ class SmsBroadcastController extends Controller
             'success' => true,
             'results' => $results,
             'valid_count' => $validCount,
-            'invalid_count' => count($results) - $validCount
+            'invalid_count' => count($results) - $validCount,
         ]);
     }
 
@@ -462,7 +462,7 @@ class SmsBroadcastController extends Controller
     public function getMessageInfo(Request $request)
     {
         $validated = $request->validate([
-            'message' => 'required|string'
+            'message' => 'required|string',
         ]);
 
         $message = $validated['message'];
@@ -476,7 +476,7 @@ class SmsBroadcastController extends Controller
             'segments' => $segments,
             'remaining' => $remaining,
             'max_length' => 1600,
-            'warning' => $segments > 3 ? 'Long message may incur additional costs' : null
+            'warning' => $segments > 3 ? 'Long message may incur additional costs' : null,
         ]);
     }
 
@@ -485,7 +485,7 @@ class SmsBroadcastController extends Controller
      */
     protected function substituteVariables(string $message, $member = null): string
     {
-        if (!$member) {
+        if (! $member) {
             return $message;
         }
 
@@ -522,9 +522,9 @@ class SmsBroadcastController extends Controller
 
         // Convert to international format
         if (strlen($cleaned) === 10 && $cleaned[0] === '0') {
-            return '+233' . substr($cleaned, 1);
+            return '+233'.substr($cleaned, 1);
         } elseif (strlen($cleaned) === 12 && substr($cleaned, 0, 3) === '233') {
-            return '+' . $cleaned;
+            return '+'.$cleaned;
         } elseif (strlen($cleaned) === 13 && $cleaned[0] === '+') {
             return $cleaned;
         }

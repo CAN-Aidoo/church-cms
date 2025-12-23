@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
-use App\Services\QRManagementService;
 use App\Repositories\QRCodeRepository;
+use App\Services\QRManagementService;
 use Illuminate\Http\Request;
 
 class QRScanController extends Controller
@@ -19,7 +19,6 @@ class QRScanController extends Controller
     /**
      * Validate and process a QR code scan.
      *
-     * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
     public function scan(Request $request)
@@ -59,7 +58,6 @@ class QRScanController extends Controller
     /**
      * Validate QR code without processing (check if valid).
      *
-     * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
     public function validateQr(Request $request)
@@ -72,7 +70,7 @@ class QRScanController extends Controller
             $decoded = app(QRSecurityService::class)->decode($validated['qr_data']);
             $qrCode = $this->repository->findById($decoded['id']);
 
-            if (!$qrCode) {
+            if (! $qrCode) {
                 return response()->json([
                     'valid' => false,
                     'error' => 'QR code not found',
@@ -123,7 +121,6 @@ class QRScanController extends Controller
     /**
      * Get user's scan history.
      *
-     * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
     public function history(Request $request)
@@ -157,7 +154,6 @@ class QRScanController extends Controller
     /**
      * Sync offline scans.
      *
-     * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
     public function syncOffline(Request $request)
@@ -215,14 +211,13 @@ class QRScanController extends Controller
     /**
      * Get QR code information by ID.
      *
-     * @param string $id
      * @return \Illuminate\Http\JsonResponse
      */
     public function info(string $id)
     {
         $qrCode = $this->repository->findById($id);
 
-        if (!$qrCode) {
+        if (! $qrCode) {
             return response()->json([
                 'success' => false,
                 'error' => 'QR code not found',
@@ -249,8 +244,6 @@ class QRScanController extends Controller
     /**
      * Check if user has already scanned a QR code.
      *
-     * @param Request $request
-     * @param string $id
      * @return \Illuminate\Http\JsonResponse
      */
     public function hasScanned(Request $request, string $id)
@@ -266,7 +259,6 @@ class QRScanController extends Controller
     /**
      * Get active QR codes for current service.
      *
-     * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
     public function activeService(Request $request)
@@ -277,11 +269,11 @@ class QRScanController extends Controller
         $qrCodes = $this->repository->getForService($date, $serviceType);
 
         // Filter only active codes
-        $active = $qrCodes->filter(fn($qr) => $qr->isActive() && !$qr->revoked);
+        $active = $qrCodes->filter(fn ($qr) => $qr->isActive() && ! $qr->revoked);
 
         return response()->json([
             'success' => true,
-            'data' => $active->map(fn($qr) => [
+            'data' => $active->map(fn ($qr) => [
                 'id' => $qr->id,
                 'type' => $qr->type,
                 'service_date' => $qr->service_date,
@@ -294,8 +286,6 @@ class QRScanController extends Controller
     /**
      * Report a problematic QR code.
      *
-     * @param Request $request
-     * @param string $id
      * @return \Illuminate\Http\JsonResponse
      */
     public function report(Request $request, string $id)

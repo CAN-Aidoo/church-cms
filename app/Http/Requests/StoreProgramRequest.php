@@ -19,11 +19,11 @@ class StoreProgramRequest extends FormRequest
             'description' => ['nullable', 'string', 'max:2000'],
             'program_type' => ['required', Rule::in([
                 'conference', 'seminar', 'retreat', 'crusade', 'workshop',
-                'training', 'outreach', 'social', 'fundraising', 'other'
+                'training', 'outreach', 'social', 'fundraising', 'other',
             ])],
             'category' => ['nullable', Rule::in([
                 'spiritual_development', 'leadership_training', 'youth',
-                'marriage_enrichment', 'professional_development', 'evangelism', 'other'
+                'marriage_enrichment', 'professional_development', 'evangelism', 'other',
             ])],
             'start_date' => ['required', 'date', 'after_or_equal:today'],
             'end_date' => ['required', 'date', 'after_or_equal:start_date'],

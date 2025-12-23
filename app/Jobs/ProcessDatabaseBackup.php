@@ -36,7 +36,7 @@ class ProcessDatabaseBackup implements ShouldQueue
     public function handle(): void
     {
         try {
-            Log::info("Starting database backup");
+            Log::info('Starting database backup');
 
             // Create backup record
             $backup = SystemBackup::create([
@@ -47,7 +47,7 @@ class ProcessDatabaseBackup implements ShouldQueue
             ]);
 
             // Generate backup file name
-            $fileName = 'backups/db_backup_' . now()->format('YmdHis') . '.sql';
+            $fileName = 'backups/db_backup_'.now()->format('YmdHis').'.sql';
 
             // Execute mysqldump command
             $databaseName = config('database.connections.mysql.database');
@@ -61,7 +61,7 @@ class ProcessDatabaseBackup implements ShouldQueue
                 escapeshellarg($username),
                 escapeshellarg($password),
                 escapeshellarg($databaseName),
-                storage_path('app/' . $fileName)
+                storage_path('app/'.$fileName)
             );
 
             exec($command, $output, $returnCode);
@@ -71,8 +71,8 @@ class ProcessDatabaseBackup implements ShouldQueue
             }
 
             // Compress the backup
-            $compressedFile = $fileName . '.gz';
-            exec("gzip " . storage_path('app/' . $fileName));
+            $compressedFile = $fileName.'.gz';
+            exec('gzip '.storage_path('app/'.$fileName));
 
             // Get file size
             $fileSize = Storage::size($compressedFile);

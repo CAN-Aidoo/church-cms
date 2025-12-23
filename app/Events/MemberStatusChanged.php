@@ -12,8 +12,11 @@ class MemberStatusChanged
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
     public Member $member;
+
     public string $oldStatus;
+
     public string $newStatus;
+
     public ?string $reason;
 
     /**

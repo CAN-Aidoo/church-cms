@@ -18,7 +18,7 @@ class BulkAttendanceRequest extends FormRequest
             'service_date' => ['required', 'date'],
             'service_type' => ['required', Rule::in([
                 'sunday_first', 'sunday_second', 'sunday_third',
-                'midweek', 'prayer', 'youth', 'children', 'special'
+                'midweek', 'prayer', 'youth', 'children', 'special',
             ])],
             'attendance' => ['required', 'array', 'min:1'],
             'attendance.*.member_id' => ['required', 'exists:members,id'],

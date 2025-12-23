@@ -42,7 +42,8 @@
       "Bash([ -f \"resources/views/dashboard/index.blade.php\" ])",
       "Bash(net start)",
       "Bash([ -f \"resources/views/mobile/register.blade.php\" ])",
-      "Bash(php verify-deployment.php:*)"
+      "Bash(php verify-deployment.php:*)",
+      "Bash(vendor/bin/pint:*)"
     ],
     "deny": [],
     "ask": []

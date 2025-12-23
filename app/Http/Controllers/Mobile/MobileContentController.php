@@ -4,11 +4,11 @@ namespace App\Http\Controllers\Mobile;
 
 use App\Http\Controllers\Controller;
 use App\Models\Announcement;
-use App\Models\Service;
-use App\Models\Program;
 use App\Models\ChurchInfo;
-use Illuminate\Http\Request;
+use App\Models\Program;
+use App\Models\Service;
 use Carbon\Carbon;
+use Illuminate\Http\Request;
 
 class MobileContentController extends Controller
 {
@@ -22,9 +22,9 @@ class MobileContentController extends Controller
 
         $query = Announcement::where('status', 'published')
             ->where('visibility', 'public')
-            ->where(function($q) {
+            ->where(function ($q) {
                 $q->whereNull('expires_at')
-                  ->orWhere('expires_at', '>=', now());
+                    ->orWhere('expires_at', '>=', now());
             });
 
         if ($category) {
@@ -39,7 +39,7 @@ class MobileContentController extends Controller
         return response()->json([
             'success' => true,
             'data' => [
-                'announcements' => $announcements->map(function($announcement) {
+                'announcements' => $announcements->map(function ($announcement) {
                     return [
                         'id' => $announcement->id,
                         'title' => $announcement->title,
@@ -62,7 +62,7 @@ class MobileContentController extends Controller
                     'event' => $announcements->where('category', 'event')->count(),
                     'emergency' => $announcements->where('category', 'emergency')->count(),
                 ],
-            ]
+            ],
         ]);
     }
 
@@ -74,14 +74,14 @@ class MobileContentController extends Controller
         $date = $request->input('date', now()->format('Y-m-d'));
         $period = $request->input('period', 'week'); // day, week, month
 
-        $startDate = match($period) {
+        $startDate = match ($period) {
             'day' => Carbon::parse($date),
             'week' => Carbon::parse($date)->startOfWeek(),
             'month' => Carbon::parse($date)->startOfMonth(),
             default => Carbon::parse($date)->startOfWeek(),
         };
 
-        $endDate = match($period) {
+        $endDate = match ($period) {
             'day' => Carbon::parse($date),
             'week' => Carbon::parse($date)->endOfWeek(),
             'month' => Carbon::parse($date)->endOfMonth(),
@@ -105,7 +105,7 @@ class MobileContentController extends Controller
                     'start' => $startDate->format('Y-m-d'),
                     'end' => $endDate->format('Y-m-d'),
                 ],
-                'services' => $services->map(function($service) {
+                'services' => $services->map(function ($service) {
                     return [
                         'id' => $service->id,
                         'title' => $service->title,
@@ -122,10 +122,10 @@ class MobileContentController extends Controller
                     ];
                 }),
                 'regular_schedule' => $regularSchedule,
-                'today_services' => $services->filter(function($service) {
+                'today_services' => $services->filter(function ($service) {
                     return Carbon::parse($service->service_date)->isToday();
                 })->values(),
-            ]
+            ],
         ]);
     }
 
@@ -136,7 +136,7 @@ class MobileContentController extends Controller
     {
         $info = ChurchInfo::first();
 
-        if (!$info) {
+        if (! $info) {
             $info = $this->getDefaultChurchInfo();
         }
 
@@ -178,7 +178,7 @@ class MobileContentController extends Controller
                     'has_wifi' => $info->has_wifi,
                 ],
                 'service_times_summary' => $this->getServiceTimesSummary(),
-            ]
+            ],
         ]);
     }
 
@@ -203,7 +203,7 @@ class MobileContentController extends Controller
         return response()->json([
             'success' => true,
             'data' => [
-                'events' => $programs->map(function($program) {
+                'events' => $programs->map(function ($program) {
                     $isRegistrationOpen = $program->registration_start_date <= now() &&
                                          $program->registration_end_date >= now();
 
@@ -244,15 +244,15 @@ class MobileContentController extends Controller
                 }),
                 'summary' => [
                     'total_upcoming' => $programs->count(),
-                    'this_week' => $programs->filter(function($p) {
+                    'this_week' => $programs->filter(function ($p) {
                         return Carbon::parse($p->start_date)->isCurrentWeek();
                     })->count(),
-                    'this_month' => $programs->filter(function($p) {
+                    'this_month' => $programs->filter(function ($p) {
                         return Carbon::parse($p->start_date)->isCurrentMonth();
                     })->count(),
                 ],
                 'categories_available' => $programs->pluck('category')->unique()->values(),
-            ]
+            ],
         ]);
     }
 
@@ -263,10 +263,10 @@ class MobileContentController extends Controller
     {
         $program = Program::with(['sessions', 'speakers'])->find($eventId);
 
-        if (!$program) {
+        if (! $program) {
             return response()->json([
                 'success' => false,
-                'message' => 'Event not found'
+                'message' => 'Event not found',
             ], 404);
         }
 
@@ -295,7 +295,7 @@ class MobileContentController extends Controller
                     'venue' => $program->venue,
                     'flyer_url' => $program->flyer_url,
                 ],
-                'sessions' => $program->sessions->map(function($session) {
+                'sessions' => $program->sessions->map(function ($session) {
                     return [
                         'id' => $session->id,
                         'title' => $session->title,
@@ -307,7 +307,7 @@ class MobileContentController extends Controller
                         'location' => $session->location,
                     ];
                 }),
-                'speakers' => $program->speakers->map(function($speaker) {
+                'speakers' => $program->speakers->map(function ($speaker) {
                     return [
                         'name' => $speaker->name,
                         'title' => $speaker->title,
@@ -317,11 +317,11 @@ class MobileContentController extends Controller
                 }),
                 'registration_status' => [
                     'is_registered' => $isRegistered,
-                    'can_register' => !$isRegistered && $program->registration_start_date <= now() &&
+                    'can_register' => ! $isRegistered && $program->registration_start_date <= now() &&
                                      $program->registration_end_date >= now(),
                     'registration_fee' => $program->registration_fee,
                 ],
-            ]
+            ],
         ]);
     }
 
@@ -346,13 +346,13 @@ class MobileContentController extends Controller
 
         if (in_array($type, ['all', 'announcements'])) {
             $results['announcements'] = Announcement::where('status', 'published')
-                ->where(function($q) use ($query) {
+                ->where(function ($q) use ($query) {
                     $q->where('title', 'like', "%{$query}%")
-                      ->orWhere('content', 'like', "%{$query}%");
+                        ->orWhere('content', 'like', "%{$query}%");
                 })
                 ->limit(10)
                 ->get()
-                ->map(fn($a) => [
+                ->map(fn ($a) => [
                     'id' => $a->id,
                     'title' => $a->title,
                     'excerpt' => substr($a->content, 0, 150),
@@ -362,13 +362,13 @@ class MobileContentController extends Controller
 
         if (in_array($type, ['all', 'events'])) {
             $results['events'] = Program::where('status', 'published')
-                ->where(function($q) use ($query) {
+                ->where(function ($q) use ($query) {
                     $q->where('name', 'like', "%{$query}%")
-                      ->orWhere('description', 'like', "%{$query}%");
+                        ->orWhere('description', 'like', "%{$query}%");
                 })
                 ->limit(10)
                 ->get()
-                ->map(fn($p) => [
+                ->map(fn ($p) => [
                     'id' => $p->id,
                     'title' => $p->name,
                     'date' => $p->start_date,
@@ -377,21 +377,21 @@ class MobileContentController extends Controller
         }
 
         if (in_array($type, ['all', 'services'])) {
-            $results['services'] = Service::where(function($q) use ($query) {
-                    $q->where('title', 'like', "%{$query}%")
-                      ->orWhere('theme', 'like', "%{$query}%")
-                      ->orWhere('speaker_name', 'like', "%{$query}%");
-                })
+            $results['services'] = Service::where(function ($q) use ($query) {
+                $q->where('title', 'like', "%{$query}%")
+                    ->orWhere('theme', 'like', "%{$query}%")
+                    ->orWhere('speaker_name', 'like', "%{$query}%");
+            })
                 ->where('service_date', '>=', now())
                 ->limit(10)
                 ->get()
-                ->map(fn($s) => [
-                    'id' => $s->id,
-                    'title' => $s->title,
-                    'date' => $s->service_date,
-                    'time' => $s->service_time,
-                    'type' => 'service',
-                ]);
+                ->map(fn ($s) => [
+                'id' => $s->id,
+                'title' => $s->title,
+                'date' => $s->service_date,
+                'time' => $s->service_time,
+                'type' => 'service',
+            ]);
         }
 
         return response()->json([
@@ -400,7 +400,7 @@ class MobileContentController extends Controller
                 'query' => $query,
                 'results' => $results,
                 'total_results' => collect($results)->flatten(1)->count(),
-            ]
+            ],
         ]);
     }
 
@@ -429,7 +429,7 @@ class MobileContentController extends Controller
      */
     private function getServiceTimesSummary(): string
     {
-        return "Sundays: 7:00am, 9:30am, 5:00pm | Wednesdays: 6:00pm | Fridays: 6:00pm";
+        return 'Sundays: 7:00am, 9:30am, 5:00pm | Wednesdays: 6:00pm | Fridays: 6:00pm';
     }
 
     /**
@@ -437,7 +437,7 @@ class MobileContentController extends Controller
      */
     private function getDefaultChurchInfo(): object
     {
-        return (object)[
+        return (object) [
             'name' => config('app.name'),
             'tagline' => 'A Place to Call Home',
             'description' => 'Welcome to our church family',

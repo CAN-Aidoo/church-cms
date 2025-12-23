@@ -3,17 +3,15 @@
 namespace App\Http\Controllers\Mobile;
 
 use App\Http\Controllers\Controller;
-use App\Models\User;
 use App\Models\Member;
+use App\Models\User;
 use App\Models\Visitor;
-use App\Services\SmsService;
 use App\Services\NotificationService;
+use App\Services\SmsService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Cache;
-use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 
 class MobileRegistrationController extends Controller
 {
@@ -37,7 +35,7 @@ class MobileRegistrationController extends Controller
         if ($existingUser) {
             return response()->json([
                 'success' => false,
-                'message' => 'Phone number already registered. Please log in instead.'
+                'message' => 'Phone number already registered. Please log in instead.',
             ], 400);
         }
 
@@ -50,7 +48,7 @@ class MobileRegistrationController extends Controller
             'otp' => $otp,
             'phone' => $validated['phone'],
             'email' => $validated['email'] ?? null,
-            'expires_at' => $expiresAt
+            'expires_at' => $expiresAt,
         ], $expiresAt);
 
         // Send OTP via SMS
@@ -63,7 +61,7 @@ class MobileRegistrationController extends Controller
             'data' => [
                 'phone' => $validated['phone'],
                 'expires_in_minutes' => 10,
-            ]
+            ],
         ]);
     }
 
@@ -87,17 +85,17 @@ class MobileRegistrationController extends Controller
         // Retrieve and validate OTP
         $cachedData = Cache::get("otp:{$validated['phone']}");
 
-        if (!$cachedData) {
+        if (! $cachedData) {
             return response()->json([
                 'success' => false,
-                'message' => 'Verification code expired. Please request a new one.'
+                'message' => 'Verification code expired. Please request a new one.',
             ], 400);
         }
 
         if ($cachedData['otp'] !== $validated['otp']) {
             return response()->json([
                 'success' => false,
-                'message' => 'Invalid verification code.'
+                'message' => 'Invalid verification code.',
             ], 400);
         }
 
@@ -106,8 +104,8 @@ class MobileRegistrationController extends Controller
 
             // Create user account with LIMITED access
             $user = User::create([
-                'name' => $validated['first_name'] . ' ' . $validated['last_name'],
-                'email' => $validated['email'] ?? $validated['phone'] . '@mobile.church.local',
+                'name' => $validated['first_name'].' '.$validated['last_name'],
+                'email' => $validated['email'] ?? $validated['phone'].'@mobile.church.local',
                 'phone' => $validated['phone'],
                 'password' => Hash::make($validated['password']),
                 'role' => 'member', // Mobile member role
@@ -117,7 +115,7 @@ class MobileRegistrationController extends Controller
             ]);
 
             // Generate unique member ID
-            $memberCode = 'M-' . date('Y') . '-' . str_pad(Member::count() + 1, 6, '0', STR_PAD_LEFT);
+            $memberCode = 'M-'.date('Y').'-'.str_pad(Member::count() + 1, 6, '0', STR_PAD_LEFT);
 
             // Create member profile
             $member = Member::create([
@@ -172,8 +170,8 @@ class MobileRegistrationController extends Controller
                         'can_make_contributions' => false, // Requires verification
                         'can_register_for_programs' => false, // Requires verification
                         'can_access_directory' => false, // Requires verification
-                    ]
-                ]
+                    ],
+                ],
             ], 201);
 
         } catch (\Exception $e) {
@@ -181,7 +179,7 @@ class MobileRegistrationController extends Controller
 
             return response()->json([
                 'success' => false,
-                'message' => 'Registration failed: ' . $e->getMessage()
+                'message' => 'Registration failed: '.$e->getMessage(),
             ], 500);
         }
     }
@@ -227,7 +225,7 @@ class MobileRegistrationController extends Controller
                         'visitor_id' => $existingVisitor->id,
                         'visit_count' => $existingVisitor->visit_count,
                         'eligible_for_membership' => $existingVisitor->visit_count >= 5,
-                    ]
+                    ],
                 ]);
             }
 
@@ -248,7 +246,7 @@ class MobileRegistrationController extends Controller
             ]);
 
             // Send welcome SMS
-            $welcomeMessage = "Welcome to our church! Thank you for visiting us today. We hope to see you again soon!";
+            $welcomeMessage = 'Welcome to our church! Thank you for visiting us today. We hope to see you again soon!';
             $this->smsService->sendSms($validated['phone'], $welcomeMessage);
 
             // Notify admin/pastoral team
@@ -261,13 +259,13 @@ class MobileRegistrationController extends Controller
                     'visitor_id' => $visitor->id,
                     'visit_count' => 1,
                     'eligible_for_membership' => false,
-                ]
+                ],
             ], 201);
 
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Registration failed: ' . $e->getMessage()
+                'message' => 'Registration failed: '.$e->getMessage(),
             ], 500);
         }
     }
@@ -293,7 +291,7 @@ class MobileRegistrationController extends Controller
             'otp' => $otp,
             'phone' => $validated['phone'],
             'email' => $existingData['email'] ?? null,
-            'expires_at' => $expiresAt
+            'expires_at' => $expiresAt,
         ], $expiresAt);
 
         // Send OTP via SMS
@@ -306,7 +304,7 @@ class MobileRegistrationController extends Controller
             'data' => [
                 'phone' => $validated['phone'],
                 'expires_in_minutes' => 10,
-            ]
+            ],
         ]);
     }
 
@@ -318,10 +316,10 @@ class MobileRegistrationController extends Controller
         $user = $request->user();
         $member = $user->member;
 
-        if (!$member) {
+        if (! $member) {
             return response()->json([
                 'success' => false,
-                'message' => 'No member profile found'
+                'message' => 'No member profile found',
             ], 404);
         }
 
@@ -346,8 +344,8 @@ class MobileRegistrationController extends Controller
                 ],
                 'message' => $isVerified
                     ? 'Your account is fully verified!'
-                    : 'Your account is pending admin verification. Some features are limited.'
-            ]
+                    : 'Your account is pending admin verification. Some features are limited.',
+            ],
         ]);
     }
 }

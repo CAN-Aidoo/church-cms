@@ -2,8 +2,8 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
 use App\Models\User;
+use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 
 class InitialChurchDataSeeder extends Seeder
@@ -14,7 +14,7 @@ class InitialChurchDataSeeder extends Seeder
     public function run(): void
     {
         // Create Admin User (if not exists)
-        if (!User::where('email', 'admin@churchcms.com')->exists()) {
+        if (! User::where('email', 'admin@churchcms.com')->exists()) {
             User::create([
                 'full_name' => 'System Administrator',
                 'email' => 'admin@churchcms.com',
@@ -28,7 +28,7 @@ class InitialChurchDataSeeder extends Seeder
         }
 
         // Create Pastor User (if not exists)
-        if (!User::where('email', 'pastor@churchcms.com')->exists()) {
+        if (! User::where('email', 'pastor@churchcms.com')->exists()) {
             User::create([
                 'full_name' => 'Lead Pastor',
                 'email' => 'pastor@churchcms.com',
@@ -42,7 +42,7 @@ class InitialChurchDataSeeder extends Seeder
         }
 
         // Create Staff User (if not exists)
-        if (!User::where('email', 'staff@churchcms.com')->exists()) {
+        if (! User::where('email', 'staff@churchcms.com')->exists()) {
             User::create([
                 'full_name' => 'Church Staff',
                 'email' => 'staff@churchcms.com',
@@ -56,7 +56,7 @@ class InitialChurchDataSeeder extends Seeder
         }
 
         // Create Demo Member User (if not exists)
-        if (!User::where('email', 'member@churchcms.com')->exists()) {
+        if (! User::where('email', 'member@churchcms.com')->exists()) {
             User::create([
                 'full_name' => 'Demo Member',
                 'email' => 'member@churchcms.com',

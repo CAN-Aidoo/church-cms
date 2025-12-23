@@ -591,9 +591,16 @@ class TransactionController extends Controller
             ->groupBy('member_id')
             ->get()
             ->groupBy(function ($item) {
-                if ($item->transaction_count >= 40) return 'weekly';
-                if ($item->transaction_count >= 10) return 'bi_weekly';
-                if ($item->transaction_count >= 6) return 'monthly';
+                if ($item->transaction_count >= 40) {
+                    return 'weekly';
+                }
+                if ($item->transaction_count >= 10) {
+                    return 'bi_weekly';
+                }
+                if ($item->transaction_count >= 6) {
+                    return 'monthly';
+                }
+
                 return 'occasional';
             })
             ->map(function ($group) {
@@ -622,6 +629,7 @@ class TransactionController extends Controller
         $totalGiving = $givingMethods->sum('total');
         $givingMethods = $givingMethods->map(function ($item) use ($totalGiving) {
             $item['percentage'] = $totalGiving > 0 ? ($item['total'] / $totalGiving * 100) : 0;
+
             return $item;
         });
 
@@ -669,6 +677,7 @@ class TransactionController extends Controller
                 foreach ($monthGroup as $item) {
                     $categories[$item->category] = (float) $item->total;
                 }
+
                 return [
                     'total' => $monthGroup->sum('total'),
                     'categories' => $categories,

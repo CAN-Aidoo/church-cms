@@ -101,6 +101,7 @@ class GenerateReport implements ShouldQueue
     {
         $timestamp = now()->format('YmdHis');
         $sanitizedName = preg_replace('/[^A-Za-z0-9_-]/', '_', $this->report->name);
+
         return "reports/{$sanitizedName}_{$timestamp}";
     }
 
@@ -113,6 +114,7 @@ class GenerateReport implements ShouldQueue
         // For now, return placeholder
         $filePath = "{$fileName}.pdf";
         Storage::put($filePath, 'PDF content placeholder');
+
         return $filePath;
     }
 
@@ -125,6 +127,7 @@ class GenerateReport implements ShouldQueue
         // For now, return placeholder
         $filePath = "{$fileName}.xlsx";
         Storage::put($filePath, 'Excel content placeholder');
+
         return $filePath;
     }
 
@@ -137,6 +140,7 @@ class GenerateReport implements ShouldQueue
 
         if (empty($data)) {
             Storage::put($filePath, '');
+
             return $filePath;
         }
 
@@ -156,6 +160,7 @@ class GenerateReport implements ShouldQueue
         fclose($csv);
 
         Storage::put($filePath, $content);
+
         return $filePath;
     }
 

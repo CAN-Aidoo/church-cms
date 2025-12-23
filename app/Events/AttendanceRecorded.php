@@ -15,8 +15,11 @@ class AttendanceRecorded implements ShouldBroadcast
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
     public $attendance;
+
     public $memberName;
+
     public $serviceDate;
+
     public $serviceType;
 
     /**
@@ -25,7 +28,7 @@ class AttendanceRecorded implements ShouldBroadcast
     public function __construct(Attendance $attendance)
     {
         $this->attendance = $attendance;
-        $this->memberName = $attendance->member->first_name . ' ' . $attendance->member->last_name;
+        $this->memberName = $attendance->member->first_name.' '.$attendance->member->last_name;
         $this->serviceDate = $attendance->service_date->format('Y-m-d');
         $this->serviceType = $attendance->service_type;
     }
@@ -37,7 +40,7 @@ class AttendanceRecorded implements ShouldBroadcast
     {
         return [
             new Channel('attendance'),
-            new Channel('attendance.' . $this->serviceDate),
+            new Channel('attendance.'.$this->serviceDate),
             new PresenceChannel('staff-dashboard'),
         ];
     }

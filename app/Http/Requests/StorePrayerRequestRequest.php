@@ -19,7 +19,7 @@ class StorePrayerRequestRequest extends FormRequest
             'description' => ['required', 'string', 'max:2000'],
             'category' => ['required', Rule::in([
                 'healing', 'family', 'financial', 'spiritual',
-                'career', 'relationships', 'guidance', 'thanksgiving', 'other'
+                'career', 'relationships', 'guidance', 'thanksgiving', 'other',
             ])],
             'urgency' => ['required', Rule::in(['urgent', 'normal', 'ongoing'])],
             'is_anonymous' => ['required', 'boolean'],

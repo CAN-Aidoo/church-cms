@@ -19,7 +19,7 @@ class SmsBroadcastRequest extends FormRequest
             'recipient_type' => ['required', Rule::in([
                 'all_members', 'active_members', 'staff', 'custom_group',
                 'service_unit', 'shepherd_group', 'birthday_celebrants',
-                'specific_members'
+                'specific_members',
             ])],
             'recipient_ids' => ['nullable', 'array'],
             'recipient_ids.*' => ['exists:members,id'],

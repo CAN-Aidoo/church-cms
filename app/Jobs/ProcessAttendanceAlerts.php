@@ -29,7 +29,7 @@ class ProcessAttendanceAlerts implements ShouldQueue
     public function handle(AttendanceRepository $attendanceRepository): void
     {
         try {
-            Log::info("Processing attendance alerts");
+            Log::info('Processing attendance alerts');
 
             $members = Member::where('status', 'active')->get();
             $alertCount = 0;

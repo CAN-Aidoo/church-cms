@@ -3,10 +3,8 @@
 namespace Tests\Feature;
 
 use App\Models\User;
-use App\Models\Child;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
-use App\Http\Middleware\VerifyCsrfToken;
 
 class ChildrensMinistryTest extends TestCase
 {
@@ -27,6 +25,6 @@ class ChildrensMinistryTest extends TestCase
         // Placeholder for testing event registration logic
         // Since event registration relies on events existing, we'd need to create an event first.
         // For now, basic route access test is sufficient for initial verification.
-        $this->assertTrue(true); 
+        $this->assertTrue(true);
     }
 }

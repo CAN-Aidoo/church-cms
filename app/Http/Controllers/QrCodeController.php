@@ -136,7 +136,7 @@ class QrCodeController extends Controller
     {
         $member = Auth::user()->member;
 
-        if (!$member) {
+        if (! $member) {
             return redirect()->back()->with('error', 'Member profile not found.');
         }
 

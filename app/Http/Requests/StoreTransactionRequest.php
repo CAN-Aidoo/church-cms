@@ -23,7 +23,7 @@ class StoreTransactionRequest extends FormRequest
             'transaction_date' => ['required', 'date', 'before_or_equal:today'],
             'payment_method' => ['required', Rule::in([
                 'cash', 'cheque', 'bank_transfer', 'mobile_money',
-                'card', 'online', 'other'
+                'card', 'online', 'other',
             ])],
             'reference_number' => ['nullable', 'string', 'max:100'],
             'member_id' => ['nullable', 'exists:members,id'],
@@ -55,9 +55,9 @@ class StoreTransactionRequest extends FormRequest
             if ($this->transaction_type === 'expense') {
                 $validExpenseCategories = [
                     'salaries', 'utilities', 'maintenance', 'events',
-                    'admin', 'welfare', 'missions', 'equipment', 'other'
+                    'admin', 'welfare', 'missions', 'equipment', 'other',
                 ];
-                if (!in_array($this->category, $validExpenseCategories)) {
+                if (! in_array($this->category, $validExpenseCategories)) {
                     $validator->errors()->add('category', 'Invalid expense category');
                 }
             }
@@ -66,9 +66,9 @@ class StoreTransactionRequest extends FormRequest
             if ($this->transaction_type === 'income') {
                 $validIncomeCategories = [
                     'tithe', 'offering', 'donation', 'pledge',
-                    'partnership', 'fundraising', 'rent', 'other'
+                    'partnership', 'fundraising', 'rent', 'other',
                 ];
-                if (!in_array($this->category, $validIncomeCategories)) {
+                if (! in_array($this->category, $validIncomeCategories)) {
                     $validator->errors()->add('category', 'Invalid income category');
                 }
             }

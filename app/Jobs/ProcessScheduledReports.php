@@ -27,7 +27,7 @@ class ProcessScheduledReports implements ShouldQueue
     public function handle(): void
     {
         try {
-            Log::info("Processing scheduled reports");
+            Log::info('Processing scheduled reports');
 
             $now = Carbon::now();
 
@@ -63,11 +63,12 @@ class ProcessScheduledReports implements ShouldQueue
                     Log::info("Scheduled report dispatched: {$schedule->id}");
                 } catch (\Exception $e) {
                     Log::error("Failed to process scheduled report {$schedule->id}: {$e->getMessage()}");
+
                     continue;
                 }
             }
 
-            Log::info("Scheduled reports processing completed");
+            Log::info('Scheduled reports processing completed');
         } catch (\Exception $e) {
             Log::error("Failed to process scheduled reports: {$e->getMessage()}");
             throw $e;
@@ -79,7 +80,7 @@ class ProcessScheduledReports implements ShouldQueue
      */
     private function calculateNextRun(string $frequency, Carbon $from): Carbon
     {
-        return match($frequency) {
+        return match ($frequency) {
             'daily' => $from->copy()->addDay(),
             'weekly' => $from->copy()->addWeek(),
             'monthly' => $from->copy()->addMonth(),

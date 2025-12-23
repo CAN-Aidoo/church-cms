@@ -19,7 +19,7 @@ class StoreAttendanceRequest extends FormRequest
             'service_date' => ['required', 'date'],
             'service_type' => ['required', Rule::in([
                 'sunday_first', 'sunday_second', 'sunday_third',
-                'midweek', 'prayer', 'youth', 'children', 'special'
+                'midweek', 'prayer', 'youth', 'children', 'special',
             ])],
             'attendance_status' => ['required', Rule::in(['present', 'absent', 'excused', 'late', 'online'])],
             'notes' => ['nullable', 'string', 'max:500'],

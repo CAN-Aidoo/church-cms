@@ -2,11 +2,10 @@
 
 namespace Tests\Feature;
 
+use App\Http\Middleware\VerifyCsrfToken;
 use App\Models\User;
-use App\Models\Visitor;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
-use App\Http\Middleware\VerifyCsrfToken;
 
 class VisitorTest extends TestCase
 {
@@ -25,7 +24,7 @@ class VisitorTest extends TestCase
     public function test_create_visitor()
     {
         $this->withoutMiddleware(VerifyCsrfToken::class);
-        
+
         $user = User::factory()->staff()->create();
         $this->actingAs($user);
 

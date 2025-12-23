@@ -12,6 +12,7 @@ class VisitorRegistered
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
     public Visitor $visitor;
+
     public bool $isFirstVisit;
 
     /**

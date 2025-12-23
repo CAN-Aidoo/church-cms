@@ -548,7 +548,7 @@ class ReportRepository
             ->withCount('registrations')
             ->get();
 
-        $avgAttendanceRate = $programs->isEmpty() ? 0 : $programs->avg(function($program) {
+        $avgAttendanceRate = $programs->isEmpty() ? 0 : $programs->avg(function ($program) {
             return $program->max_participants > 0
                 ? ($program->registrations_count / $program->max_participants) * 100
                 : 0;
@@ -577,7 +577,7 @@ class ReportRepository
 
         // Get statistics if calculations are configured
         $statistics = [];
-        if (!empty($config['calculations'])) {
+        if (! empty($config['calculations'])) {
             $statistics = $this->calculateStatistics($query, $config['calculations']);
         }
 
@@ -603,17 +603,17 @@ class ReportRepository
         };
 
         // Apply column selection
-        if (!empty($config['columns'])) {
+        if (! empty($config['columns'])) {
             $query->select($config['columns']);
         }
 
         // Apply filters
-        if (!empty($config['filters'])) {
+        if (! empty($config['filters'])) {
             $query = $this->applyFilters($query, $config['filters']);
         }
 
         // Apply grouping
-        if (!empty($config['group_by'])) {
+        if (! empty($config['group_by'])) {
             $query->groupBy($config['group_by']);
         }
 
@@ -631,7 +631,7 @@ class ReportRepository
             $field = $calc['field'];
             $type = $calc['type'];
 
-            $statistics[$field] = match($type) {
+            $statistics[$field] = match ($type) {
                 'sum' => $query->sum($field),
                 'avg' => $query->avg($field),
                 'count' => $query->count(),
@@ -658,7 +658,7 @@ class ReportRepository
         }
 
         // Validate filters
-        if (!empty($config['filters'])) {
+        if (! empty($config['filters'])) {
             foreach ($config['filters'] as $index => $filter) {
                 if (empty($filter['field'])) {
                     $errors[] = "Filter #{$index}: Field is required";

@@ -9,8 +9,11 @@ use Illuminate\Support\Str;
 class PaymentGatewayService
 {
     protected string $paystackSecretKey;
+
     protected string $paystackPublicKey;
+
     protected string $hubtelClientId;
+
     protected string $hubtelClientSecret;
 
     public function __construct()
@@ -28,7 +31,7 @@ class PaymentGatewayService
     public function processMobileMoney(array $data): array
     {
         try {
-            $reference = 'MM-' . strtoupper(Str::random(12));
+            $reference = 'MM-'.strtoupper(Str::random(12));
 
             // Format phone number for mobile money
             $phone = $this->formatPhoneNumber($data['phone']);
@@ -83,7 +86,7 @@ class PaymentGatewayService
 
             return [
                 'success' => false,
-                'message' => 'Payment processing error: ' . $e->getMessage(),
+                'message' => 'Payment processing error: '.$e->getMessage(),
             ];
         }
     }
@@ -94,7 +97,7 @@ class PaymentGatewayService
     public function initiateCardPayment(array $data): array
     {
         try {
-            $reference = 'CARD-' . strtoupper(Str::random(12));
+            $reference = 'CARD-'.strtoupper(Str::random(12));
 
             $response = Http::withToken($this->paystackSecretKey)
                 ->post('https://api.paystack.co/transaction/initialize', [
@@ -132,7 +135,7 @@ class PaymentGatewayService
 
             return [
                 'success' => false,
-                'message' => 'Payment processing error: ' . $e->getMessage(),
+                'message' => 'Payment processing error: '.$e->getMessage(),
             ];
         }
     }
@@ -159,7 +162,7 @@ class PaymentGatewayService
             return [
                 'success' => false,
                 'status' => 'unknown',
-                'message' => 'Verification failed: ' . $e->getMessage(),
+                'message' => 'Verification failed: '.$e->getMessage(),
             ];
         }
     }
@@ -176,7 +179,7 @@ class PaymentGatewayService
             if ($response->successful()) {
                 $result = $response->json();
 
-                $status = match(strtolower($result['Status'] ?? '')) {
+                $status = match (strtolower($result['Status'] ?? '')) {
                     'success', 'successful' => 'completed',
                     'pending' => 'pending',
                     'failed', 'cancelled' => 'failed',
@@ -221,7 +224,7 @@ class PaymentGatewayService
                 if ($result['status']) {
                     $data = $result['data'];
 
-                    $status = match(strtolower($data['status'] ?? '')) {
+                    $status = match (strtolower($data['status'] ?? '')) {
                         'success' => 'completed',
                         'pending' => 'pending',
                         'failed', 'abandoned' => 'failed',
@@ -262,12 +265,12 @@ class PaymentGatewayService
 
         // If starts with country code +233, remove it
         if (str_starts_with($phone, '233')) {
-            $phone = '0' . substr($phone, 3);
+            $phone = '0'.substr($phone, 3);
         }
 
         // Ensure it starts with 0
-        if (!str_starts_with($phone, '0')) {
-            $phone = '0' . $phone;
+        if (! str_starts_with($phone, '0')) {
+            $phone = '0'.$phone;
         }
 
         return $phone;
@@ -292,7 +295,7 @@ class PaymentGatewayService
         } catch (\Exception $e) {
             return [
                 'success' => false,
-                'message' => 'Refund failed: ' . $e->getMessage(),
+                'message' => 'Refund failed: '.$e->getMessage(),
             ];
         }
     }
@@ -329,7 +332,7 @@ class PaymentGatewayService
         } catch (\Exception $e) {
             return [
                 'success' => false,
-                'message' => 'Refund error: ' . $e->getMessage(),
+                'message' => 'Refund error: '.$e->getMessage(),
             ];
         }
     }

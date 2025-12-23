@@ -13,8 +13,11 @@ class AttendanceMarked
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
     public Member $member;
+
     public Attendance $attendance;
+
     public bool $isFirstTimeAfterAbsence;
+
     public int $consecutiveAbsences;
 
     /**

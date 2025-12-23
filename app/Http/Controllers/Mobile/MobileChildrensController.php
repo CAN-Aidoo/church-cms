@@ -7,11 +7,10 @@ use App\Models\Child;
 use App\Models\ChildCheckIn;
 use App\Models\ChildIncident;
 use App\Models\Member;
-use App\Services\QrCodeService;
 use App\Services\NotificationService;
+use App\Services\QrCodeService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Carbon\Carbon;
 
 class MobileChildrensController extends Controller
 {
@@ -36,10 +35,10 @@ class MobileChildrensController extends Controller
         $user = $request->user();
         $member = $user->member;
 
-        if (!$member) {
+        if (! $member) {
             return response()->json([
                 'success' => false,
-                'message' => 'No member profile found'
+                'message' => 'No member profile found',
             ], 404);
         }
 
@@ -49,7 +48,7 @@ class MobileChildrensController extends Controller
         if ($child->parent_id !== $member->id && $child->guardian_id !== $member->id) {
             return response()->json([
                 'success' => false,
-                'message' => 'You are not authorized to check in this child'
+                'message' => 'You are not authorized to check in this child',
             ], 403);
         }
 
@@ -62,7 +61,7 @@ class MobileChildrensController extends Controller
         if ($existingCheckIn) {
             return response()->json([
                 'success' => false,
-                'message' => 'Child is already checked in'
+                'message' => 'Child is already checked in',
             ], 400);
         }
 
@@ -116,7 +115,7 @@ class MobileChildrensController extends Controller
                         'photo_id_required' => true,
                         'must_match_authorized_list' => true,
                     ],
-                ]
+                ],
             ], 201);
 
         } catch (\Exception $e) {
@@ -124,7 +123,7 @@ class MobileChildrensController extends Controller
 
             return response()->json([
                 'success' => false,
-                'message' => 'Check-in failed: ' . $e->getMessage()
+                'message' => 'Check-in failed: '.$e->getMessage(),
             ], 500);
         }
     }
@@ -150,10 +149,10 @@ class MobileChildrensController extends Controller
             ->whereNull('check_out_time')
             ->first();
 
-        if (!$checkIn) {
+        if (! $checkIn) {
             return response()->json([
                 'success' => false,
-                'message' => 'No active check-in found for this child'
+                'message' => 'No active check-in found for this child',
             ], 404);
         }
 
@@ -163,13 +162,13 @@ class MobileChildrensController extends Controller
             $validated['security_code']
         );
 
-        if (!$isValidCode) {
+        if (! $isValidCode) {
             // Log security violation
             $this->logSecurityViolation($checkIn, 'Invalid security code attempt');
 
             return response()->json([
                 'success' => false,
-                'message' => 'Invalid security code'
+                'message' => 'Invalid security code',
             ], 403);
         }
 
@@ -179,16 +178,16 @@ class MobileChildrensController extends Controller
             if ($child->guardian_id !== $member->id) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'You are not authorized to pick up this child'
+                    'message' => 'You are not authorized to pick up this child',
                 ], 403);
             }
         }
 
         // Verify photo ID if required
-        if (!$validated['photo_id_verified']) {
+        if (! $validated['photo_id_verified']) {
             return response()->json([
                 'success' => false,
-                'message' => 'Photo ID verification required'
+                'message' => 'Photo ID verification required',
             ], 400);
         }
 
@@ -225,7 +224,7 @@ class MobileChildrensController extends Controller
                     'check_out_time' => $checkIn->check_out_time,
                     'duration_hours' => $checkIn->check_in_time->diffInHours($checkIn->check_out_time),
                     'picked_up_by' => $validated['pickup_person_name'],
-                ]
+                ],
             ]);
 
         } catch (\Exception $e) {
@@ -233,7 +232,7 @@ class MobileChildrensController extends Controller
 
             return response()->json([
                 'success' => false,
-                'message' => 'Check-out failed: ' . $e->getMessage()
+                'message' => 'Check-out failed: '.$e->getMessage(),
             ], 500);
         }
     }
@@ -246,23 +245,23 @@ class MobileChildrensController extends Controller
         $user = $request->user();
         $member = $user->member;
 
-        if (!$member) {
+        if (! $member) {
             return response()->json([
                 'success' => false,
-                'message' => 'No member profile found'
+                'message' => 'No member profile found',
             ], 404);
         }
 
         // Get children where member is parent or guardian
-        $children = Child::where(function($query) use ($member) {
+        $children = Child::where(function ($query) use ($member) {
             $query->where('parent_id', $member->id)
-                  ->orWhere('guardian_id', $member->id);
+                ->orWhere('guardian_id', $member->id);
         })->get();
 
         return response()->json([
             'success' => true,
             'data' => [
-                'children' => $children->map(function($child) {
+                'children' => $children->map(function ($child) {
                     // Get current check-in status
                     $currentCheckIn = ChildCheckIn::where('child_id', $child->id)
                         ->whereDate('check_in_time', today())
@@ -298,14 +297,14 @@ class MobileChildrensController extends Controller
                 }),
                 'summary' => [
                     'total_children' => $children->count(),
-                    'checked_in_now' => $children->filter(function($child) {
+                    'checked_in_now' => $children->filter(function ($child) {
                         return ChildCheckIn::where('child_id', $child->id)
                             ->whereDate('check_in_time', today())
                             ->whereNull('check_out_time')
                             ->exists();
                     })->count(),
                 ],
-            ]
+            ],
         ]);
     }
 
@@ -327,7 +326,7 @@ class MobileChildrensController extends Controller
         if ($child->parent_id !== $member->id && $child->guardian_id !== $member->id) {
             return response()->json([
                 'success' => false,
-                'message' => 'You are not authorized to generate code for this child'
+                'message' => 'You are not authorized to generate code for this child',
             ], 403);
         }
 
@@ -337,10 +336,10 @@ class MobileChildrensController extends Controller
             ->whereNull('check_out_time')
             ->first();
 
-        if (!$activeCheckIn) {
+        if (! $activeCheckIn) {
             return response()->json([
                 'success' => false,
-                'message' => 'Child is not currently checked in'
+                'message' => 'Child is not currently checked in',
             ], 400);
         }
 
@@ -352,7 +351,7 @@ class MobileChildrensController extends Controller
                 'class_assigned' => $activeCheckIn->class_assigned,
                 'check_in_time' => $activeCheckIn->check_in_time,
                 'valid_until' => now()->endOfDay(),
-            ]
+            ],
         ]);
     }
 
@@ -418,7 +417,7 @@ class MobileChildrensController extends Controller
                     'child_name' => $child->full_name,
                     'severity' => $incident->severity,
                     'parent_notified' => $validated['severity'] === 'serious',
-                ]
+                ],
             ], 201);
 
         } catch (\Exception $e) {
@@ -426,7 +425,7 @@ class MobileChildrensController extends Controller
 
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to submit incident report: ' . $e->getMessage()
+                'message' => 'Failed to submit incident report: '.$e->getMessage(),
             ], 500);
         }
     }
@@ -451,7 +450,7 @@ class MobileChildrensController extends Controller
         if ($child->parent_id !== $member->id && $child->guardian_id !== $member->id) {
             return response()->json([
                 'success' => false,
-                'message' => 'You are not authorized to view this child\'s records'
+                'message' => 'You are not authorized to view this child\'s records',
             ], 403);
         }
 
@@ -474,7 +473,7 @@ class MobileChildrensController extends Controller
                     'start' => $startDate,
                     'end' => $endDate,
                 ],
-                'attendance_records' => $attendance->map(function($record) {
+                'attendance_records' => $attendance->map(function ($record) {
                     return [
                         'date' => $record->check_in_time->format('Y-m-d'),
                         'check_in_time' => $record->check_in_time->format('H:i'),
@@ -487,7 +486,7 @@ class MobileChildrensController extends Controller
                     'total_attendances' => $attendance->count(),
                     'average_per_month' => round($attendance->count() / max($startDate->diffInMonths($endDate), 1), 1),
                 ],
-            ]
+            ],
         ]);
     }
 
@@ -496,7 +495,7 @@ class MobileChildrensController extends Controller
      */
     private function assignClass(int $age): string
     {
-        return match(true) {
+        return match (true) {
             $age <= 2 => 'Nursery (0-2 years)',
             $age <= 4 => 'Toddlers (3-4 years)',
             $age <= 6 => 'Beginners (5-6 years)',

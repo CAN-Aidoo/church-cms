@@ -53,7 +53,7 @@ class GenerateScheduledQRCodes extends Command
 
         foreach ($services as $service) {
             // Check if QR already exists
-            if (!$force) {
+            if (! $force) {
                 $existing = QRCode::where('service_date', $service['date'])
                     ->where('service_type', $service['type'])
                     ->where('revoked', false)
@@ -62,6 +62,7 @@ class GenerateScheduledQRCodes extends Command
                 if ($existing) {
                     $this->warn("  Skipping {$service['name']} - QR code already exists");
                     $skipped++;
+
                     continue;
                 }
             }
@@ -90,7 +91,7 @@ class GenerateScheduledQRCodes extends Command
         }
 
         $this->newLine();
-        $this->info("Summary:");
+        $this->info('Summary:');
         $this->info("  Generated: {$generated}");
         $this->info("  Skipped: {$skipped}");
         $this->info("  Errors: {$errors}");

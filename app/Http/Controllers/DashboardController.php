@@ -506,8 +506,8 @@ class DashboardController extends Controller
                     'type' => 'check_in',
                     'icon' => 'check-circle',
                     'color' => 'green',
-                    'title' => ($attendance->member->first_name ?? '') . ' ' . ($attendance->member->last_name ?? '') . ' checked in',
-                    'description' => 'via ' . ($attendance->check_in_method ?? 'manual'),
+                    'title' => ($attendance->member->first_name ?? '').' '.($attendance->member->last_name ?? '').' checked in',
+                    'description' => 'via '.($attendance->check_in_method ?? 'manual'),
                     'timestamp' => $attendance->created_at,
                 ];
             });
@@ -525,7 +525,7 @@ class DashboardController extends Controller
                     'icon' => $transaction->transaction_type === 'income' ? 'arrow-down' : 'arrow-up',
                     'color' => $transaction->transaction_type === 'income' ? 'green' : 'red',
                     'title' => $transaction->transaction_type === 'income' ? 'Income received' : 'Expense recorded',
-                    'description' => 'GHS ' . number_format($transaction->amount, 2) . ' - ' . $transaction->category,
+                    'description' => 'GHS '.number_format($transaction->amount, 2).' - '.$transaction->category,
                     'timestamp' => $transaction->created_at,
                 ];
             });
@@ -541,7 +541,7 @@ class DashboardController extends Controller
                     'icon' => 'user-plus',
                     'color' => 'blue',
                     'title' => 'New member registered',
-                    'description' => $member->first_name . ' ' . $member->last_name,
+                    'description' => $member->first_name.' '.$member->last_name,
                     'timestamp' => $member->created_at,
                 ];
             });

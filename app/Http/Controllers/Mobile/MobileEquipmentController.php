@@ -6,11 +6,10 @@ use App\Http\Controllers\Controller;
 use App\Models\Equipment;
 use App\Models\EquipmentAssignment;
 use App\Models\EquipmentMaintenanceRequest;
-use App\Services\QrCodeService;
 use App\Services\NotificationService;
+use App\Services\QrCodeService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Carbon\Carbon;
 
 class MobileEquipmentController extends Controller
 {
@@ -27,19 +26,19 @@ class MobileEquipmentController extends Controller
         // Decode QR code
         $qrData = json_decode($qrCode, true);
 
-        if (!isset($qrData['equipment_id'])) {
+        if (! isset($qrData['equipment_id'])) {
             return response()->json([
                 'success' => false,
-                'message' => 'Invalid equipment QR code'
+                'message' => 'Invalid equipment QR code',
             ], 400);
         }
 
         $equipment = Equipment::with(['category', 'currentAssignment.user'])->find($qrData['equipment_id']);
 
-        if (!$equipment) {
+        if (! $equipment) {
             return response()->json([
                 'success' => false,
-                'message' => 'Equipment not found'
+                'message' => 'Equipment not found',
             ], 404);
         }
 
@@ -72,7 +71,7 @@ class MobileEquipmentController extends Controller
                     'can_return' => false, // Will be true if user has this checked out
                     'can_report_issue' => true,
                 ],
-            ]
+            ],
         ]);
     }
 
@@ -95,7 +94,7 @@ class MobileEquipmentController extends Controller
         if ($equipment->status !== 'available') {
             return response()->json([
                 'success' => false,
-                'message' => 'Equipment is not available for checkout'
+                'message' => 'Equipment is not available for checkout',
             ], 400);
         }
 
@@ -108,7 +107,7 @@ class MobileEquipmentController extends Controller
         if ($existingAssignment) {
             return response()->json([
                 'success' => false,
-                'message' => 'You already have this equipment checked out'
+                'message' => 'You already have this equipment checked out',
             ], 400);
         }
 
@@ -145,7 +144,7 @@ class MobileEquipmentController extends Controller
                     'checkout_date' => $assignment->checkout_date,
                     'expected_return' => $assignment->expected_return_date,
                     'reminder' => 'You will receive a reminder 24 hours before the due date.',
-                ]
+                ],
             ], 201);
 
         } catch (\Exception $e) {
@@ -153,7 +152,7 @@ class MobileEquipmentController extends Controller
 
             return response()->json([
                 'success' => false,
-                'message' => 'Checkout failed: ' . $e->getMessage()
+                'message' => 'Checkout failed: '.$e->getMessage(),
             ], 500);
         }
     }
@@ -179,10 +178,10 @@ class MobileEquipmentController extends Controller
             ->whereNull('actual_return_date')
             ->first();
 
-        if (!$assignment) {
+        if (! $assignment) {
             return response()->json([
                 'success' => false,
-                'message' => 'You do not have this equipment checked out'
+                'message' => 'You do not have this equipment checked out',
             ], 404);
         }
 
@@ -236,7 +235,7 @@ class MobileEquipmentController extends Controller
                     'checkout_duration_days' => $assignment->checkout_date->diffInDays($assignment->actual_return_date),
                     'was_overdue' => $assignment->actual_return_date->gt($assignment->expected_return_date),
                     'needs_inspection' => $needsInspection,
-                ]
+                ],
             ]);
 
         } catch (\Exception $e) {
@@ -244,7 +243,7 @@ class MobileEquipmentController extends Controller
 
             return response()->json([
                 'success' => false,
-                'message' => 'Return failed: ' . $e->getMessage()
+                'message' => 'Return failed: '.$e->getMessage(),
             ], 500);
         }
     }
@@ -264,7 +263,7 @@ class MobileEquipmentController extends Controller
         return response()->json([
             'success' => true,
             'data' => [
-                'checkouts' => $checkouts->map(function($assignment) {
+                'checkouts' => $checkouts->map(function ($assignment) {
                     $isOverdue = now()->gt($assignment->expected_return_date);
                     $daysRemaining = now()->diffInDays($assignment->expected_return_date, false);
 
@@ -285,13 +284,12 @@ class MobileEquipmentController extends Controller
                 }),
                 'summary' => [
                     'total_checkouts' => $checkouts->count(),
-                    'overdue' => $checkouts->filter(fn($a) => now()->gt($a->expected_return_date))->count(),
-                    'due_soon' => $checkouts->filter(fn($a) =>
-                        now()->diffInDays($a->expected_return_date, false) <= 1 &&
-                        !now()->gt($a->expected_return_date)
+                    'overdue' => $checkouts->filter(fn ($a) => now()->gt($a->expected_return_date))->count(),
+                    'due_soon' => $checkouts->filter(fn ($a) => now()->diffInDays($a->expected_return_date, false) <= 1 &&
+                        ! now()->gt($a->expected_return_date)
                     )->count(),
-                ]
-            ]
+                ],
+            ],
         ]);
     }
 
@@ -330,13 +328,13 @@ class MobileEquipmentController extends Controller
                     'request_id' => $maintenanceRequest->id,
                     'priority' => $maintenanceRequest->priority,
                     'status' => $maintenanceRequest->status,
-                ]
+                ],
             ], 201);
 
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Report failed: ' . $e->getMessage()
+                'message' => 'Report failed: '.$e->getMessage(),
             ], 500);
         }
     }
@@ -346,7 +344,7 @@ class MobileEquipmentController extends Controller
      */
     private function getStatusMessage(Equipment $equipment): string
     {
-        return match($equipment->status) {
+        return match ($equipment->status) {
             'available' => 'Available for checkout',
             'checked_out' => 'Currently checked out',
             'maintenance' => 'Under maintenance',

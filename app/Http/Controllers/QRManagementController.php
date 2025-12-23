@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Services\QRManagementService;
 use App\Repositories\QRCodeRepository;
+use App\Services\QRManagementService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -93,7 +93,7 @@ class QRManagementController extends Controller
     {
         $qrCode = $this->repository->findById($id);
 
-        if (!$qrCode) {
+        if (! $qrCode) {
             abort(404);
         }
 
@@ -254,14 +254,14 @@ class QRManagementController extends Controller
             \Carbon\Carbon::parse($dateRange['end'])
         );
 
-        $filename = 'qr-analytics-' . now()->format('Y-m-d') . '.csv';
+        $filename = 'qr-analytics-'.now()->format('Y-m-d').'.csv';
 
         $headers = [
             'Content-Type' => 'text/csv',
             'Content-Disposition' => "attachment; filename=\"$filename\"",
         ];
 
-        $callback = function() use ($stats) {
+        $callback = function () use ($stats) {
             $file = fopen('php://output', 'w');
 
             // Headers
@@ -344,7 +344,7 @@ class QRManagementController extends Controller
 
             return response($image, 200)
                 ->header('Content-Type', 'image/png')
-                ->header('Content-Disposition', 'attachment; filename="qr-' . $id . '.png"');
+                ->header('Content-Disposition', 'attachment; filename="qr-'.$id.'.png"');
         } catch (\Exception $e) {
             abort(404);
         }

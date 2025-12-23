@@ -2,8 +2,8 @@
 
 namespace Database\Factories;
 
-use App\Models\Shepherd;
 use App\Models\Member;
+use App\Models\Shepherd;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -22,7 +22,7 @@ class ShepherdFactory extends Factory
     {
         return [
             'member_id' => Member::factory(),
-            'flock_name' => $this->faker->words(2, true) . ' Flock',
+            'flock_name' => $this->faker->words(2, true).' Flock',
             'description' => $this->faker->sentence(),
             'max_flock_size' => 15,
             'current_flock_size' => 0,

@@ -15,6 +15,7 @@ class MemberRegistered implements ShouldBroadcast
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
     public Member $member;
+
     public bool $convertedFromVisitor;
 
     /**
@@ -45,7 +46,7 @@ class MemberRegistered implements ShouldBroadcast
         return [
             'id' => $this->member->id,
             'member_id' => $this->member->member_id,
-            'name' => $this->member->first_name . ' ' . $this->member->last_name,
+            'name' => $this->member->first_name.' '.$this->member->last_name,
             'email' => $this->member->email,
             'phone' => $this->member->phone,
             'status' => $this->member->status,

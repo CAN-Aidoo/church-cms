@@ -12,8 +12,11 @@ class MemberAbsent
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
     public Member $member;
+
     public int $consecutiveAbsences;
+
     public \Carbon\Carbon $serviceDate;
+
     public string $serviceType;
 
     /**

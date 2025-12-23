@@ -3,8 +3,8 @@
 namespace App\Listeners;
 
 use App\Events\BirthdayToday;
-use App\Services\SmsService;
 use App\Services\NotificationService;
+use App\Services\SmsService;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Support\Facades\Log;
@@ -28,7 +28,7 @@ class SendBirthdayWishes implements ShouldQueue
             $member = $event->member;
 
             // Send SMS if phone number available
-            if (!empty($member->phone)) {
+            if (! empty($member->phone)) {
                 $message = $event->isMilestone
                     ? "Happy {$event->age}th Birthday, {$member->first_name}! 🎉 What a special milestone! May God continue to bless you abundantly. Enjoy your special day!"
                     : "Happy Birthday, {$member->first_name}! 🎂 Wishing you a blessed year ahead filled with God's goodness and grace!";
@@ -52,7 +52,7 @@ class SendBirthdayWishes implements ShouldQueue
                     data: [
                         'member_id' => $member->id,
                         'age' => $event->age,
-                        'is_milestone' => $event->isMilestone
+                        'is_milestone' => $event->isMilestone,
                     ]
                 );
             }

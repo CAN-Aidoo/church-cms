@@ -56,7 +56,7 @@ class ProcessBirthdayWishes implements ShouldQueue
                 Log::info("Birthday event dispatched for member: {$member->id}, Age: {$age}");
             }
 
-            Log::info("Birthday processing completed successfully");
+            Log::info('Birthday processing completed successfully');
         } catch (\Exception $e) {
             Log::error("Failed to process birthdays: {$e->getMessage()}");
             throw $e;

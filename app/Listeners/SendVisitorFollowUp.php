@@ -23,7 +23,7 @@ class SendVisitorFollowUp implements ShouldQueue
     public function handle(VisitorRegistered $event): void
     {
         try {
-            if (!$event->isFirstVisit) {
+            if (! $event->isFirstVisit) {
                 return;
             }
 
@@ -31,12 +31,13 @@ class SendVisitorFollowUp implements ShouldQueue
 
             if (empty($visitor->phone)) {
                 Log::info("Skipping visitor follow-up for visitor {$visitor->id}: No phone number");
+
                 return;
             }
 
             $message = "Hello {$visitor->first_name}, thank you for visiting our church! "
-                     . "We're excited to have you and hope to see you again soon. "
-                     . "God bless you!";
+                     ."We're excited to have you and hope to see you again soon. "
+                     .'God bless you!';
 
             // Delay sending by 2 hours to avoid immediate spam
             $this->smsService->sendSms(

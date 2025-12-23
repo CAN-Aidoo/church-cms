@@ -12,6 +12,7 @@ class PrayerRequestAnswered
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
     public PrayerRequest $prayerRequest;
+
     public ?string $testimony;
 
     /**

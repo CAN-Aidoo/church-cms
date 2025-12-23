@@ -3,8 +3,8 @@
 namespace App\Listeners;
 
 use App\Events\PrayerRequestSubmitted;
-use App\Services\NotificationService;
 use App\Models\User;
+use App\Services\NotificationService;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Support\Facades\Log;
@@ -50,7 +50,7 @@ class NotifyPrayerTeam implements ShouldQueue
                         'prayer_request_id' => $prayerRequest->id,
                         'category' => $prayerRequest->category,
                         'urgency' => $prayerRequest->urgency,
-                        'title' => $prayerRequest->title
+                        'title' => $prayerRequest->title,
                     ]
                 );
             }

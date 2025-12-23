@@ -44,19 +44,19 @@ class SendProgramConfirmation implements ShouldQueue
                         'venue' => $program->venue,
                         'registration_code' => $registration->registration_code,
                         'requires_payment' => $event->requiresPayment,
-                        'amount' => $program->registration_fee
+                        'amount' => $program->registration_fee,
                     ]
                 );
             }
 
             // Send SMS confirmation
-            if (!empty($member->phone)) {
+            if (! empty($member->phone)) {
                 $message = "Your registration for {$program->name} is confirmed! ";
-                $message .= "Date: " . $program->start_date->format('M d, Y') . ". ";
+                $message .= 'Date: '.$program->start_date->format('M d, Y').'. ';
                 $message .= "Venue: {$program->venue}. ";
 
                 if ($event->requiresPayment) {
-                    $message .= "Registration fee: GHS " . number_format($program->registration_fee, 2) . ". ";
+                    $message .= 'Registration fee: GHS '.number_format($program->registration_fee, 2).'. ';
                 }
 
                 $message .= "Code: {$registration->registration_code}";

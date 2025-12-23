@@ -167,6 +167,7 @@ class VisitorController extends Controller
             if ($request->wantsJson()) {
                 return response()->json(['error' => 'Cannot update converted visitors.'], 403);
             }
+
             return redirect()
                 ->route('visitors.show', $visitor)
                 ->with('error', 'Cannot update converted visitors.');
@@ -252,6 +253,7 @@ class VisitorController extends Controller
             if (request()->wantsJson()) {
                 return response()->json(['error' => 'Cannot delete converted visitors.'], 403);
             }
+
             return redirect()
                 ->route('visitors.index')
                 ->with('error', 'Cannot delete converted visitors.');
@@ -290,6 +292,7 @@ class VisitorController extends Controller
                     'eligible_for_conversion' => true,
                 ]);
             }
+
             return redirect()
                 ->route('visitors.show', $visitor)
                 ->with('success', 'Visit recorded! This visitor is now eligible for conversion to member.');
@@ -338,6 +341,7 @@ class VisitorController extends Controller
             if ($request->wantsJson()) {
                 return response()->json(['error' => 'Visitor must have at least 5 visits to convert.'], 400);
             }
+
             return redirect()
                 ->route('visitors.show', $visitor)
                 ->with('error', 'Visitor must have at least 5 visits to convert.');
@@ -347,6 +351,7 @@ class VisitorController extends Controller
             if ($request->wantsJson()) {
                 return response()->json(['error' => 'Visitor already converted.'], 400);
             }
+
             return redirect()
                 ->route('visitors.show', $visitor)
                 ->with('error', 'Visitor already converted.');

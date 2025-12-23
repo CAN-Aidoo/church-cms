@@ -12,6 +12,7 @@ class ProgramRegistrationReceived
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
     public ProgramRegistration $registration;
+
     public bool $requiresPayment;
 
     /**

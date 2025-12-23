@@ -6,11 +6,10 @@ use App\Http\Controllers\Controller;
 use App\Models\Member;
 use App\Models\Shepherd;
 use App\Models\ShepherdVisit;
-use App\Services\SmsService;
 use App\Services\NotificationService;
+use App\Services\SmsService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Carbon\Carbon;
 
 class MobileShepherdController extends Controller
 {
@@ -29,10 +28,10 @@ class MobileShepherdController extends Controller
         // Find shepherd record for this user
         $shepherd = Shepherd::where('user_id', $user->id)->first();
 
-        if (!$shepherd) {
+        if (! $shepherd) {
             return response()->json([
                 'success' => false,
-                'message' => 'You are not assigned as a shepherd'
+                'message' => 'You are not assigned as a shepherd',
             ], 403);
         }
 
@@ -55,11 +54,11 @@ class MobileShepherdController extends Controller
                     'flock_size' => $flockMembers->count(),
                     'max_flock_size' => config('church.max_flock_size', 15),
                 ],
-                'flock_members' => $flockMembers->map(function($member) use ($thisMonth) {
+                'flock_members' => $flockMembers->map(function ($member) use ($thisMonth) {
                     // Get recent attendance
                     $attendanceThisMonth = DB::table('attendance')
                         ->where('member_id', $member->id)
-                        ->where('service_date', 'like', $thisMonth . '%')
+                        ->where('service_date', 'like', $thisMonth.'%')
                         ->count();
 
                     // Get last visit
@@ -95,32 +94,33 @@ class MobileShepherdController extends Controller
                         'quick_actions' => [
                             'call' => "tel:{$member->phone}",
                             'sms' => "sms:{$member->phone}",
-                            'whatsapp' => "https://wa.me/" . preg_replace('/[^0-9]/', '', $member->phone),
+                            'whatsapp' => 'https://wa.me/'.preg_replace('/[^0-9]/', '', $member->phone),
                         ],
                     ];
                 }),
                 'statistics' => [
                     'total_members' => $flockMembers->count(),
-                    'regular_attenders' => $flockMembers->filter(function($m) use ($thisMonth) {
+                    'regular_attenders' => $flockMembers->filter(function ($m) use ($thisMonth) {
                         return DB::table('attendance')
                             ->where('member_id', $m->id)
-                            ->where('service_date', 'like', $thisMonth . '%')
+                            ->where('service_date', 'like', $thisMonth.'%')
                             ->count() >= 3;
                     })->count(),
-                    'at_risk' => $flockMembers->filter(function($m) use ($thisMonth) {
+                    'at_risk' => $flockMembers->filter(function ($m) use ($thisMonth) {
                         return DB::table('attendance')
                             ->where('member_id', $m->id)
-                            ->where('service_date', 'like', $thisMonth . '%')
+                            ->where('service_date', 'like', $thisMonth.'%')
                             ->count() === 0;
                     })->count(),
-                    'need_visit' => $flockMembers->filter(function($m) {
+                    'need_visit' => $flockMembers->filter(function ($m) {
                         $lastVisit = ShepherdVisit::where('member_id', $m->id)
                             ->latest('visit_date')
                             ->first();
-                        return !$lastVisit || now()->diffInDays($lastVisit->visit_date) > 60;
+
+                        return ! $lastVisit || now()->diffInDays($lastVisit->visit_date) > 60;
                     })->count(),
                 ],
-            ]
+            ],
         ]);
     }
 
@@ -147,10 +147,10 @@ class MobileShepherdController extends Controller
         $user = $request->user();
         $shepherd = Shepherd::where('user_id', $user->id)->first();
 
-        if (!$shepherd) {
+        if (! $shepherd) {
             return response()->json([
                 'success' => false,
-                'message' => 'You are not assigned as a shepherd'
+                'message' => 'You are not assigned as a shepherd',
             ], 403);
         }
 
@@ -159,10 +159,10 @@ class MobileShepherdController extends Controller
             ->where('shepherd_id', $shepherd->id)
             ->first();
 
-        if (!$member) {
+        if (! $member) {
             return response()->json([
                 'success' => false,
-                'message' => 'This member is not in your flock'
+                'message' => 'This member is not in your flock',
             ], 403);
         }
 
@@ -205,7 +205,7 @@ class MobileShepherdController extends Controller
                     'visit_date' => $visit->visit_date,
                     'visit_type' => $visit->visit_type,
                     'follow_up_scheduled' => $visit->follow_up_needed,
-                ]
+                ],
             ], 201);
 
         } catch (\Exception $e) {
@@ -213,7 +213,7 @@ class MobileShepherdController extends Controller
 
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to record visit: ' . $e->getMessage()
+                'message' => 'Failed to record visit: '.$e->getMessage(),
             ], 500);
         }
     }
@@ -226,15 +226,15 @@ class MobileShepherdController extends Controller
         $user = $request->user();
         $shepherd = Shepherd::where('user_id', $user->id)->first();
 
-        if (!$shepherd) {
+        if (! $shepherd) {
             return response()->json([
                 'success' => false,
-                'message' => 'You are not assigned as a shepherd'
+                'message' => 'You are not assigned as a shepherd',
             ], 403);
         }
 
         $period = $request->input('period', 'month'); // month, quarter, year
-        $startDate = match($period) {
+        $startDate = match ($period) {
             'week' => now()->startOfWeek(),
             'month' => now()->startOfMonth(),
             'quarter' => now()->startOfQuarter(),
@@ -259,7 +259,7 @@ class MobileShepherdController extends Controller
                     'start' => $startDate->format('Y-m-d'),
                     'end' => now()->format('Y-m-d'),
                 ],
-                'visits' => $visits->map(function($visit) {
+                'visits' => $visits->map(function ($visit) {
                     return [
                         'id' => $visit->id,
                         'member' => [
@@ -292,7 +292,7 @@ class MobileShepherdController extends Controller
                         ->count(),
                     'total_duration_hours' => round($visits->sum('duration_minutes') / 60, 1),
                 ],
-            ]
+            ],
         ]);
     }
 
@@ -311,17 +311,17 @@ class MobileShepherdController extends Controller
         $user = $request->user();
         $shepherd = Shepherd::where('user_id', $user->id)->first();
 
-        if (!$shepherd) {
+        if (! $shepherd) {
             return response()->json([
                 'success' => false,
-                'message' => 'You are not assigned as a shepherd'
+                'message' => 'You are not assigned as a shepherd',
             ], 403);
         }
 
         // Get recipients
         $query = Member::where('shepherd_id', $shepherd->id);
 
-        if (!empty($validated['member_ids'])) {
+        if (! empty($validated['member_ids'])) {
             $query->whereIn('id', $validated['member_ids']);
         }
 
@@ -330,7 +330,7 @@ class MobileShepherdController extends Controller
         if ($recipients->isEmpty()) {
             return response()->json([
                 'success' => false,
-                'message' => 'No recipients found'
+                'message' => 'No recipients found',
             ], 400);
         }
 
@@ -339,8 +339,9 @@ class MobileShepherdController extends Controller
             $failed = 0;
 
             foreach ($recipients as $member) {
-                if (!$member->phone) {
+                if (! $member->phone) {
                     $failed++;
+
                     continue;
                 }
 
@@ -349,7 +350,7 @@ class MobileShepherdController extends Controller
                     try {
                         $this->smsService->sendSms(
                             $member->phone,
-                            "From Shepherd {$shepherd->name}: " . $validated['message']
+                            "From Shepherd {$shepherd->name}: ".$validated['message']
                         );
                         $sent++;
                     } catch (\Exception $e) {
@@ -369,13 +370,13 @@ class MobileShepherdController extends Controller
                     'sent' => $sent,
                     'failed' => $failed,
                     'method' => $validated['send_via'],
-                ]
+                ],
             ]);
 
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to send messages: ' . $e->getMessage()
+                'message' => 'Failed to send messages: '.$e->getMessage(),
             ], 500);
         }
     }
@@ -388,10 +389,10 @@ class MobileShepherdController extends Controller
         $user = $request->user();
         $shepherd = Shepherd::where('user_id', $user->id)->first();
 
-        if (!$shepherd) {
+        if (! $shepherd) {
             return response()->json([
                 'success' => false,
-                'message' => 'You are not assigned as a shepherd'
+                'message' => 'You are not assigned as a shepherd',
             ], 403);
         }
 
@@ -404,17 +405,17 @@ class MobileShepherdController extends Controller
         // Attendance this month
         $attendanceThisMonth = DB::table('attendance')
             ->whereIn('member_id', $flockMembers->pluck('id'))
-            ->where('service_date', 'like', $thisMonth . '%')
+            ->where('service_date', 'like', $thisMonth.'%')
             ->count();
 
         // Visits this month
         $visitsThisMonth = ShepherdVisit::where('shepherd_id', $shepherd->id)
-            ->where('visit_date', 'like', $thisMonth . '%')
+            ->where('visit_date', 'like', $thisMonth.'%')
             ->count();
 
         // Visits last month
         $visitsLastMonth = ShepherdVisit::where('shepherd_id', $shepherd->id)
-            ->where('visit_date', 'like', $lastMonth . '%')
+            ->where('visit_date', 'like', $lastMonth.'%')
             ->count();
 
         return response()->json([
@@ -443,7 +444,7 @@ class MobileShepherdController extends Controller
                     'current_progress' => $visitsThisMonth,
                     'percentage' => round(($visitsThisMonth / 12) * 100, 1),
                 ],
-            ]
+            ],
         ]);
     }
 

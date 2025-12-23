@@ -29,8 +29,8 @@ class ChildFactory extends Factory
             'blood_group' => $this->faker->randomElement(['A+', 'O+', 'B+']),
             'allergies' => $this->faker->word(),
             'medical_conditions' => $this->faker->sentence(),
-            'school' => $this->faker->company() . ' Elementary',
-            'grade_level' => 'Grade ' . $this->faker->numberBetween(1, 6),
+            'school' => $this->faker->company().' Elementary',
+            'grade_level' => 'Grade '.$this->faker->numberBetween(1, 6),
             'is_active' => true,
             'notes' => $this->faker->sentence(),
         ];

@@ -13,6 +13,7 @@ class TransactionApproved
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
     public Transaction $transaction;
+
     public User $approvedBy;
 
     /**

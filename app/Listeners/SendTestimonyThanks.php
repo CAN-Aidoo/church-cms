@@ -25,7 +25,7 @@ class SendTestimonyThanks implements ShouldQueue
         try {
             $prayerRequest = $event->prayerRequest;
 
-            if (!$prayerRequest->submitted_by) {
+            if (! $prayerRequest->submitted_by) {
                 return;
             }
 
@@ -33,13 +33,13 @@ class SendTestimonyThanks implements ShouldQueue
                 userId: $prayerRequest->submitted_by,
                 type: 'prayer_answered',
                 title: 'Praise Report!',
-                message: "Hallelujah! Your prayer request has been marked as answered. We give glory to God!",
+                message: 'Hallelujah! Your prayer request has been marked as answered. We give glory to God!',
                 channels: ['in_app', 'email'],
                 priority: 'normal',
                 data: [
                     'prayer_request_id' => $prayerRequest->id,
                     'title' => $prayerRequest->title,
-                    'testimony' => $event->testimony
+                    'testimony' => $event->testimony,
                 ]
             );
 

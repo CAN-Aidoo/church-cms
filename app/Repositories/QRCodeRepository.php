@@ -9,7 +9,6 @@ use App\Models\QRScanLog;
 use Carbon\Carbon;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Support\Facades\DB;
 
 class QRCodeRepository
 {
@@ -21,23 +20,23 @@ class QRCodeRepository
         $query = QRCode::query()->with(['generator', 'scanLogs']);
 
         // Apply filters
-        if (!empty($filters['type'])) {
+        if (! empty($filters['type'])) {
             $query->where('type', $filters['type']);
         }
 
-        if (!empty($filters['status'])) {
+        if (! empty($filters['status'])) {
             $query->where('status', $filters['status']);
         }
 
-        if (!empty($filters['date_from'])) {
+        if (! empty($filters['date_from'])) {
             $query->whereDate('service_date', '>=', $filters['date_from']);
         }
 
-        if (!empty($filters['date_to'])) {
+        if (! empty($filters['date_to'])) {
             $query->whereDate('service_date', '<=', $filters['date_to']);
         }
 
-        if (!empty($filters['service_type'])) {
+        if (! empty($filters['service_type'])) {
             $query->where('service_type', $filters['service_type']);
         }
 
@@ -145,11 +144,11 @@ class QRCodeRepository
             $query->where('success', $filters['success']);
         }
 
-        if (!empty($filters['date_from'])) {
+        if (! empty($filters['date_from'])) {
             $query->whereDate('scan_time', '>=', $filters['date_from']);
         }
 
-        if (!empty($filters['date_to'])) {
+        if (! empty($filters['date_to'])) {
             $query->whereDate('scan_time', '<=', $filters['date_to']);
         }
 
@@ -247,7 +246,7 @@ class QRCodeRepository
             ],
             'error_breakdown' => $scans->where('success', false)
                 ->groupBy('error_reason')
-                ->map(fn($group) => $group->count())
+                ->map(fn ($group) => $group->count())
                 ->toArray(),
         ];
     }
@@ -365,7 +364,7 @@ class QRCodeRepository
             'error_count' => $failed->count(),
             'hourly_distribution' => $this->getHourlyScanDistribution($qrId, $date),
             'error_categories' => $failed->groupBy('error_reason')
-                ->map(fn($group) => $group->count())
+                ->map(fn ($group) => $group->count())
                 ->toArray(),
             'device_breakdown' => [
                 'ios' => $scans->where('device_type', 'ios')->count(),
@@ -376,7 +375,7 @@ class QRCodeRepository
 
         // Find peak time
         $hourlyDist = $data['hourly_distribution'];
-        if (!empty($hourlyDist)) {
+        if (! empty($hourlyDist)) {
             $peakHour = array_keys($hourlyDist, max($hourlyDist))[0];
             $data['peak_time'] = Carbon::parse($date)->setHour($peakHour)->setMinute(0)->setSecond(0);
             $data['peak_scans'] = $hourlyDist[$peakHour];

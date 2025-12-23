@@ -4,8 +4,6 @@ namespace App\Http\Controllers\Mobile;
 
 use App\Http\Controllers\Controller;
 use App\Models\ServiceUnit;
-use App\Models\ServiceUnitMember;
-use App\Models\DutyRoster;
 use App\Repositories\ServiceUnitRepository;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -28,26 +26,27 @@ class MobileServiceUnitController extends Controller
 
         $units = ServiceUnit::whereHas('members', function ($query) use ($memberId) {
             $query->where('member_id', $memberId)
-                  ->where('status', 'active');
+                ->where('status', 'active');
         })
-        ->with(['members' => function ($query) use ($memberId) {
-            $query->where('member_id', $memberId);
-        }])
-        ->get()
-        ->map(function ($unit) {
-            $memberPivot = $unit->members->first()->pivot;
-            return [
-                'id' => $unit->id,
-                'name' => $unit->name,
-                'description' => $unit->description,
-                'role' => $memberPivot->role, // leader, assistant_leader, member
-                'next_meeting' => $unit->meeting_schedule,
-            ];
-        });
+            ->with(['members' => function ($query) use ($memberId) {
+                $query->where('member_id', $memberId);
+            }])
+            ->get()
+            ->map(function ($unit) {
+                $memberPivot = $unit->members->first()->pivot;
+
+                return [
+                    'id' => $unit->id,
+                    'name' => $unit->name,
+                    'description' => $unit->description,
+                    'role' => $memberPivot->role, // leader, assistant_leader, member
+                    'next_meeting' => $unit->meeting_schedule,
+                ];
+            });
 
         return response()->json([
             'success' => true,
-            'data' => $units
+            'data' => $units,
         ]);
     }
 
@@ -59,7 +58,7 @@ class MobileServiceUnitController extends Controller
         $this->authorizeLeader($serviceUnit);
 
         $serviceUnit->load(['leader', 'assistantLeader']);
-        
+
         // Get stats
         $stats = [
             'total_members' => $serviceUnit->activeMembers()->count(),
@@ -70,8 +69,8 @@ class MobileServiceUnitController extends Controller
             'success' => true,
             'data' => [
                 'unit' => $serviceUnit,
-                'stats' => $stats
-            ]
+                'stats' => $stats,
+            ],
         ]);
     }
 
@@ -86,7 +85,7 @@ class MobileServiceUnitController extends Controller
 
         return response()->json([
             'success' => true,
-            'data' => $members
+            'data' => $members,
         ]);
     }
 
@@ -101,14 +100,14 @@ class MobileServiceUnitController extends Controller
             'member_id' => 'required|exists:members,id',
             'role' => 'required|in:member,trainee,assistant_leader',
             'joined_date' => 'required|date',
-            'notes' => 'nullable|string'
+            'notes' => 'nullable|string',
         ]);
 
         // Check if already a member
         if ($serviceUnit->members()->where('member_id', $validated['member_id'])->exists()) {
             return response()->json([
                 'success' => false,
-                'message' => 'Member is already in this unit'
+                'message' => 'Member is already in this unit',
             ], 422);
         }
 
@@ -117,7 +116,7 @@ class MobileServiceUnitController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'Member added successfully'
+            'message' => 'Member added successfully',
         ]);
     }
 
@@ -132,7 +131,7 @@ class MobileServiceUnitController extends Controller
 
         return response()->json([
             'success' => true,
-            'data' => $rosters
+            'data' => $rosters,
         ]);
     }
 
@@ -150,7 +149,7 @@ class MobileServiceUnitController extends Controller
             'end_time' => 'nullable|after:start_time',
             'duty_type' => 'required|in:sunday_service,midweek_service,special_event,rehearsal,practice,other',
             'assigned_members' => 'nullable|array',
-            'assigned_members.*' => 'exists:members,id'
+            'assigned_members.*' => 'exists:members,id',
         ]);
 
         $validated['created_by'] = Auth::id();
@@ -158,11 +157,11 @@ class MobileServiceUnitController extends Controller
 
         $roster = $this->serviceUnitRepository->createDutyRoster($serviceUnit, $validated);
 
-        if (!empty($validated['assigned_members'])) {
+        if (! empty($validated['assigned_members'])) {
             foreach ($validated['assigned_members'] as $memberId) {
                 $roster->assignments()->create([
                     'member_id' => $memberId,
-                    'status' => 'assigned'
+                    'status' => 'assigned',
                 ]);
             }
         }
@@ -170,7 +169,7 @@ class MobileServiceUnitController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Duty roster created',
-            'data' => $roster
+            'data' => $roster,
         ]);
     }
 
@@ -180,7 +179,7 @@ class MobileServiceUnitController extends Controller
     protected function authorizeLeader(ServiceUnit $unit)
     {
         $memberId = Auth::user()->member->id;
-        
+
         if ($unit->leader_id !== $memberId && $unit->assistant_leader_id !== $memberId) {
             abort(403, 'You are not a leader of this unit.');
         }

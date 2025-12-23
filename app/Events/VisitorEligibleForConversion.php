@@ -12,6 +12,7 @@ class VisitorEligibleForConversion
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
     public Visitor $visitor;
+
     public int $visitCount;
 
     /**

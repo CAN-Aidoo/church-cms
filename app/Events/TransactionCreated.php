@@ -15,6 +15,7 @@ class TransactionCreated implements ShouldBroadcast
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
     public Transaction $transaction;
+
     public bool $requiresApproval;
 
     /**
@@ -51,7 +52,7 @@ class TransactionCreated implements ShouldBroadcast
             'status' => $this->transaction->status,
             'requires_approval' => $this->requiresApproval,
             'member_name' => $this->transaction->member
-                ? $this->transaction->member->first_name . ' ' . $this->transaction->member->last_name
+                ? $this->transaction->member->first_name.' '.$this->transaction->member->last_name
                 : null,
             'timestamp' => now()->toISOString(),
         ];

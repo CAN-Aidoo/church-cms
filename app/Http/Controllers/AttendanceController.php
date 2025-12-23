@@ -144,7 +144,7 @@ class AttendanceController extends Controller
 
         if ($results['created'] > 0) {
             $message = "{$results['created']} attendance record(s) marked/updated successfully.";
-            
+
             return redirect()
                 ->route('attendance.index')
                 ->with('success', $message);
@@ -341,9 +341,9 @@ class AttendanceController extends Controller
         // Get manual check-ins count
         $manualCheckinsCount = \App\Models\Attendance::whereDate('service_date', $serviceDate)
             ->where('service_type', $serviceType)
-            ->where(function($query) {
+            ->where(function ($query) {
                 $query->whereNull('check_in_method')
-                      ->orWhere('check_in_method', 'manual');
+                    ->orWhere('check_in_method', 'manual');
             })
             ->count();
 

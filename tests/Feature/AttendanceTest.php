@@ -2,12 +2,11 @@
 
 namespace Tests\Feature;
 
-use App\Models\User;
+use App\Http\Middleware\VerifyCsrfToken;
 use App\Models\Member;
-use App\Models\Attendance;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
-use App\Http\Middleware\VerifyCsrfToken;
 
 class AttendanceTest extends TestCase
 {
@@ -26,10 +25,10 @@ class AttendanceTest extends TestCase
     public function test_mark_attendance()
     {
         $this->withoutMiddleware(VerifyCsrfToken::class);
-        
+
         $user = User::factory()->staff()->create();
         $this->actingAs($user);
-        
+
         $member = Member::factory()->create();
 
         $response = $this->post(route('attendance.store'), [
@@ -48,14 +47,14 @@ class AttendanceTest extends TestCase
             'service_type' => 'sunday_first',
         ]);
     }
-    
+
     public function test_bulk_mark_attendance()
     {
         $this->withoutMiddleware(VerifyCsrfToken::class);
-        
+
         $user = User::factory()->staff()->create();
         $this->actingAs($user);
-        
+
         $member1 = Member::factory()->create();
         $member2 = Member::factory()->create();
 

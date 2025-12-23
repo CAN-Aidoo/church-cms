@@ -4,15 +4,12 @@ namespace App\Http\Controllers\Mobile;
 
 use App\Http\Controllers\Controller;
 use App\Models\Transaction;
-use App\Models\Member;
-use App\Services\QrCodeService;
-use App\Services\PaymentGatewayService;
 use App\Services\NotificationService;
+use App\Services\PaymentGatewayService;
+use App\Services\QrCodeService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
-use Illuminate\Support\Facades\Cache;
-use Carbon\Carbon;
 
 class MobilePaymentController extends Controller
 {
@@ -42,10 +39,10 @@ class MobilePaymentController extends Controller
         $member = $user ? $user->member : null;
 
         // Verify user is allowed to make payments (requires admin verification)
-        if (!$user || !$user->is_verified) {
+        if (! $user || ! $user->is_verified) {
             return response()->json([
                 'success' => false,
-                'message' => 'Payment requires verified account. Please wait for admin approval.'
+                'message' => 'Payment requires verified account. Please wait for admin approval.',
             ], 403);
         }
 
@@ -53,7 +50,7 @@ class MobilePaymentController extends Controller
             DB::beginTransaction();
 
             // Generate unique transaction code
-            $transactionCode = 'TXN-' . date('YmdHis') . '-' . strtoupper(Str::random(6));
+            $transactionCode = 'TXN-'.date('YmdHis').'-'.strtoupper(Str::random(6));
 
             // Create transaction record
             $transaction = Transaction::create([
@@ -64,7 +61,7 @@ class MobilePaymentController extends Controller
                 'category' => $validated['category'],
                 'amount' => $validated['amount'],
                 'payment_method' => $validated['payment_method'],
-                'description' => $validated['description'] ?? ucfirst($validated['category']) . ' via mobile',
+                'description' => $validated['description'] ?? ucfirst($validated['category']).' via mobile',
                 'transaction_date' => now(),
                 'status' => 'pending',
                 'is_anonymous' => $validated['is_anonymous'] ?? false,
@@ -77,7 +74,7 @@ class MobilePaymentController extends Controller
             ]);
 
             // Process payment based on method
-            $paymentResult = match($validated['payment_method']) {
+            $paymentResult = match ($validated['payment_method']) {
                 'mobile_money' => $this->paymentGatewayService->processMobileMoney([
                     'amount' => $validated['amount'],
                     'phone' => $validated['mobile_money_number'],
@@ -98,11 +95,12 @@ class MobilePaymentController extends Controller
                 default => throw new \Exception('Invalid payment method')
             };
 
-            if (!$paymentResult['success']) {
+            if (! $paymentResult['success']) {
                 DB::rollBack();
+
                 return response()->json([
                     'success' => false,
-                    'message' => $paymentResult['message'] ?? 'Payment initiation failed'
+                    'message' => $paymentResult['message'] ?? 'Payment initiation failed',
                 ], 400);
             }
 
@@ -115,7 +113,7 @@ class MobilePaymentController extends Controller
             DB::commit();
 
             // Send notification
-            if (!$validated['is_anonymous'] && $member) {
+            if (! $validated['is_anonymous'] && $member) {
                 $this->notificationService->notifyPaymentInitiated($transaction, $member);
             }
 
@@ -130,7 +128,7 @@ class MobilePaymentController extends Controller
                     'payment_reference' => $paymentResult['reference'] ?? null,
                     'payment_url' => $paymentResult['payment_url'] ?? null,
                     'instructions' => $this->getPaymentInstructions($validated['payment_method'], $paymentResult),
-                ]
+                ],
             ], 201);
 
         } catch (\Exception $e) {
@@ -138,7 +136,7 @@ class MobilePaymentController extends Controller
 
             return response()->json([
                 'success' => false,
-                'message' => 'Payment failed: ' . $e->getMessage()
+                'message' => 'Payment failed: '.$e->getMessage(),
             ], 500);
         }
     }
@@ -154,10 +152,10 @@ class MobilePaymentController extends Controller
 
         $transaction = Transaction::where('transaction_code', $validated['transaction_code'])->first();
 
-        if (!$transaction) {
+        if (! $transaction) {
             return response()->json([
                 'success' => false,
-                'message' => 'Transaction not found'
+                'message' => 'Transaction not found',
             ], 404);
         }
 
@@ -188,7 +186,7 @@ class MobilePaymentController extends Controller
                     'completed_at' => $transaction->approved_at,
                     'receipt_url' => $receipt['url'],
                     'receipt_pdf' => $receipt['pdf_url'],
-                ]
+                ],
             ]);
         }
 
@@ -199,7 +197,7 @@ class MobilePaymentController extends Controller
                 'transaction_code' => $transaction->transaction_code,
                 'status' => $transaction->status,
                 'payment_status' => $verificationResult['status'] ?? 'pending',
-            ]
+            ],
         ]);
     }
 
@@ -214,10 +212,10 @@ class MobilePaymentController extends Controller
 
         $qrData = $this->qrCodeService->validateToken($validated['token'], 'payment');
 
-        if (!$qrData) {
+        if (! $qrData) {
             return response()->json([
                 'success' => false,
-                'message' => 'Invalid or expired QR code'
+                'message' => 'Invalid or expired QR code',
             ], 400);
         }
 
@@ -236,7 +234,7 @@ class MobilePaymentController extends Controller
                     'card' => ['available' => true],
                     'bank_transfer' => ['available' => true],
                 ],
-            ]
+            ],
         ]);
     }
 
@@ -258,10 +256,10 @@ class MobilePaymentController extends Controller
         $user = $request->user();
         $member = $user->member;
 
-        if (!$user->is_verified) {
+        if (! $user->is_verified) {
             return response()->json([
                 'success' => false,
-                'message' => 'Recurring payments require verified account'
+                'message' => 'Recurring payments require verified account',
             ], 403);
         }
 
@@ -294,13 +292,13 @@ class MobilePaymentController extends Controller
                     'frequency' => $validated['frequency'],
                     'start_date' => $validated['start_date'],
                     'next_payment_date' => $validated['start_date'],
-                ]
+                ],
             ], 201);
 
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Setup failed: ' . $e->getMessage()
+                'message' => 'Setup failed: '.$e->getMessage(),
             ], 500);
         }
     }
@@ -314,10 +312,10 @@ class MobilePaymentController extends Controller
         $member = $user->member;
 
         $transactions = Transaction::where('user_id', $user->id)
-            ->orWhere(function($query) use ($member) {
+            ->orWhere(function ($query) use ($member) {
                 if ($member) {
                     $query->where('member_id', $member->id)
-                          ->where('is_anonymous', false);
+                        ->where('is_anonymous', false);
                 }
             })
             ->orderBy('transaction_date', 'desc')
@@ -326,7 +324,7 @@ class MobilePaymentController extends Controller
         return response()->json([
             'success' => true,
             'data' => [
-                'transactions' => $transactions->map(function($transaction) {
+                'transactions' => $transactions->map(function ($transaction) {
                     return [
                         'transaction_code' => $transaction->transaction_code,
                         'amount' => $transaction->amount,
@@ -352,8 +350,8 @@ class MobilePaymentController extends Controller
                         ->whereMonth('transaction_date', now()->month)
                         ->where('status', 'completed')
                         ->sum('amount'),
-                ]
-            ]
+                ],
+            ],
         ]);
     }
 
@@ -362,7 +360,7 @@ class MobilePaymentController extends Controller
      */
     private function getSuggestedAmounts(string $category): array
     {
-        return match($category) {
+        return match ($category) {
             'tithe' => [50, 100, 200, 500],
             'offering' => [20, 50, 100, 200],
             'donation' => [100, 500, 1000, 5000],
@@ -376,8 +374,8 @@ class MobilePaymentController extends Controller
      */
     private function getPaymentInstructions(string $method, array $result): string
     {
-        return match($method) {
-            'mobile_money' => 'Please authorize the payment on your phone. A prompt has been sent to ' . ($result['phone'] ?? 'your number'),
+        return match ($method) {
+            'mobile_money' => 'Please authorize the payment on your phone. A prompt has been sent to '.($result['phone'] ?? 'your number'),
             'card' => 'Please complete payment at the provided URL',
             'bank_transfer' => 'Please transfer to the church bank account. Details have been sent to your email.',
             default => 'Complete the payment to finalize your transaction'

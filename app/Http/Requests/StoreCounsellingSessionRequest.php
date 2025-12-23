@@ -20,7 +20,7 @@ class StoreCounsellingSessionRequest extends FormRequest
             'case_id' => ['nullable', 'exists:counselling_cases,id'],
             'session_type' => ['required', Rule::in([
                 'pre_marital', 'marital', 'youth', 'addiction',
-                'grief', 'career', 'spiritual', 'family', 'other'
+                'grief', 'career', 'spiritual', 'family', 'other',
             ])],
             'session_date' => ['required', 'date', 'after_or_equal:today'],
             'session_time' => ['required', 'date_format:H:i'],

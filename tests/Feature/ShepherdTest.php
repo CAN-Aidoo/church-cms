@@ -2,12 +2,11 @@
 
 namespace Tests\Feature;
 
-use App\Models\User;
-use App\Models\Shepherd;
+use App\Http\Middleware\VerifyCsrfToken;
 use App\Models\Member;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
-use App\Http\Middleware\VerifyCsrfToken;
 
 class ShepherdTest extends TestCase
 {
@@ -26,10 +25,10 @@ class ShepherdTest extends TestCase
     public function test_create_shepherd()
     {
         $this->withoutMiddleware(VerifyCsrfToken::class);
-        
+
         $user = User::factory()->pastor()->create();
         $this->actingAs($user);
-        
+
         $member = Member::factory()->create();
 
         $response = $this->post(route('shepherds.store'), [

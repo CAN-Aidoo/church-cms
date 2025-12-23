@@ -12,7 +12,9 @@ class BirthdayToday
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
     public Member $member;
+
     public int $age;
+
     public bool $isMilestone;
 
     /**

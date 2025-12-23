@@ -2,14 +2,13 @@
 
 namespace App\Http\Controllers\Mobile;
 
+use App\Events\AttendanceRecorded;
 use App\Http\Controllers\Controller;
-use App\Services\QrCodeService;
 use App\Models\Attendance;
 use App\Models\Member;
-use App\Events\AttendanceRecorded;
+use App\Services\QrCodeService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Carbon\Carbon;
 
 class MobileCheckInController extends Controller
 {
@@ -31,18 +30,18 @@ class MobileCheckInController extends Controller
 
         $tokenData = $this->qrCodeService->validateToken($validated['token'], 'member');
 
-        if (!$tokenData) {
+        if (! $tokenData) {
             return response()->json([
                 'success' => false,
-                'message' => 'Invalid or expired QR code'
+                'message' => 'Invalid or expired QR code',
             ], 400);
         }
 
         $member = Member::find($tokenData['member_id']);
-        if (!$member) {
+        if (! $member) {
             return response()->json([
                 'success' => false,
-                'message' => 'Member not found'
+                'message' => 'Member not found',
             ], 404);
         }
 
@@ -69,10 +68,10 @@ class MobileCheckInController extends Controller
             'success' => true,
             'message' => 'Check-in successful',
             'data' => [
-                'member_name' => $member->first_name . ' ' . $member->last_name,
+                'member_name' => $member->first_name.' '.$member->last_name,
                 'check_in_time' => $attendance->check_in_time,
                 'service_date' => $attendance->service_date,
-            ]
+            ],
         ]);
     }
 
@@ -88,10 +87,10 @@ class MobileCheckInController extends Controller
 
         $tokenData = $this->qrCodeService->validateToken($validated['token'], 'service');
 
-        if (!$tokenData) {
+        if (! $tokenData) {
             return response()->json([
                 'success' => false,
-                'message' => 'Invalid or expired service QR code'
+                'message' => 'Invalid or expired service QR code',
             ], 400);
         }
 
@@ -106,7 +105,7 @@ class MobileCheckInController extends Controller
         if ($existingAttendance) {
             return response()->json([
                 'success' => false,
-                'message' => 'Already checked in for this service'
+                'message' => 'Already checked in for this service',
             ], 400);
         }
 
@@ -127,11 +126,11 @@ class MobileCheckInController extends Controller
             'success' => true,
             'message' => 'Service check-in successful',
             'data' => [
-                'member_name' => $member->first_name . ' ' . $member->last_name,
+                'member_name' => $member->first_name.' '.$member->last_name,
                 'service_date' => $attendance->service_date,
                 'service_type' => $attendance->service_type,
                 'check_in_time' => $attendance->check_in_time,
-            ]
+            ],
         ]);
     }
 
@@ -148,10 +147,10 @@ class MobileCheckInController extends Controller
 
         $tokenData = $this->qrCodeService->validateToken($validated['token'], 'service');
 
-        if (!$tokenData) {
+        if (! $tokenData) {
             return response()->json([
                 'success' => false,
-                'message' => 'Invalid or expired QR code'
+                'message' => 'Invalid or expired QR code',
             ], 400);
         }
 
@@ -168,7 +167,8 @@ class MobileCheckInController extends Controller
 
                 if ($existing) {
                     $member = Member::find($memberId);
-                    $alreadyCheckedIn[] = $member->first_name . ' ' . $member->last_name;
+                    $alreadyCheckedIn[] = $member->first_name.' '.$member->last_name;
+
                     continue;
                 }
 
@@ -186,7 +186,7 @@ class MobileCheckInController extends Controller
                 broadcast(new AttendanceRecorded($attendance))->toOthers();
 
                 $member = Member::find($memberId);
-                $checkedIn[] = $member->first_name . ' ' . $member->last_name;
+                $checkedIn[] = $member->first_name.' '.$member->last_name;
             }
         });
 
@@ -197,7 +197,7 @@ class MobileCheckInController extends Controller
                 'checked_in' => $checkedIn,
                 'already_checked_in' => $alreadyCheckedIn,
                 'total_checked_in' => count($checkedIn),
-            ]
+            ],
         ]);
     }
 
@@ -208,10 +208,10 @@ class MobileCheckInController extends Controller
     {
         $member = $request->user()->member;
 
-        if (!$member) {
+        if (! $member) {
             return response()->json([
                 'success' => false,
-                'message' => 'Member profile not found'
+                'message' => 'Member profile not found',
             ], 404);
         }
 
@@ -223,7 +223,7 @@ class MobileCheckInController extends Controller
                 'qr_code_url' => $this->qrCodeService->generateQrImageUrl($qrData['data']),
                 'token' => $qrData['token'],
                 'expires_at' => $qrData['expires_at'],
-            ]
+            ],
         ]);
     }
 }

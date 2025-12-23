@@ -2,12 +2,12 @@
 
 namespace App\Services;
 
-use App\Models\Member;
-use App\Models\Visitor;
 use App\Models\Equipment;
+use App\Models\Member;
 use App\Models\Program;
-use Illuminate\Support\Str;
+use App\Models\Visitor;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Str;
 
 class QrCodeService
 {
@@ -22,7 +22,7 @@ class QrCodeService
         Cache::put("qr:member:{$token}", [
             'member_id' => $member->id,
             'type' => 'member_checkin',
-            'expires_at' => $expiresAt
+            'expires_at' => $expiresAt,
         ], $expiresAt);
 
         return [
@@ -31,7 +31,7 @@ class QrCodeService
             'data' => json_encode([
                 'type' => 'member_checkin',
                 'member_id' => $member->id,
-                'name' => $member->first_name . ' ' . $member->last_name,
+                'name' => $member->first_name.' '.$member->last_name,
                 'token' => $token,
             ]),
             'expires_at' => $expiresAt,
@@ -50,7 +50,7 @@ class QrCodeService
             'service_date' => $serviceDate,
             'service_type' => $serviceType,
             'type' => 'service_checkin',
-            'expires_at' => $expiresAt
+            'expires_at' => $expiresAt,
         ], $expiresAt);
 
         return [
@@ -115,7 +115,7 @@ class QrCodeService
             'category' => $paymentData['category'] ?? 'offering',
             'description' => $paymentData['description'] ?? 'Offering',
             'type' => 'payment',
-            'expires_at' => $expiresAt
+            'expires_at' => $expiresAt,
         ], $expiresAt);
 
         return [
@@ -179,7 +179,7 @@ class QrCodeService
             'child_id' => $childId,
             'parent_id' => $parentId,
             'type' => 'child_checkin',
-            'expires_at' => $expiresAt
+            'expires_at' => $expiresAt,
         ], $expiresAt);
 
         return [
@@ -197,13 +197,14 @@ class QrCodeService
         $key = "qr:{$type}:{$token}";
         $data = Cache::get($key);
 
-        if (!$data) {
+        if (! $data) {
             return null;
         }
 
         // Check expiration
         if (isset($data['expires_at']) && now()->gt($data['expires_at'])) {
             Cache::forget($key);
+
             return null;
         }
 
@@ -218,12 +219,13 @@ class QrCodeService
         $key = "security:child:{$childId}:{$code}";
         $data = Cache::get($key);
 
-        if (!$data) {
+        if (! $data) {
             return null;
         }
 
         if (isset($data['expires_at']) && now()->gt($data['expires_at'])) {
             Cache::forget($key);
+
             return null;
         }
 
@@ -249,10 +251,11 @@ class QrCodeService
                 ->errorCorrection('H')
                 ->generate($data);
 
-            return 'data:image/png;base64,' . base64_encode($qrCode);
+            return 'data:image/png;base64,'.base64_encode($qrCode);
         } catch (\Exception $e) {
             \Log::warning('QR generation failed', ['error' => $e->getMessage()]);
-            return "https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=" . urlencode($data);
+
+            return 'https://api.qrserver.com/v1/create-qr-code/?size=300x300&data='.urlencode($data);
         }
     }
 

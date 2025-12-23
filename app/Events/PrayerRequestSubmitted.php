@@ -12,6 +12,7 @@ class PrayerRequestSubmitted
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
     public PrayerRequest $prayerRequest;
+
     public bool $isUrgent;
 
     /**

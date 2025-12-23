@@ -3,8 +3,8 @@
 namespace App\Listeners;
 
 use App\Events\TransactionCreated;
-use App\Services\NotificationService;
 use App\Models\User;
+use App\Services\NotificationService;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Support\Facades\Log;
@@ -24,7 +24,7 @@ class NotifyApproversOfTransaction implements ShouldQueue
     public function handle(TransactionCreated $event): void
     {
         try {
-            if (!$event->requiresApproval) {
+            if (! $event->requiresApproval) {
                 return;
             }
 
@@ -38,7 +38,7 @@ class NotifyApproversOfTransaction implements ShouldQueue
                     userId: $approver->id,
                     type: 'finance_approval',
                     title: 'Transaction Approval Required',
-                    message: "A {$transaction->type} transaction of GHS " . number_format($transaction->amount, 2) . " requires your approval.",
+                    message: "A {$transaction->type} transaction of GHS ".number_format($transaction->amount, 2).' requires your approval.',
                     channels: ['in_app', 'email'],
                     priority: $transaction->amount > 5000 ? 'high' : 'normal',
                     data: [
@@ -46,7 +46,7 @@ class NotifyApproversOfTransaction implements ShouldQueue
                         'type' => $transaction->type,
                         'amount' => $transaction->amount,
                         'category' => $transaction->category,
-                        'description' => $transaction->description
+                        'description' => $transaction->description,
                     ]
                 );
             }

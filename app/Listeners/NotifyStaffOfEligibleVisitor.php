@@ -3,8 +3,8 @@
 namespace App\Listeners;
 
 use App\Events\VisitorEligibleForConversion;
-use App\Services\NotificationService;
 use App\Models\User;
+use App\Services\NotificationService;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Support\Facades\Log;
@@ -39,10 +39,10 @@ class NotifyStaffOfEligibleVisitor implements ShouldQueue
                     priority: 'high',
                     data: [
                         'visitor_id' => $visitor->id,
-                        'visitor_name' => $visitor->first_name . ' ' . $visitor->last_name,
+                        'visitor_name' => $visitor->first_name.' '.$visitor->last_name,
                         'visit_count' => $event->visitCount,
                         'phone' => $visitor->phone,
-                        'email' => $visitor->email
+                        'email' => $visitor->email,
                     ]
                 );
             }

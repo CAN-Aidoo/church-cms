@@ -314,7 +314,7 @@ class BirthdayController extends Controller
 
         return response()->json([
             'success' => true,
-            'analytics' => $analytics
+            'analytics' => $analytics,
         ]);
     }
 
@@ -335,7 +335,7 @@ class BirthdayController extends Controller
         return response()->json([
             'success' => true,
             'celebrations' => $celebrations,
-            'total_count' => collect($celebrations)->flatten(1)->count()
+            'total_count' => collect($celebrations)->flatten(1)->count(),
         ]);
     }
 
@@ -363,7 +363,7 @@ class BirthdayController extends Controller
                 $generated[] = [
                     'type' => 'birthday',
                     'count' => $birthdays->count(),
-                    'text' => $announcement
+                    'text' => $announcement,
                 ];
             }
         }
@@ -375,7 +375,7 @@ class BirthdayController extends Controller
                 $generated[] = [
                     'type' => 'milestone',
                     'milestone_type' => $milestone->milestone_type,
-                    'text' => $announcement
+                    'text' => $announcement,
                 ];
             }
         }
@@ -383,7 +383,7 @@ class BirthdayController extends Controller
         return response()->json([
             'success' => true,
             'announcements' => $generated,
-            'count' => count($generated)
+            'count' => count($generated),
         ]);
     }
 
@@ -406,7 +406,7 @@ class BirthdayController extends Controller
             'success' => $result['success'],
             'message' => $result['message'],
             'preview' => $result['preview'] ?? null,
-            'details' => $result['details'] ?? []
+            'details' => $result['details'] ?? [],
         ]);
     }
 
@@ -456,8 +456,8 @@ class BirthdayController extends Controller
             'summary' => [
                 'total_days' => $days,
                 'total_events' => collect($schedule)->sum('total'),
-                'busiest_day' => collect($schedule)->sortByDesc('total')->first()
-            ]
+                'busiest_day' => collect($schedule)->sortByDesc('total')->first(),
+            ],
         ]);
     }
 
@@ -483,7 +483,7 @@ class BirthdayController extends Controller
             'success' => true,
             'scheduled' => $results['scheduled'],
             'failed' => $results['failed'],
-            'message' => "Scheduled {$results['scheduled']} wishes successfully."
+            'message' => "Scheduled {$results['scheduled']} wishes successfully.",
         ]);
     }
 
@@ -504,7 +504,7 @@ class BirthdayController extends Controller
         return response()->json([
             'success' => true,
             'suggestions' => $suggestions,
-            'total_count' => $totalSuggestions
+            'total_count' => $totalSuggestions,
         ]);
     }
 }

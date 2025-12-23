@@ -253,7 +253,7 @@ class AttendanceRepository
             // Using whereBetween on date string column might need care with time components if datetime, but service_date is date
             $weekAttendance = Attendance::whereBetween('service_date', [
                 $weekStart->format('Y-m-d'),
-                $weekEnd->format('Y-m-d')
+                $weekEnd->format('Y-m-d'),
             ])->get();
 
             $total = $weekAttendance->count();

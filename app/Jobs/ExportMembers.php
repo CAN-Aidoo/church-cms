@@ -38,7 +38,7 @@ class ExportMembers implements ShouldQueue
     public function handle(MemberRepository $memberRepository): void
     {
         try {
-            Log::info("Exporting members with filters", $this->filters);
+            Log::info('Exporting members with filters', $this->filters);
 
             // Get members based on filters
             $members = $memberRepository->export($this->filters);
@@ -69,6 +69,7 @@ class ExportMembers implements ShouldQueue
     private function generateFileName(): string
     {
         $timestamp = now()->format('YmdHis');
+
         return "exports/members_{$timestamp}";
     }
 
@@ -81,6 +82,7 @@ class ExportMembers implements ShouldQueue
 
         if (empty($members)) {
             Storage::put($filePath, '');
+
             return $filePath;
         }
 
@@ -91,7 +93,7 @@ class ExportMembers implements ShouldQueue
             'Member ID', 'First Name', 'Middle Name', 'Last Name',
             'Email', 'Phone', 'Gender', 'Date of Birth',
             'Marital Status', 'Occupation', 'Address',
-            'Membership Date', 'Baptism Status', 'Status'
+            'Membership Date', 'Baptism Status', 'Status',
         ];
         fputcsv($csv, $headers);
 
@@ -120,6 +122,7 @@ class ExportMembers implements ShouldQueue
         fclose($csv);
 
         Storage::put($filePath, $content);
+
         return $filePath;
     }
 
@@ -131,6 +134,7 @@ class ExportMembers implements ShouldQueue
         // Would use Maatwebsite/Laravel-Excel package
         $filePath = "{$fileName}.xlsx";
         Storage::put($filePath, 'Excel placeholder');
+
         return $filePath;
     }
 

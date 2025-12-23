@@ -360,10 +360,10 @@ class MemberController extends Controller
         $user = $request->user();
         $member = $user->member;
 
-        if (!$member) {
+        if (! $member) {
             return response()->json([
                 'success' => false,
-                'message' => 'No member profile found for this user.'
+                'message' => 'No member profile found for this user.',
             ], 404);
         }
 
@@ -390,10 +390,10 @@ class MemberController extends Controller
                 'member_status' => $member->member_status,
                 'occupation' => $member->occupation,
                 'department' => $member->department,
-                'photo_url' => $member->photo_url ? asset('storage/' . $member->photo_url) : null,
+                'photo_url' => $member->photo_url ? asset('storage/'.$member->photo_url) : null,
                 'emergency_contact_name' => $member->emergency_contact_name,
                 'emergency_contact_phone' => $member->emergency_contact_phone,
-            ]
+            ],
         ]);
     }
 
@@ -405,10 +405,10 @@ class MemberController extends Controller
         $user = $request->user();
         $member = $user->member;
 
-        if (!$member) {
+        if (! $member) {
             return response()->json([
                 'success' => false,
-                'message' => 'No member profile found for this user.'
+                'message' => 'No member profile found for this user.',
             ], 404);
         }
 
@@ -429,7 +429,7 @@ class MemberController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Profile updated successfully.',
-            'member' => $member->fresh()
+            'member' => $member->fresh(),
         ]);
     }
 
@@ -441,7 +441,7 @@ class MemberController extends Controller
         $user = $request->user();
         $member = $user->member;
 
-        if (!$member) {
+        if (! $member) {
             return response()->json(['success' => false, 'message' => 'No member profile found.'], 404);
         }
 
@@ -472,7 +472,7 @@ class MemberController extends Controller
                 'attendance_rate' => $stats['attendance_rate'],
                 'consecutive_attendance' => $stats['consecutive_attendance'],
                 'last_attendance' => $stats['last_attendance'],
-            ]
+            ],
         ]);
     }
 
@@ -484,7 +484,7 @@ class MemberController extends Controller
         $user = $request->user();
         $member = $user->member;
 
-        if (!$member) {
+        if (! $member) {
             return response()->json(['success' => false, 'message' => 'No member profile found.'], 404);
         }
 
@@ -518,7 +518,7 @@ class MemberController extends Controller
                 'this_year_giving' => $summary['this_year_giving'],
                 'last_contribution_date' => $summary['last_contribution_date'],
                 'giving_frequency' => $summary['giving_frequency'],
-            ]
+            ],
         ]);
     }
 
@@ -530,7 +530,7 @@ class MemberController extends Controller
         $user = $request->user();
         $member = $user->member;
 
-        if (!$member) {
+        if (! $member) {
             return response()->json(['success' => false, 'message' => 'No member profile found.'], 404);
         }
 
@@ -559,7 +559,7 @@ class MemberController extends Controller
         return response()->json([
             'success' => true,
             'registrations' => $registrations,
-            'total' => $registrations->count()
+            'total' => $registrations->count(),
         ]);
     }
 
@@ -571,7 +571,7 @@ class MemberController extends Controller
         $user = $request->user();
         $member = $user->member;
 
-        if (!$member) {
+        if (! $member) {
             return response()->json(['success' => false, 'message' => 'No member profile found.'], 404);
         }
 
@@ -598,7 +598,7 @@ class MemberController extends Controller
         return response()->json([
             'success' => true,
             'service_units' => $serviceUnits,
-            'total' => $serviceUnits->count()
+            'total' => $serviceUnits->count(),
         ]);
     }
 
@@ -610,17 +610,17 @@ class MemberController extends Controller
         $user = $request->user();
         $member = $user->member;
 
-        if (!$member) {
+        if (! $member) {
             return response()->json(['success' => false, 'message' => 'No member profile found.'], 404);
         }
 
         $shepherd = $member->shepherd;
 
-        if (!$shepherd) {
+        if (! $shepherd) {
             return response()->json([
                 'success' => true,
                 'shepherd' => null,
-                'message' => 'No shepherd assigned yet.'
+                'message' => 'No shepherd assigned yet.',
             ]);
         }
 
@@ -633,7 +633,7 @@ class MemberController extends Controller
                 'phone' => $shepherd->phone,
                 'flock_name' => $shepherd->flock_name,
                 'meeting_schedule' => $shepherd->meeting_schedule,
-            ]
+            ],
         ]);
     }
 
@@ -645,18 +645,18 @@ class MemberController extends Controller
         $user = $request->user();
         $member = $user->member;
 
-        if (!$member) {
+        if (! $member) {
             return response()->json(['success' => false, 'message' => 'No member profile found.'], 404);
         }
 
         $family = $member->family;
 
-        if (!$family) {
+        if (! $family) {
             return response()->json([
                 'success' => true,
                 'family' => null,
                 'members' => [],
-                'message' => 'Not part of any family unit.'
+                'message' => 'Not part of any family unit.',
             ]);
         }
 
@@ -669,7 +669,7 @@ class MemberController extends Controller
                     'member_id' => $familyMember->member_id,
                     'full_name' => $familyMember->full_name,
                     'relationship' => $familyMember->pivot->relationship ?? 'family_member',
-                    'photo_url' => $familyMember->photo_url ? asset('storage/' . $familyMember->photo_url) : null,
+                    'photo_url' => $familyMember->photo_url ? asset('storage/'.$familyMember->photo_url) : null,
                 ];
             });
 
@@ -681,7 +681,7 @@ class MemberController extends Controller
                 'head_of_family_id' => $family->head_of_family_id,
             ],
             'members' => $familyMembers,
-            'total_members' => $familyMembers->count() + 1 // +1 for the member themselves
+            'total_members' => $familyMembers->count() + 1, // +1 for the member themselves
         ]);
     }
 
@@ -693,7 +693,7 @@ class MemberController extends Controller
         $user = $request->user();
         $member = $user->member;
 
-        if (!$member) {
+        if (! $member) {
             return response()->json(['success' => false, 'message' => 'No member profile found.'], 404);
         }
 
@@ -716,7 +716,7 @@ class MemberController extends Controller
         return response()->json([
             'success' => true,
             'documents' => $documents,
-            'total' => $documents->count()
+            'total' => $documents->count(),
         ]);
     }
 
@@ -728,19 +728,19 @@ class MemberController extends Controller
         $user = $request->user();
         $member = $user->member;
 
-        if (!$member) {
+        if (! $member) {
             return response()->json(['success' => false, 'message' => 'No member profile found.'], 404);
         }
 
         $document = $member->documents()->find($documentId);
 
-        if (!$document) {
+        if (! $document) {
             return response()->json(['success' => false, 'message' => 'Document not found.'], 404);
         }
 
-        $filePath = storage_path('app/private/member_documents/' . $document->file_path);
+        $filePath = storage_path('app/private/member_documents/'.$document->file_path);
 
-        if (!file_exists($filePath)) {
+        if (! file_exists($filePath)) {
             return response()->json(['success' => false, 'message' => 'File not found on server.'], 404);
         }
 
@@ -755,7 +755,7 @@ class MemberController extends Controller
         $user = $request->user();
         $member = $user->member;
 
-        if (!$member) {
+        if (! $member) {
             return response()->json(['success' => false, 'message' => 'No member profile found.'], 404);
         }
 
@@ -805,7 +805,7 @@ class MemberController extends Controller
         return response()->json([
             'success' => true,
             'events' => $allEvents,
-            'total' => count($allEvents)
+            'total' => count($allEvents),
         ]);
     }
 }
