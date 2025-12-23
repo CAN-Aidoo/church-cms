@@ -2,10 +2,12 @@
 nixPkgs = ["php82", "php82Packages.composer", "php82Extensions.mbstring", "php82Extensions.pdo", "php82Extensions.pdo_mysql", "php82Extensions.tokenizer", "php82Extensions.xml", "php82Extensions.ctype", "php82Extensions.bcmath", "php82Extensions.fileinfo", "nodejs"]
 
 [phases.install]
-cmds = ["composer install --no-dev --optimize-autoloader --no-interaction"]
+cmds = ["composer install --no-dev --optimize-autoloader --no-interaction --no-scripts"]
 
 [phases.build]
 cmds = [
+  "composer dump-autoload",
+  "php artisan package:discover --ansi || true",
   "php artisan config:cache",
   "php artisan route:cache",
   "php artisan view:cache",
