@@ -1,17 +1,44 @@
+# Dependencies
 /node_modules
-/public/hot
-/public/storage
-/storage/*.key
 /vendor
+
+# Build artifacts (generated during deployment)
+/public/hot
+/public/build
+/public/storage
+
+# Laravel storage (keep structure, ignore contents)
+/storage/*.key
+/storage/framework/cache/*
+!/storage/framework/cache/.gitignore
+/storage/framework/sessions/*
+!/storage/framework/sessions/.gitignore
+/storage/framework/views/*
+!/storage/framework/views/.gitignore
+/storage/logs/*
+!/storage/logs/.gitignore
+
+# Environment files (SECURITY CRITICAL)
 .env
 .env.backup
 .env.production
+
+# Testing
 .phpunit.result.cache
+/coverage
+
+# IDE
+/.fleet
+/.idea
+/.vscode
+
+# Local development
 Homestead.json
 Homestead.yaml
 auth.json
 npm-debug.log
 yarn-error.log
-/.fleet
-/.idea
-/.vscode
+
+# OS files
+.DS_Store
+Thumbs.db
