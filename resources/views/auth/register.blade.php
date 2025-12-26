@@ -120,16 +120,6 @@
                 </div>
             </form>
 
-            <!-- Back to Home -->
-            <div class="text-center mt-6">
-                <a href="{{ route('landing') }}" class="inline-flex items-center text-sm text-gray-600 hover:text-primary-600 transition-colors">
-                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
-                    </svg>
-                    Back to Home
-                </a>
-            </div>
-
             <!-- Footer -->
             <div class="text-center text-xs text-gray-500 mt-8">
                 <p>&copy; {{ date('Y') }} {{ config('church.name', config('app.name')) }}</p>
