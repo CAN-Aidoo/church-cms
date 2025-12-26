@@ -43,7 +43,10 @@
       "Bash(net start)",
       "Bash([ -f \"resources/views/mobile/register.blade.php\" ])",
       "Bash(php verify-deployment.php:*)",
-      "Bash(vendor/bin/pint:*)"
+      "Bash(vendor/bin/pint:*)",
+      "Bash(mv:*)",
+      "Bash(tree:*)",
+      "Bash(railway:*)"
     ],
     "deny": [],
     "ask": []

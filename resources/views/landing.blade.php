@@ -22,17 +22,22 @@
         }
 
         :root {
-            --primary: #6366f1;
-            --primary-dark: #4f46e5;
-            --primary-light: #818cf8;
-            --secondary: #ec4899;
+            /* Brand Colors - Blue & Gold Theme */
+            --primary: #3b82f6;
+            --primary-dark: #2563eb;
+            --primary-light: #60a5fa;
+            --secondary: #f59e0b;
+            --secondary-dark: #d97706;
+            --secondary-light: #fbbf24;
             --dark: #0f172a;
             --dark-light: #1e293b;
             --gray: #64748b;
             --light: #f8fafc;
             --white: #ffffff;
-            --gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            --gradient-2: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            /* Brand Gradients - Blue to Gold */
+            --gradient: linear-gradient(135deg, #3b82f6 0%, #f59e0b 100%);
+            --gradient-reverse: linear-gradient(135deg, #f59e0b 0%, #3b82f6 100%);
+            --gradient-soft: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(245, 158, 11, 0.1) 100%);
             --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
             --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
             --shadow-lg: 0 20px 25px -5px rgb(0 0 0 / 0.1);
@@ -145,7 +150,7 @@
             min-height: 100vh;
             display: flex;
             align-items: center;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: var(--gradient);
             position: relative;
             overflow: hidden;
             padding-top: 80px;
@@ -242,12 +247,13 @@
         .section-badge {
             display: inline-block;
             padding: 0.5rem 1rem;
-            background: rgba(99, 102, 241, 0.1);
+            background: var(--gradient-soft);
             color: var(--primary);
             border-radius: 2rem;
             font-weight: 600;
             font-size: 0.875rem;
             margin-bottom: 1rem;
+            border: 1px solid rgba(59, 130, 246, 0.2);
         }
 
         .section-title {
@@ -296,6 +302,7 @@
             margin-bottom: 1.5rem;
             font-size: 1.5rem;
             color: var(--white);
+            box-shadow: var(--shadow);
         }
 
         .feature-title {
@@ -349,13 +356,14 @@
         .benefit-icon {
             width: 40px;
             height: 40px;
-            background: rgba(99, 102, 241, 0.1);
+            background: var(--gradient-soft);
             border-radius: 0.5rem;
             display: flex;
             align-items: center;
             justify-content: center;
             flex-shrink: 0;
             color: var(--primary);
+            border: 1px solid rgba(59, 130, 246, 0.2);
         }
 
         .benefit-text h3 {
