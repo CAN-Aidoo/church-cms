@@ -32,10 +32,10 @@ use Illuminate\Support\Facades\Route;
 |--------------------------------------------------------------------------
 */
 
-// Welcome page (temporary - for testing)
+// Landing Page
 Route::get('/', function () {
-    return view('welcome');
-});
+    return view('landing');
+})->name('landing');
 
 // Guest Routes (Authentication) - with rate limiting
 Route::middleware(['guest', 'throttle:5,1'])->group(function () {
