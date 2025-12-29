@@ -530,10 +530,47 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 🆘 Support
 
 ### Documentation
-- **User Guide**: `USER_GUIDE.md`
-- **API Reference**: `SKILL.md`
-- **Contributing**: `CONTRIBUTING.md`
-- **Changelog**: `CHANGELOG.md`
+
+**Essential Guides:**
+- **README.md** - This file (Quick start & overview)
+- **USER_GUIDE.md** - Complete user manual
+- **SKILL.md** - Full API reference
+- **CONTRIBUTING.md** - How to contribute
+- **CHANGELOG.md** - Version history
+
+**Setup & Installation:**
+- `docs/setup/QUICK_START.md` - Fast setup guide
+- `docs/setup/BEGINNER_INSTALLATION_GUIDE.md` - Detailed beginner guide
+
+**Deployment:**
+- `docs/deployment/DEPLOYMENT_GUIDE.md` - Production deployment guide
+
+**Features:**
+- `docs/features/qr-system/QR_QUICK_START_GUIDE.md` - QR code quick start
+- `docs/features/qr-system/QR_SCHEDULER_SETUP_GUIDE.md` - QR scheduler setup
+
+**Mobile PWA:**
+- `docs/mobile-pwa/PWA_SETUP_GUIDE.md` - PWA setup guide
+- `docs/mobile-pwa/PWA_TESTING_GUIDE.md` - PWA testing guide
+- `docs/mobile-pwa/MOBILE_LOGIN_GUIDE.md` - Mobile login guide
+- `docs/mobile-pwa/MOBILE_QUICK_REFERENCE.md` - Mobile quick reference
+
+**Architecture & Design:**
+- `docs/project-documentation/01_PROJECT_OVERVIEW.md` - Project overview
+- `docs/project-documentation/02_TECH_STACK.md` - Technology stack
+- `docs/project-documentation/03_DATABASE_DESIGN.md` - Database design
+- `docs/project-documentation/04_API_DOCUMENTATION.md` - API architecture
+- `docs/project-documentation/05_FRONTEND_ARCHITECTURE.md` - Frontend architecture
+- `docs/project-documentation/06_AUTHENTICATION_COMPLETE.md` - Authentication system
+- `docs/project-documentation/07_FEATURE_MODULES_UPDATED.md` - Feature modules
+- `docs/project-documentation/QR_CODE_IMPLEMENTATION_SPEC.md` - QR code specification
+- `docs/project-documentation/UI_UX_CONSISTENCY_GUIDE.md` - UI/UX guidelines
+
+**Security:**
+- `docs/security/SECURITY_AUDIT_REPORT.md` - Security audit report
+
+**Development:**
+- `docs/implementation-guides/NEXT_STEPS.md` - Future development roadmap
 
 ### Community
 - **GitHub Issues**: [Report bugs](https://github.com/your-org/church-cms/issues)
@@ -581,7 +618,7 @@ Total Lines of Code:     40,000+
 Database Tables:         100+
 API Endpoints:           250+
 Mobile Pages:            24
-Documentation Pages:     15+
+Documentation Pages:     25 (streamlined from 68)
 Test Coverage:           In Progress
 ```
 
