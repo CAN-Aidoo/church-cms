@@ -272,7 +272,7 @@
 
                 // Redirect after delay
                 setTimeout(() => {
-                    window.location.href = '/mobile/service-unit';
+                    window.location.href = '{{ url('/mobile/service-unit') }}';
                 }, 2000);
             }
         } catch (error) {

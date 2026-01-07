@@ -407,7 +407,7 @@ document.getElementById('profileForm').addEventListener('submit', async (e) => {
         if (data.success) {
             ChurchApp.showToast('Profile updated successfully', 'success');
             setTimeout(() => {
-                window.location.href = '/mobile/profile';
+                window.location.href = '{{ url('/mobile/profile') }}';
             }, 1500);
         } else {
             throw new Error(data.message || 'Update failed');

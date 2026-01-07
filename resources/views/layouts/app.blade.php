@@ -15,7 +15,7 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @stack('styles')
 </head>
-<body class="font-sans antialiased bg-gray-100">
+<body class="font-sans antialiased bg-slate-50">
     <div x-data="{ sidebarOpen: false }">
         <!-- Sidebar - Always Visible -->
         @include('components.sidebar')
@@ -29,17 +29,17 @@
              x-transition:leave="transition-opacity ease-linear duration-300"
              x-transition:leave-start="opacity-100"
              x-transition:leave-end="opacity-0"
-             class="fixed inset-0 bg-gray-600 bg-opacity-75 z-20 lg:hidden"
+             class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-20 lg:hidden"
              style="display: none;">
         </div>
 
         <!-- Main Content Wrapper -->
-        <div class="min-h-screen flex flex-col" style="margin-left: 256px;">
+        <div class="min-h-screen flex flex-col lg:ml-64 transition-all duration-300">
             <!-- Navbar -->
             @include('components.navbar')
 
             <!-- Page Content -->
-            <main class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100">
+            <main class="flex-1 overflow-x-hidden overflow-y-auto bg-slate-50">
                 <div class="container mx-auto px-6 py-8">
                     <!-- Page Header -->
                     @if (isset($header) || View::hasSection('header'))

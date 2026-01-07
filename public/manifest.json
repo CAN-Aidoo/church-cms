@@ -94,6 +94,18 @@
           "sizes": "96x96"
         }
       ]
+    },
+    {
+      "name": "Scan QR Code",
+      "short_name": "Scan QR",
+      "description": "Scan QR code for attendance or payment",
+      "url": "/pwa/scanner",
+      "icons": [
+        {
+          "src": "/images/icon-96x96.png",
+          "sizes": "96x96"
+        }
+      ]
     }
   ]
 }

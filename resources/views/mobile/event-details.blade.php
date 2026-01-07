@@ -264,7 +264,7 @@ async function loadEventDetails() {
         } else {
             ChurchApp.showToast('Event not found', 'error');
             setTimeout(() => {
-                window.location.href = '/mobile/events';
+                window.location.href = '{{ url('/mobile/events') }}';
             }, 2000);
         }
     } catch (error) {

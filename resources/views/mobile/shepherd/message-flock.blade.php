@@ -314,7 +314,7 @@
 
                 // Redirect after delay
                 setTimeout(() => {
-                    window.location.href = '/mobile/shepherd';
+                    window.location.href = '{{ url('/mobile/shepherd') }}';
                 }, 2000);
             } else {
                 throw new Error(result.message || 'Failed to send message');

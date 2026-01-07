@@ -3,141 +3,153 @@
 @section('title', 'Attendance Record Details')
 
 @section('content')
-<div class="page-header">
+<div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
     <div>
-        <h1 class="page-title">Attendance Record Details</h1>
-        <nav class="breadcrumb">
-            <a href="{{ route('dashboard') }}">Dashboard</a>
+        <h1 class="text-2xl font-heading font-bold text-slate-900">Attendance Record Details</h1>
+        <nav class="flex items-center gap-2 text-sm text-slate-500 mt-1">
+            <a href="{{ route('dashboard') }}" class="hover:text-primary-600 transition-colors">Dashboard</a>
             <span>/</span>
-            <a href="{{ route('attendance.index') }}">Attendance</a>
+            <a href="{{ route('attendance.index') }}" class="hover:text-primary-600 transition-colors">Attendance</a>
             <span>/</span>
-            <span>Details</span>
+            <span class="text-slate-800 font-medium">Details</span>
         </nav>
     </div>
-    <div class="flex gap-3">
-        <a href="{{ route('attendance.edit', $attendance) }}" class="btn btn-secondary">
-            <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                <path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828z"/>
-                <path fill-rule="evenodd" d="M2 6a2 2 0 012-2h4a1 1 0 010 2H4v10h10v-4a1 1 0 112 0v4a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" clip-rule="evenodd"/>
+    <div class="flex items-center gap-3">
+        <a href="{{ route('attendance.edit', $attendance) }}" class="btn btn-primary flex items-center gap-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
             </svg>
             Edit Record
         </a>
-        <a href="{{ route('attendance.index') }}" class="btn btn-outline">
+        <a href="{{ route('attendance.index') }}" class="btn bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 hover:text-slate-900 transition-colors">
             Back to List
         </a>
     </div>
 </div>
 
-<div class="max-w-4xl mx-auto">
-    <!-- Member & Service Information Card -->
-    <div class="card mb-6">
-        <div class="card-header bg-gradient-to-r from-primary-50 to-blue-50">
-            <div class="flex items-center justify-between">
-                <h2 class="text-xl font-semibold text-gray-900">Attendance Information</h2>
-                <span class="px-4 py-2 rounded-full text-sm font-semibold
-                    @if($attendance->status === 'present') bg-green-100 text-green-800
-                    @elseif($attendance->status === 'absent') bg-red-100 text-red-800
-                    @elseif($attendance->status === 'excused') bg-blue-100 text-blue-800
-                    @elseif($attendance->status === 'late') bg-yellow-100 text-yellow-800
-                    @endif">
-                    {{ ucfirst($attendance->status) }}
-                </span>
-            </div>
+<div class="max-w-4xl mx-auto space-y-8">
+    <!-- Main Card -->
+    <div class="card border border-slate-100 overflow-hidden">
+        <div class="px-6 py-4 border-b border-slate-100 bg-slate-50/50 flex items-center justify-between">
+            <h3 class="font-bold text-slate-800 text-base">Attendance Information</h3>
+            @php
+                $statusClasses = [
+                    'present' => 'bg-emerald-100 text-emerald-700 ring-emerald-600/20',
+                    'absent' => 'bg-red-100 text-red-700 ring-red-600/20',
+                    'excused' => 'bg-amber-100 text-amber-700 ring-amber-600/20',
+                    'late' => 'bg-amber-100 text-amber-700 ring-amber-600/20',
+                ];
+            @endphp
+            <span class="inline-flex items-center rounded-md px-2.5 py-1 text-sm font-medium ring-1 ring-inset {{ $statusClasses[$attendance->status] ?? 'bg-slate-100 text-slate-700 ring-slate-600/20' }}">
+                {{ ucfirst($attendance->status) }}
+            </span>
         </div>
 
-        <div class="card-body">
+        <div class="p-6 space-y-8">
             <!-- Member Information -->
-            <div class="mb-6 p-4 bg-gradient-to-r from-primary-50 to-blue-50 rounded-lg border border-primary-100">
-                <div class="flex items-center gap-4">
-                    <div class="w-16 h-16 rounded-full bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center text-white text-2xl font-bold">
+            <div class="p-4 bg-primary-50 rounded-xl border border-primary-100 flex flex-col md:flex-row items-start md:items-center gap-6">
+                <div class="flex items-center gap-4 flex-1">
+                    @if($attendance->member->photo_url)
+                    <img src="{{ Storage::url($attendance->member->photo_url) }}"
+                         alt="{{ $attendance->member->full_name }}"
+                         class="w-16 h-16 rounded-full object-cover border-2 border-white shadow-sm">
+                    @else
+                    <div class="w-16 h-16 rounded-full bg-white flex items-center justify-center text-primary-600 text-xl font-bold border-2 border-white shadow-sm">
                         {{ strtoupper(substr($attendance->member->first_name, 0, 1)) }}{{ strtoupper(substr($attendance->member->last_name, 0, 1)) }}
                     </div>
-                    <div class="flex-1">
-                        <h3 class="text-lg font-semibold text-gray-900">
-                            {{ $attendance->member->first_name }} {{ $attendance->member->last_name }}
+                    @endif
+                    <div>
+                        <h3 class="font-heading font-bold text-slate-900 text-lg">
+                            {{ $attendance->member->full_name }}
                         </h3>
-                        <p class="text-sm text-gray-600">{{ $attendance->member->member_id }}</p>
-                        <div class="flex gap-4 mt-1 text-sm text-gray-500">
+                        <p class="text-sm text-slate-500 font-mono mb-1">{{ $attendance->member->member_id }}</p>
+                        <div class="flex flex-wrap gap-4 text-xs font-medium text-slate-600">
                             @if($attendance->member->email)
-                                <span class="flex items-center">
-                                    <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                                        <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z"/>
-                                        <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z"/>
-                                    </svg>
-                                    {{ $attendance->member->email }}
-                                </span>
+                            <span class="flex items-center gap-1.5">
+                                <svg class="w-3.5 h-3.5 text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                                {{ $attendance->member->email }}
+                            </span>
                             @endif
                             @if($attendance->member->phone)
-                                <span class="flex items-center">
-                                    <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                                        <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z"/>
-                                    </svg>
-                                    {{ $attendance->member->phone }}
-                                </span>
+                            <span class="flex items-center gap-1.5">
+                                <svg class="w-3.5 h-3.5 text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/></svg>
+                                {{ $attendance->member->phone }}
+                            </span>
                             @endif
                         </div>
                     </div>
-                    <a href="{{ route('members.show', $attendance->member) }}" class="text-primary-600 hover:text-primary-800 text-sm font-medium">
-                        View Profile →
-                    </a>
                 </div>
+                <a href="{{ route('members.show', $attendance->member) }}" class="btn bg-white border border-primary-100 text-primary-600 hover:bg-primary-50 hover:border-primary-200 shadow-sm text-sm">
+                    View Profile
+                </a>
             </div>
 
-            <!-- Service Details -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                <div class="p-4 bg-gray-50 rounded-lg border border-gray-200">
-                    <div class="flex items-center mb-2">
-                        <svg class="w-5 h-5 text-gray-600 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd"/>
-                        </svg>
-                        <h4 class="text-sm font-semibold text-gray-700">Service Date</h4>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Service Details -->
+                <div class="p-4 bg-slate-50 rounded-xl border border-slate-100">
+                    <h4 class="text-sm font-bold text-slate-900 mb-3 flex items-center gap-2">
+                        <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                        Service Information
+                    </h4>
+                    <div class="space-y-3">
+                        <div>
+                            <p class="text-xs text-slate-500 uppercase tracking-wider font-bold mb-0.5">Service Date</p>
+                            <p class="text-slate-900 font-medium">{{ $attendance->service_date->format('l, F d, Y') }}</p>
+                        </div>
+                        <div>
+                            <p class="text-xs text-slate-500 uppercase tracking-wider font-bold mb-0.5">Service Type</p>
+                            <p class="text-slate-900 font-medium capitalize">{{ str_replace('_', ' ', $attendance->service_type) }}</p>
+                        </div>
                     </div>
-                    <p class="text-lg font-medium text-gray-900">{{ $attendance->service_date->format('l, F d, Y') }}</p>
-                    <p class="text-xs text-gray-500 mt-1">{{ $attendance->service_date->diffForHumans() }}</p>
                 </div>
 
-                <div class="p-4 bg-gray-50 rounded-lg border border-gray-200">
-                    <div class="flex items-center mb-2">
-                        <svg class="w-5 h-5 text-gray-600 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"/>
-                        </svg>
-                        <h4 class="text-sm font-semibold text-gray-700">Service Type</h4>
+                <!-- Record Metadata -->
+                <div class="p-4 bg-slate-50 rounded-xl border border-slate-100">
+                    <h4 class="text-sm font-bold text-slate-900 mb-3 flex items-center gap-2">
+                        <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        Record Metadata
+                    </h4>
+                    <div class="space-y-3">
+                        <div class="flex justify-between">
+                            <div>
+                                <p class="text-xs text-slate-500 uppercase tracking-wider font-bold mb-0.5">Recorded By</p>
+                                <p class="text-slate-900 font-medium">{{ $attendance->recorder->full_name ?? 'System' }}</p>
+                            </div>
+                            <div class="text-right">
+                                <p class="text-xs text-slate-500 uppercase tracking-wider font-bold mb-0.5">Recorded At</p>
+                                <p class="text-slate-900 font-medium">{{ $attendance->recorded_at ? $attendance->recorded_at->format('M d, H:i') : 'N/A' }}</p>
+                            </div>
+                        </div>
+                        @if($attendance->updated_at > $attendance->created_at)
+                        <div>
+                            <p class="text-xs text-slate-500 uppercase tracking-wider font-bold mb-0.5">Last Updated</p>
+                            <p class="text-slate-900 font-medium text-sm">{{ $attendance->updated_at->format('M d, Y H:i') }} <span class="text-slate-400 font-normal">({{ $attendance->updated_at->diffForHumans() }})</span></p>
+                        </div>
+                        @endif
                     </div>
-                    <p class="text-lg font-medium text-gray-900">{{ ucwords(str_replace('_', ' ', $attendance->service_type)) }}</p>
                 </div>
             </div>
 
             <!-- Check-in Details (if available) -->
             @if($attendance->check_in_time || $attendance->check_in_method)
-            <div class="mb-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
-                <h4 class="text-sm font-semibold text-gray-700 mb-3 flex items-center">
-                    <svg class="w-5 h-5 mr-2 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
-                    </svg>
+            <div class="p-4 bg-indigo-50 rounded-xl border border-indigo-100">
+                <h4 class="text-sm font-bold text-indigo-900 mb-3 flex items-center gap-2">
+                    <svg class="w-4 h-4 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"></path></svg>
                     Check-in Details
                 </h4>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="flex gap-8">
                     @if($attendance->check_in_time)
                     <div>
-                        <p class="text-xs text-gray-600">Check-in Time</p>
-                        <p class="text-sm font-medium text-gray-900">{{ $attendance->check_in_time }}</p>
+                        <p class="text-xs text-indigo-600/70 uppercase tracking-wider font-bold mb-0.5">Check-in Time</p>
+                        <p class="text-indigo-900 font-medium">{{ \Carbon\Carbon::parse($attendance->check_in_time)->format('h:i A') }}</p>
                     </div>
                     @endif
                     @if($attendance->check_in_method)
                     <div>
-                        <p class="text-xs text-gray-600">Check-in Method</p>
-                        <p class="text-sm font-medium text-gray-900">
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
-                                @if($attendance->check_in_method === 'qr_code' || $attendance->check_in_method === 'qr_code_service' || $attendance->check_in_method === 'qr_code_family')
-                                    bg-purple-100 text-purple-800
-                                @elseif($attendance->check_in_method === 'mobile')
-                                    bg-green-100 text-green-800
-                                @else
-                                    bg-gray-100 text-gray-800
-                                @endif">
-                                {{ ucwords(str_replace('_', ' ', $attendance->check_in_method)) }}
-                            </span>
-                        </p>
+                        <p class="text-xs text-indigo-600/70 uppercase tracking-wider font-bold mb-0.5">Method</p>
+                        <span class="inline-flex items-center rounded-md bg-indigo-100 px-2 py-1 text-xs font-medium text-indigo-800 ring-1 ring-inset ring-indigo-600/20">
+                            {{ ucwords(str_replace('_', ' ', $attendance->check_in_method)) }}
+                        </span>
                     </div>
                     @endif
                 </div>
@@ -146,133 +158,78 @@
 
             <!-- Notes Section -->
             @if($attendance->notes)
-            <div class="mb-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
-                <h4 class="text-sm font-semibold text-gray-700 mb-2 flex items-center">
-                    <svg class="w-5 h-5 mr-2 text-gray-600" fill="currentColor" viewBox="0 0 20 20">
-                        <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z"/>
-                    </svg>
-                    Notes
-                </h4>
-                <p class="text-sm text-gray-700 whitespace-pre-wrap">{{ $attendance->notes }}</p>
+            <div class="p-4 bg-slate-50 rounded-xl border border-slate-100">
+                <h4 class="text-sm font-bold text-slate-900 mb-2">Notes</h4>
+                <p class="text-slate-700 leading-relaxed whitespace-pre-wrap">{{ $attendance->notes }}</p>
             </div>
             @endif
-
-            <!-- Record Metadata -->
-            <div class="p-4 bg-gray-50 rounded-lg border border-gray-200">
-                <h4 class="text-sm font-semibold text-gray-700 mb-3">Record Information</h4>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                    <div>
-                        <p class="text-gray-600">Recorded By</p>
-                        <p class="font-medium text-gray-900">{{ $attendance->recordedBy->name ?? 'System' }}</p>
-                    </div>
-                    <div>
-                        <p class="text-gray-600">Recorded At</p>
-                        <p class="font-medium text-gray-900">{{ $attendance->recorded_at ? $attendance->recorded_at->format('M d, Y H:i:s') : 'N/A' }}</p>
-                    </div>
-                    @if($attendance->updated_at && $attendance->updated_at != $attendance->created_at)
-                    <div>
-                        <p class="text-gray-600">Last Updated</p>
-                        <p class="font-medium text-gray-900">{{ $attendance->updated_at->format('M d, Y H:i:s') }}</p>
-                    </div>
-                    <div>
-                        <p class="text-gray-600">Time Since Update</p>
-                        <p class="font-medium text-gray-900">{{ $attendance->updated_at->diffForHumans() }}</p>
-                    </div>
-                    @endif
-                </div>
-            </div>
         </div>
-
-        <!-- Card Footer with Actions -->
-        <div class="card-footer bg-gray-50 flex justify-between items-center">
-            <a href="{{ route('attendance.index') }}" class="text-sm text-gray-600 hover:text-gray-800">
-                ← Back to Attendance List
-            </a>
-            <div class="flex gap-3">
-                <a href="{{ route('attendance.edit', $attendance) }}" class="btn btn-sm btn-secondary">
-                    Edit Record
-                </a>
-                @can('delete', $attendance)
-                <form action="{{ route('attendance.destroy', $attendance) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this attendance record?')">
-                    @csrf
-                    @method('DELETE')
-                    <button type="submit" class="btn btn-sm btn-danger">
-                        <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd"/>
-                        </svg>
-                        Delete
-                    </button>
-                </form>
-                @endcan
-            </div>
+        
+        <div class="px-6 py-4 bg-slate-50 border-t border-slate-100 flex justify-between items-center">
+            @if(auth()->user()->hasAnyRole(['admin', 'pastor']))
+            <form action="{{ route('attendance.destroy', $attendance) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this attendance record?')">
+                @csrf
+                @method('DELETE')
+                <button type="submit" class="text-red-600 hover:text-red-700 text-sm font-medium flex items-center gap-2 transition-colors">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                    Delete Record
+                </button>
+            </form>
+            @else
+            <div></div> <!-- Spacer -->
+            @endif
         </div>
     </div>
 
-    <!-- Related Member Attendance History -->
-    <div class="card">
-        <div class="card-header bg-gradient-to-r from-primary-50 to-blue-50">
-            <h3 class="text-lg font-semibold text-gray-900">Recent Attendance History</h3>
-            <p class="text-sm text-gray-600 mt-1">Last 10 attendance records for this member</p>
+    <!-- Attendance History Table -->
+    <div class="card border border-slate-100 overflow-hidden">
+        <div class="px-6 py-4 border-b border-slate-100 bg-slate-50/50">
+            <h3 class="font-bold text-slate-800 text-base">Recent Attendance History</h3>
         </div>
-        <div class="card-body p-0">
-            @php
-                $recentAttendance = $attendance->member->attendances()
-                    ->orderBy('service_date', 'desc')
-                    ->take(10)
-                    ->get();
-            @endphp
-
-            @if($recentAttendance->count() > 0)
-            <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-gray-200">
-                    <thead class="bg-gray-50">
-                        <tr>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Service Type</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Check-in</th>
-                        </tr>
-                    </thead>
-                    <tbody class="bg-white divide-y divide-gray-200">
-                        @foreach($recentAttendance as $record)
-                        <tr class="hover:bg-gray-50 {{ $record->id === $attendance->id ? 'bg-primary-50' : '' }}">
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+                <thead class="bg-slate-50 text-slate-500 text-xs uppercase tracking-wider">
+                    <tr>
+                        <th class="px-6 py-3 font-semibold border-b border-slate-100">Date</th>
+                        <th class="px-6 py-3 font-semibold border-b border-slate-100">Service Type</th>
+                        <th class="px-6 py-3 font-semibold border-b border-slate-100">Status</th>
+                        <th class="px-6 py-3 font-semibold border-b border-slate-100">Check-in</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-50 bg-white">
+                    @php
+                        $recentAttendance = $attendance->member->attendances()
+                            ->orderBy('service_date', 'desc')
+                            ->where('id', '!=', $attendance->id)
+                            ->take(5)
+                            ->get();
+                    @endphp
+                    @forelse($recentAttendance as $record)
+                    <tr class="hover:bg-slate-50/50 transition-colors">
+                        <td class="px-6 py-4 text-sm text-slate-600 font-medium">
+                            <a href="{{ route('attendance.show', $record) }}" class="hover:text-primary-600 hover:underline">
                                 {{ $record->service_date->format('M d, Y') }}
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
-                                {{ ucwords(str_replace('_', ' ', $record->service_type)) }}
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <span class="px-2.5 py-1 rounded-full text-xs font-medium
-                                    @if($record->status === 'present') bg-green-100 text-green-800
-                                    @elseif($record->status === 'absent') bg-red-100 text-red-800
-                                    @elseif($record->status === 'excused') bg-blue-100 text-blue-800
-                                    @elseif($record->status === 'late') bg-yellow-100 text-yellow-800
-                                    @endif">
-                                    {{ ucfirst($record->status) }}
-                                </span>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                {{ $record->check_in_time ?? 'N/A' }}
-                            </td>
-                        </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-            </div>
-            @else
-            <div class="p-8 text-center text-gray-500">
-                <svg class="w-12 h-12 mx-auto mb-3 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
-                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
-                </svg>
-                <p>No attendance history found</p>
-            </div>
-            @endif
-        </div>
-        <div class="card-footer bg-gray-50">
-            <a href="{{ route('members.show', $attendance->member) }}" class="text-sm text-primary-600 hover:text-primary-800 font-medium">
-                View Full Member Profile →
-            </a>
+                            </a>
+                        </td>
+                        <td class="px-6 py-4 text-sm text-slate-600 capitalize">{{ str_replace('_', ' ', $record->service_type) }}</td>
+                        <td class="px-6 py-4">
+                            <span class="inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset {{ $statusClasses[$record->status] ?? 'bg-slate-100 text-slate-700 ring-slate-600/20' }}">
+                                {{ ucfirst($record->status) }}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 text-sm text-slate-500 font-mono text-xs">
+                            {{ $record->check_in_time ? \Carbon\Carbon::parse($record->check_in_time)->format('H:i') : '-' }}
+                        </td>
+                    </tr>
+                    @empty
+                    <tr>
+                        <td colspan="4" class="px-6 py-8 text-center text-slate-400">
+                            No other recent attendance records found.
+                        </td>
+                    </tr>
+                    @endforelse
+                </tbody>
+            </table>
         </div>
     </div>
 </div>

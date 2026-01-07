@@ -323,15 +323,22 @@ Route::prefix('v1')->middleware('auth:sanctum')->group(function () {
     });
 
     // QR Code Scan API - All authenticated users
-    Route::prefix('qr-scan')->group(function () {
-        Route::post('/scan', [App\Http\Controllers\API\QRScanController::class, 'scan']);
-        Route::post('/validate', [App\Http\Controllers\API\QRScanController::class, 'validateQr']);
-        Route::get('/history', [App\Http\Controllers\API\QRScanController::class, 'history']);
-        Route::post('/sync-offline', [App\Http\Controllers\API\QRScanController::class, 'syncOffline']);
-        Route::get('/{id}/info', [App\Http\Controllers\API\QRScanController::class, 'info']);
-        Route::get('/{id}/has-scanned', [App\Http\Controllers\API\QRScanController::class, 'hasScanned']);
-        Route::get('/active-service', [App\Http\Controllers\API\QRScanController::class, 'activeService']);
-        Route::post('/{id}/report', [App\Http\Controllers\API\QRScanController::class, 'report']);
+    Route::prefix('qr-scan')->name('api.qr-scan.')->group(function () {
+        // Legacy endpoints (maintained for backward compatibility)
+        Route::post('/scan', [App\Http\Controllers\API\QRScanController::class, 'scan'])->name('scan');
+        Route::post('/validate', [App\Http\Controllers\API\QRScanController::class, 'validateQr'])->name('validate');
+        Route::get('/history', [App\Http\Controllers\API\QRScanController::class, 'history'])->name('history');
+        Route::post('/sync-offline', [App\Http\Controllers\API\QRScanController::class, 'syncOffline'])->name('sync-offline');
+        Route::get('/{id}/info', [App\Http\Controllers\API\QRScanController::class, 'info'])->name('info');
+        Route::get('/{id}/has-scanned', [App\Http\Controllers\API\QRScanController::class, 'hasScanned'])->name('has-scanned');
+        Route::get('/active-service', [App\Http\Controllers\API\QRScanController::class, 'activeService'])->name('active-service');
+        Route::post('/{id}/report', [App\Http\Controllers\API\QRScanController::class, 'report'])->name('report');
+
+        // PWA Scanner endpoints (new)
+        Route::post('/process', [App\Http\Controllers\API\QRScanController::class, 'process'])->name('process');
+        Route::post('/batch-sync', [App\Http\Controllers\API\QRScanController::class, 'batchSync'])->name('batch-sync');
+        Route::get('/config', [App\Http\Controllers\API\QRScanController::class, 'config'])->name('config');
+        Route::post('/preview', [App\Http\Controllers\API\QRScanController::class, 'preview'])->name('preview');
     });
 });
 
@@ -354,6 +361,15 @@ Route::prefix('mobile/v1')->group(function () {
     Route::middleware(['auth:sanctum'])->group(function () {
         // Registration Status
         Route::get('/registration/status', [MobileRegistrationController::class, 'checkStatus']);
+
+        // Member Portal APIs
+        Route::get('/my/profile', [MemberController::class, 'getMyProfile']);
+        Route::put('/my/profile', [MemberController::class, 'updateMyProfile']);
+        Route::get('/my/attendance', [MemberController::class, 'getMyAttendance']);
+        Route::get('/my/contributions', [MemberController::class, 'getMyContributions']);
+        Route::get('/my/ministry-involvement', [MemberController::class, 'getMyMinistryInvolvement']);
+        Route::get('/my/family', [MemberController::class, 'getMyFamily']);
+        Route::get('/my/shepherd', [MemberController::class, 'getMyShepherd']);
 
         // QR Code Generation
         Route::get('/qr-code/personal', [MobileCheckInController::class, 'generatePersonalQr']);

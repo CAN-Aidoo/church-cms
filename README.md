@@ -250,10 +250,12 @@ php artisan serve
 Visit: `http://localhost:8000`
 
 **Default Admin Credentials**:
-- Email: `admin@churchcms.com`
-- Password: `Admin@123456`
+- Email: `admin@church.com`
+- Password: `password`
 
-⚠️ **Change the default password immediately after first login!**
+⚠️ **CRITICAL: Change the default password immediately after first login!**
+
+> 📖 For detailed security information and account management, see [docs/DEFAULT_CREDENTIALS.md](docs/DEFAULT_CREDENTIALS.md)
 
 ---
 

@@ -24,10 +24,10 @@ window.addEventListener('DOMContentLoaded', () => {
 
     if (token && user) {
         // User is authenticated, go to dashboard
-        window.location.href = '/mobile/dashboard';
+        window.location.href = '{{ url('/mobile/dashboard') }}';
     } else {
         // Not authenticated, go to login
-        window.location.href = '/mobile/login';
+        window.location.href = '{{ url('/mobile/login') }}';
     }
 });
 </script>

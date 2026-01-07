@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="h-full bg-slate-50">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0, viewport-fit=cover">
@@ -8,7 +8,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>@yield('title', config('app.name'))</title>
+    <title>@yield('title', config('app.name', 'Church App'))</title>
 
     <!-- PWA Manifest -->
     <link rel="manifest" href="{{ asset('manifest.json') }}">
@@ -20,55 +20,98 @@
         body {
             -webkit-tap-highlight-color: transparent;
             overscroll-behavior-y: none;
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
         }
-        .pb-safe {
-            padding-bottom: env(safe-area-inset-bottom);
-        }
-        .pt-safe {
-            padding-top: env(safe-area-inset-top);
-        }
-        /* Hide scrollbar for clean UI */
-        .no-scrollbar::-webkit-scrollbar {
-            display: none;
-        }
-        .no-scrollbar {
-            -ms-overflow-style: none;
-            scrollbar-width: none;
+        .pb-safe { padding-bottom: env(safe-area-inset-bottom); }
+        .pt-safe { padding-top: env(safe-area-inset-top); }
+        
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        
+        /* Glassmorphism utilities */
+        .glass {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
         }
     </style>
     @stack('styles')
 </head>
-<body class="bg-gray-50 text-gray-900 antialiased min-h-screen flex flex-col">
+<body class="bg-slate-50 text-slate-900 antialiased min-h-screen flex flex-col h-full selection:bg-blue-100 selection:text-blue-700">
     
+    <!-- Header (Optional per page) -->
+    @hasSection('header')
+    <header class="sticky top-0 z-40 glass border-b border-slate-200/50 pt-safe transition-all duration-200" id="main-header">
+        <div class="px-4 h-14 flex items-center justify-between">
+            <h1 class="font-bold text-lg text-slate-800 tracking-tight">@yield('header')</h1>
+            <div class="flex items-center gap-2">
+                @yield('header-actions')
+            </div>
+        </div>
+    </header>
+    @endif
+
     <!-- Main Content -->
-    <main class="flex-1 p-4 pt-safe">
+    <main class="flex-1 w-full max-w-md mx-auto relative @unless(View::hasSection('header')) pt-safe @endunless">
         @yield('content')
     </main>
 
-    <!-- Toast Container -->
-    <div id="toast-container" class="fixed top-4 left-4 right-4 z-50 flex flex-col gap-2 pointer-events-none"></div>
+    <!-- Toast Notification -->
+    <div x-data="{ 
+        show: false, 
+        message: '', 
+        type: 'success',
+        showToast(msg, type = 'success') {
+            this.message = msg;
+            this.type = type;
+            this.show = true;
+            setTimeout(() => this.show = false, 3000);
+        }
+    }" 
+    @notify.window="showToast($event.detail.message, $event.detail.type)"
+    class="fixed top-4 left-4 right-4 z-50 pointer-events-none flex justify-center pt-safe">
+        <div x-show="show" 
+             x-transition:enter="transform ease-out duration-300 transition"
+             x-transition:enter-start="translate-y-2 opacity-0 sm:translate-y-0 sm:translate-x-2"
+             x-transition:enter-end="translate-y-0 opacity-100 sm:translate-x-0"
+             x-transition:leave="transition ease-in duration-100"
+             x-transition:leave-start="opacity-100"
+             x-transition:leave-end="opacity-0"
+             class="pointer-events-auto rounded-xl shadow-lg p-3 px-4 flex items-center gap-3 min-w-[200px] max-w-sm"
+             :class="{
+                 'bg-emerald-600 text-white': type === 'success',
+                 'bg-rose-600 text-white': type === 'error',
+                 'bg-slate-800 text-white': type === 'info'
+             }">
+            <span x-text="message" class="text-sm font-medium"></span>
+        </div>
+    </div>
 
-    <!-- Scripts -->
+    <!-- Initialization Scripts -->
     <script>
-        // Set API base URLs from Laravel
         window.API_BASE_URL = '{{ url('/api/v1') }}';
         window.MOBILE_API_BASE_URL = '{{ url('/api/mobile/v1') }}';
     </script>
     <script src="{{ asset('js/mobile-app.js') }}"></script>
     <script>
-        // Initialize Mobile App
         document.addEventListener('DOMContentLoaded', () => {
-            window.app = new ChurchMobileApp();
-            
-            // Handle Toast from Session
+            // Initialize global app instance if needed
+            if(window.ChurchMobileApp) {
+                window.app = new ChurchMobileApp();
+            }
+
+            // Session Flash Messages
             @if(session('success'))
-                app.showToast("{{ session('success') }}", 'success');
+                window.dispatchEvent(new CustomEvent('notify', { detail: { message: "{{ session('success') }}", type: 'success' } }));
             @endif
             @if(session('error'))
-                app.showToast("{{ session('error') }}", 'error');
+                window.dispatchEvent(new CustomEvent('notify', { detail: { message: "{{ session('error') }}", type: 'error' } }));
             @endif
         });
     </script>
     @stack('scripts')
+
+    <!-- Bottom Navigation -->
+    @include('layouts.partials.mobile-nav')
 </body>
 </html>

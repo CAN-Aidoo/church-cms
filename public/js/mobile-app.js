@@ -33,7 +33,8 @@ class ChurchMobileApp {
 
     async registerServiceWorker() {
         try {
-            const registration = await navigator.serviceWorker.register('/sw.js');
+            const swPath = window.SW_PATH || '/sw.js';
+            const registration = await navigator.serviceWorker.register(swPath);
             console.log('Service Worker registered:', registration);
 
             // Check for updates

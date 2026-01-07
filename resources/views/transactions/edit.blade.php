@@ -3,63 +3,97 @@
 @section('title', 'Edit Transaction')
 
 @section('content')
-<div class="page-header">
+<div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
     <div>
-        <h1 class="page-title">Edit Transaction</h1>
-        <nav class="breadcrumb">
-            <a href="{{ route('dashboard') }}">Dashboard</a>
+        <div class="flex items-center gap-3">
+            <h1 class="text-2xl font-heading font-bold text-slate-900">Edit Transaction</h1>
+            <span class="px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-600 text-xs font-bold font-mono">
+                #{{ $transaction->id }}
+            </span>
+        </div>
+        <nav class="flex items-center gap-2 text-sm text-slate-500 mt-1">
+            <a href="{{ route('dashboard') }}" class="hover:text-primary-600 transition-colors">Dashboard</a>
             <span>/</span>
-            <a href="{{ route('transactions.index') }}">Transactions</a>
+            <a href="{{ route('transactions.index') }}" class="hover:text-primary-600 transition-colors">Transactions</a>
             <span>/</span>
-            <a href="{{ route('transactions.show', $transaction) }}">#{{ $transaction->id }}</a>
+            <a href="{{ route('transactions.show', $transaction) }}" class="hover:text-primary-600 transition-colors">Details</a>
             <span>/</span>
-            <span>Edit</span>
+            <span class="text-slate-800 font-medium">Edit</span>
         </nav>
     </div>
 </div>
 
-<form action="{{ route('transactions.update', $transaction) }}" method="POST" enctype="multipart/form-data" class="max-w-4xl">
+<form action="{{ route('transactions.update', $transaction) }}" method="POST" enctype="multipart/form-data" class="max-w-5xl mx-auto"
+      x-data="{ 
+          type: '{{ old('transaction_type', $transaction->transaction_type) }}',
+          init() {
+              // We do NOT want to reset category like the create page might
+              // Just ensure visibility is correct
+              this.updateVisibility();
+          },
+          updateVisibility() {
+              const income = document.getElementById('income-categories');
+              const expense = document.getElementById('expense-categories');
+              if (this.type === 'income') {
+                  income.style.display = '';
+                  expense.style.display = 'none';
+              } else if (this.type === 'expense') {
+                  income.style.display = 'none';
+                  expense.style.display = '';
+              } else {
+                  income.style.display = 'none';
+                  expense.style.display = 'none';
+              }
+          },
+          onChangeType() {
+             this.updateVisibility();
+             // Optionally clear category if type changes, but careful not to wipe it on init
+             // Since this is edit, user probably knows what they are doing.
+             // Let's reset the select to empty if they change type manually
+             document.getElementById('category').value = '';
+          }
+      }">
     @csrf
     @method('PUT')
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div class="lg:col-span-2 space-y-6">
             <!-- Transaction Details -->
-            <div class="card">
-                <div class="card-header">
-                    <h3 class="card-title">Transaction Details</h3>
+            <div class="card border border-slate-100">
+                <div class="px-6 py-4 border-b border-slate-100 bg-slate-50/50">
+                    <h3 class="font-bold text-slate-800 text-base">Transaction Details</h3>
                 </div>
-                <div class="card-body">
+                <div class="p-6">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
-                            <label for="transaction_date" class="form-label required">Transaction Date</label>
+                            <label for="transaction_date" class="form-label mb-1.5 block font-medium text-sm text-slate-700 required">Transaction Date</label>
                             <input type="date" id="transaction_date" name="transaction_date"
                                    value="{{ old('transaction_date', $transaction->transaction_date->format('Y-m-d')) }}"
-                                   class="form-input @error('transaction_date') form-input-error @enderror"
+                                   class="form-input w-full border-slate-200 focus:border-primary-500 focus:ring-primary-500 @error('transaction_date') border-red-500 @enderror"
                                    required>
                             @error('transaction_date')
-                            <p class="form-error">{{ $message }}</p>
+                            <p class="text-red-600 text-xs mt-1">{{ $message }}</p>
                             @enderror
                         </div>
 
                         <div>
-                            <label for="transaction_type" class="form-label required">Type</label>
+                            <label for="transaction_type" class="form-label mb-1.5 block font-medium text-sm text-slate-700 required">Type</label>
                             <select id="transaction_type" name="transaction_type"
-                                    class="form-select @error('transaction_type') form-input-error @enderror"
-                                    required x-data x-on:change="updateCategories($event.target.value)">
+                                    class="form-select w-full border-slate-200 focus:border-primary-500 focus:ring-primary-500 @error('transaction_type') border-red-500 @enderror"
+                                    required x-model="type" @change="onChangeType">
                                 <option value="">Select Type</option>
-                                <option value="income" {{ old('transaction_type', $transaction->transaction_type) === 'income' ? 'selected' : '' }}>Income</option>
-                                <option value="expense" {{ old('transaction_type', $transaction->transaction_type) === 'expense' ? 'selected' : '' }}>Expense</option>
+                                <option value="income">Income</option>
+                                <option value="expense">Expense</option>
                             </select>
                             @error('transaction_type')
-                            <p class="form-error">{{ $message }}</p>
+                            <p class="text-red-600 text-xs mt-1">{{ $message }}</p>
                             @enderror
                         </div>
 
                         <div>
-                            <label for="category" class="form-label required">Category</label>
+                            <label for="category" class="form-label mb-1.5 block font-medium text-sm text-slate-700 required">Category</label>
                             <select id="category" name="category"
-                                    class="form-select @error('category') form-input-error @enderror"
+                                    class="form-select w-full border-slate-200 focus:border-primary-500 focus:ring-primary-500 @error('category') border-red-500 @enderror"
                                     required>
                                 <option value="">Select Category</option>
                                 <optgroup label="Income Categories" id="income-categories" style="display:{{ old('transaction_type', $transaction->transaction_type) === 'income' ? 'block' : 'none' }};">
@@ -84,26 +118,29 @@
                                 </optgroup>
                             </select>
                             @error('category')
-                            <p class="form-error">{{ $message }}</p>
+                            <p class="text-red-600 text-xs mt-1">{{ $message }}</p>
                             @enderror
                         </div>
 
                         <div>
-                            <label for="amount" class="form-label required">Amount (GHS)</label>
-                            <input type="number" id="amount" name="amount"
-                                   value="{{ old('amount', $transaction->amount) }}"
-                                   step="0.01" min="0.01"
-                                   class="form-input @error('amount') form-input-error @enderror"
-                                   required>
+                            <label for="amount" class="form-label mb-1.5 block font-medium text-sm text-slate-700 required">Amount (GHS)</label>
+                            <div class="relative">
+                                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 font-medium">GHS</span>
+                                <input type="number" id="amount" name="amount"
+                                       value="{{ old('amount', $transaction->amount) }}"
+                                       step="0.01" min="0.01"
+                                       class="form-input w-full pl-12 border-slate-200 focus:border-primary-500 focus:ring-primary-500 @error('amount') border-red-500 @enderror"
+                                       required>
+                            </div>
                             @error('amount')
-                            <p class="form-error">{{ $message }}</p>
+                            <p class="text-red-600 text-xs mt-1">{{ $message }}</p>
                             @enderror
                         </div>
 
                         <div>
-                            <label for="payment_method" class="form-label required">Payment Method</label>
+                            <label for="payment_method" class="form-label mb-1.5 block font-medium text-sm text-slate-700 required">Payment Method</label>
                             <select id="payment_method" name="payment_method"
-                                    class="form-select @error('payment_method') form-input-error @enderror"
+                                    class="form-select w-full border-slate-200 focus:border-primary-500 focus:ring-primary-500 @error('payment_method') border-red-500 @enderror"
                                     required>
                                 <option value="">Select Method</option>
                                 <option value="cash" {{ old('payment_method', $transaction->payment_method) === 'cash' ? 'selected' : '' }}>Cash</option>
@@ -114,37 +151,37 @@
                                 <option value="other" {{ old('payment_method', $transaction->payment_method) === 'other' ? 'selected' : '' }}>Other</option>
                             </select>
                             @error('payment_method')
-                            <p class="form-error">{{ $message }}</p>
+                            <p class="text-red-600 text-xs mt-1">{{ $message }}</p>
                             @enderror
                         </div>
 
                         <div>
-                            <label for="reference_number" class="form-label">Reference Number</label>
+                            <label for="reference_number" class="form-label mb-1.5 block font-medium text-sm text-slate-700">Reference Number</label>
                             <input type="text" id="reference_number" name="reference_number"
                                    value="{{ old('reference_number', $transaction->reference_number) }}"
                                    placeholder="e.g., CHQ123456"
-                                   class="form-input @error('reference_number') form-input-error @enderror">
+                                   class="form-input w-full border-slate-200 focus:border-primary-500 focus:ring-primary-500 h-[42px] @error('reference_number') border-red-500 @enderror">
                             @error('reference_number')
-                            <p class="form-error">{{ $message }}</p>
+                            <p class="text-red-600 text-xs mt-1">{{ $message }}</p>
                             @enderror
                         </div>
 
                         <div class="md:col-span-2">
-                            <label for="description" class="form-label required">Description</label>
+                            <label for="description" class="form-label mb-1.5 block font-medium text-sm text-slate-700 required">Description</label>
                             <textarea id="description" name="description" rows="3"
-                                      class="form-textarea @error('description') form-input-error @enderror"
+                                      class="form-textarea w-full rounded-xl border-slate-200 focus:border-primary-500 focus:ring-primary-500 @error('description') border-red-500 @enderror"
                                       required>{{ old('description', $transaction->description) }}</textarea>
                             @error('description')
-                            <p class="form-error">{{ $message }}</p>
+                            <p class="text-red-600 text-xs mt-1">{{ $message }}</p>
                             @enderror
                         </div>
 
                         <div class="md:col-span-2">
-                            <label for="notes" class="form-label">Additional Notes</label>
+                            <label for="notes" class="form-label mb-1.5 block font-medium text-sm text-slate-700">Additional Notes</label>
                             <textarea id="notes" name="notes" rows="2"
-                                      class="form-textarea @error('notes') form-input-error @enderror">{{ old('notes', $transaction->notes) }}</textarea>
+                                      class="form-textarea w-full rounded-xl border-slate-200 focus:border-primary-500 focus:ring-primary-500 @error('notes') border-red-500 @enderror">{{ old('notes', $transaction->notes) }}</textarea>
                             @error('notes')
-                            <p class="form-error">{{ $message }}</p>
+                            <p class="text-red-600 text-xs mt-1">{{ $message }}</p>
                             @enderror
                         </div>
                     </div>
@@ -154,85 +191,82 @@
 
         <div class="space-y-6">
             <!-- Member Information -->
-            <div class="card">
-                <div class="card-header">
-                    <h3 class="card-title">Member (Optional)</h3>
+            <div class="card border border-slate-100">
+                <div class="px-6 py-4 border-b border-slate-100 bg-slate-50/50">
+                    <h3 class="font-bold text-slate-800 text-base">Member (Optional)</h3>
                 </div>
-                <div class="card-body">
+                <div class="p-6">
                     <div>
-                        <label for="member_id" class="form-label">Select Member</label>
+                        <label for="member_id" class="form-label mb-1.5 block font-medium text-sm text-slate-700">Select Member</label>
                         <select id="member_id" name="member_id"
-                                class="form-select @error('member_id') form-input-error @enderror">
+                                class="form-select w-full border-slate-200 focus:border-primary-500 focus:ring-primary-500 @error('member_id') border-red-500 @enderror">
                             <option value="">Anonymous/No Member</option>
                             @if($transaction->member)
                             <option value="{{ $transaction->member->id }}" selected>{{ $transaction->member->full_name }}</option>
                             @endif
                         </select>
                         @error('member_id')
-                        <p class="form-error">{{ $message }}</p>
+                        <p class="text-red-600 text-xs mt-1">{{ $message }}</p>
                         @enderror
-                        <p class="text-xs text-gray-500 mt-1">Leave blank for anonymous donations or general expenses</p>
+                        <p class="text-xs text-slate-500 mt-1.5">Leave blank for anonymous donations or general expenses</p>
                     </div>
                 </div>
             </div>
 
             <!-- Receipt Upload -->
-            <div class="card">
-                <div class="card-header">
-                    <h3 class="card-title">Receipt/Document</h3>
+            <div class="card border border-slate-100">
+                <div class="px-6 py-4 border-b border-slate-100 bg-slate-50/50">
+                    <h3 class="font-bold text-slate-800 text-base">Receipt/Document</h3>
                 </div>
-                <div class="card-body" x-data="{ fileName: '{{ $transaction->receipt_path ? basename($transaction->receipt_path) : '' }}' }">
+                <div class="p-6" x-data="{ fileName: '{{ $transaction->receipt_path ? basename($transaction->receipt_path) : '' }}' }">
                     @if($transaction->receipt_path)
-                    <div class="mb-4 p-3 bg-blue-50 border border-blue-200 rounded">
+                    <div class="mb-4 p-3 bg-secondary-50 border border-secondary-200 rounded-lg">
                         <div class="flex items-center justify-between">
-                            <div class="flex items-center gap-2">
-                                <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <div class="flex items-center gap-2 overflow-hidden">
+                                <svg class="w-5 h-5 text-secondary-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                                 </svg>
-                                <div>
-                                    <div class="text-sm font-medium text-blue-900">Current Receipt</div>
-                                    <div class="text-xs text-blue-700">{{ basename($transaction->receipt_path) }}</div>
+                                <div class="truncate">
+                                    <div class="text-xs font-semibold text-secondary-900 uppercase">Current Receipt</div>
+                                    <div class="text-xs text-secondary-700 truncate" title="{{ basename($transaction->receipt_path) }}">{{ basename($transaction->receipt_path) }}</div>
                                 </div>
                             </div>
                             <a href="{{ Storage::url($transaction->receipt_path) }}" target="_blank"
-                               class="text-blue-600 hover:text-blue-800">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
-                                </svg>
+                               class="text-secondary-600 hover:text-secondary-800 p-1 rounded hover:bg-secondary-100 transition-colors">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
                             </a>
                         </div>
                     </div>
-                    <p class="text-sm text-gray-600 mb-3">Upload a new file to replace the current receipt</p>
+                    <p class="text-xs text-slate-500 mb-3 font-medium">Upload a new file to replace the current receipt</p>
                     @endif
 
-                    <input type="file" id="receipt" name="receipt"
-                           accept=".pdf,.jpg,.jpeg,.png"
-                           class="hidden"
-                           @change="fileName = $event.target.files[0]?.name || ''">
-                    <label for="receipt" class="btn btn-outline w-full cursor-pointer justify-center">
-                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
-                        </svg>
-                        <span x-text="fileName || 'Upload {{ $transaction->receipt_path ? 'New' : '' }} Receipt'"></span>
-                    </label>
+                    <div class="flex items-center justify-center w-full">
+                        <label for="receipt" class="flex flex-col items-center justify-center w-full h-32 border-2 border-slate-300 border-dashed rounded-lg cursor-pointer bg-slate-50 hover:bg-slate-100 transition-colors">
+                            <div class="flex flex-col items-center justify-center pt-5 pb-6">
+                                <svg class="w-8 h-8 mb-3 text-slate-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 16">
+                                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2"/>
+                                </svg>
+                                <p class="mb-2 text-sm text-slate-500" x-show="!fileName"><span class="font-semibold">Click to upload</span> or drag and drop</p>
+                                <p class="mb-2 text-sm text-slate-700 font-medium truncate px-4 w-full text-center" x-show="fileName" x-text="fileName"></p>
+                                <p class="text-xs text-slate-500">PDF, JPG, PNG (MAX. 2MB)</p>
+                            </div>
+                            <input id="receipt" name="receipt" type="file" class="hidden" accept=".pdf,.jpg,.jpeg,.png" @change="fileName = $event.target.files[0]?.name || ''" />
+                        </label>
+                    </div> 
                     @error('receipt')
-                    <p class="form-error mt-2">{{ $message }}</p>
+                    <p class="text-red-600 text-xs mt-2">{{ $message }}</p>
                     @enderror
-                    <p class="text-xs text-gray-500 mt-2">PDF, JPG, PNG up to 2MB</p>
                 </div>
             </div>
 
             <!-- Actions -->
-            <div class="card">
-                <div class="card-body space-y-3">
-                    <button type="submit" class="btn btn-primary w-full">
-                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                        </svg>
+            <div class="card border border-slate-100">
+                <div class="p-6 space-y-3">
+                    <button type="submit" class="btn btn-primary w-full shadow-lg shadow-primary-500/30">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
                         Update Transaction
                     </button>
-                    <a href="{{ route('transactions.show', $transaction) }}" class="btn btn-secondary w-full">
+                    <a href="{{ route('transactions.show', $transaction) }}" class="btn bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 hover:text-slate-900 w-full justify-center">
                         Cancel
                     </a>
                 </div>
@@ -240,36 +274,4 @@
         </div>
     </div>
 </form>
-
-@endsection
-
-@section('scripts')
-<script>
-function updateCategories(type) {
-    const incomeCategories = document.getElementById('income-categories');
-    const expenseCategories = document.getElementById('expense-categories');
-    const categorySelect = document.getElementById('category');
-
-    categorySelect.value = '';
-
-    if (type === 'income') {
-        incomeCategories.style.display = 'block';
-        expenseCategories.style.display = 'none';
-    } else if (type === 'expense') {
-        incomeCategories.style.display = 'none';
-        expenseCategories.style.display = 'block';
-    } else {
-        incomeCategories.style.display = 'none';
-        expenseCategories.style.display = 'none';
-    }
-}
-
-// Initialize on page load
-document.addEventListener('DOMContentLoaded', function() {
-    const transactionType = document.getElementById('transaction_type').value;
-    if (transactionType) {
-        updateCategories(transactionType);
-    }
-});
-</script>
 @endsection

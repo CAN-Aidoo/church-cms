@@ -66,6 +66,9 @@ class Member extends Model
         'spouse_id',
         'shepherd_id',
         'created_by',
+        'member_qr_code',
+        'last_qr_scan',
+        'qr_scan_count',
     ];
 
     /**
@@ -84,6 +87,7 @@ class Member extends Model
         'spiritual_gifts' => 'array',
         'ministry_involvement' => 'array',
         'custom_fields' => 'array',
+        'last_qr_scan' => 'datetime',
     ];
 
     /**

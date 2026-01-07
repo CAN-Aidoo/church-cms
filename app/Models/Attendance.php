@@ -30,6 +30,8 @@ class Attendance extends Model
         'notes',
         'recorded_by',
         'recorded_at',
+        'check_in_method',
+        'qr_code_id',
     ];
 
     /**
@@ -56,6 +58,14 @@ class Attendance extends Model
     public function recorder(): BelongsTo
     {
         return $this->belongsTo(User::class, 'recorded_by');
+    }
+
+    /**
+     * Get the QR code used for this attendance.
+     */
+    public function qrCode(): BelongsTo
+    {
+        return $this->belongsTo(QRCode::class, 'qr_code_id');
     }
 
     /**

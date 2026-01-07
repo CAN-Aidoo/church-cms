@@ -3,44 +3,36 @@
 @section('title', 'Audit Logs')
 
 @section('content')
-<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-    <!-- Page Header -->
-    <div class="mb-8 flex items-center justify-between">
+<div class="container mx-auto px-4 py-8 max-w-7xl">
+    <!-- Header -->
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
         <div>
-            <h1 class="text-3xl font-bold text-gray-900">Audit Logs</h1>
-            <p class="mt-2 text-sm text-gray-600">Track all system activities and changes</p>
+            <h1 class="text-2xl font-bold text-slate-800 tracking-tight">Audit Logs</h1>
+            <p class="text-slate-500 mt-1">Monitor system activity and changes.</p>
         </div>
-        <a href="{{ route('settings.index') }}" class="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors">
+        <a href="{{ route('settings.index') }}" class="px-5 py-2.5 bg-white border border-slate-300 rounded-lg text-slate-700 hover:bg-slate-50 transition-all font-bold text-sm shadow-sm flex items-center gap-2">
+            <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
             Back to Settings
         </a>
     </div>
 
-    <!-- Filters -->
-    <div class="mb-6 bg-white rounded-lg shadow-sm p-6">
-        <form action="{{ route('settings.audit-logs') }}" method="GET" class="space-y-4">
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <!-- User Filter -->
-                <div>
-                    <label for="user_id" class="block text-sm font-medium text-gray-700 mb-2">User</label>
-                    <select id="user_id"
-                            name="user_id"
-                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+    <!-- Toolbar -->
+    <div class="card border border-slate-100 shadow-sm mb-8 overflow-hidden">
+        <div class="p-6 bg-slate-50/50 border-b border-slate-100">
+             <form action="{{ route('settings.audit-logs') }}" method="GET" class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                 <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1">User</label>
+                    <select name="user_id" class="form-select w-full rounded-lg border-slate-200 focus:border-primary-500 focus:ring-primary-500">
                         <option value="">All Users</option>
                         @foreach($users as $user)
-                            <option value="{{ $user->id }}" {{ request('user_id') == $user->id ? 'selected' : '' }}>
-                                {{ $user->name }}
-                            </option>
+                             <option value="{{ $user->id }}" {{ request('user_id') == $user->id ? 'selected' : '' }}>{{ $user->name }}</option>
                         @endforeach
                     </select>
                 </div>
-
-                <!-- Action Filter -->
                 <div>
-                    <label for="action" class="block text-sm font-medium text-gray-700 mb-2">Action</label>
-                    <select id="action"
-                            name="action"
-                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                        <option value="">All Actions</option>
+                     <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1">Action Type</label>
+                    <select name="action" class="form-select w-full rounded-lg border-slate-200 focus:border-primary-500 focus:ring-primary-500">
+                         <option value="">All Actions</option>
                         <option value="created" {{ request('action') == 'created' ? 'selected' : '' }}>Created</option>
                         <option value="updated" {{ request('action') == 'updated' ? 'selected' : '' }}>Updated</option>
                         <option value="deleted" {{ request('action') == 'deleted' ? 'selected' : '' }}>Deleted</option>
@@ -48,228 +40,159 @@
                         <option value="logout" {{ request('action') == 'logout' ? 'selected' : '' }}>Logout</option>
                     </select>
                 </div>
-
-                <!-- Date From -->
                 <div>
-                    <label for="date_from" class="block text-sm font-medium text-gray-700 mb-2">Date From</label>
-                    <input type="date"
-                           id="date_from"
-                           name="date_from"
-                           value="{{ request('date_from') }}"
-                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                     <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1">From Date</label>
+                    <input type="date" name="date_from" value="{{ request('date_from') }}" class="form-input w-full rounded-lg border-slate-200 focus:border-primary-500 focus:ring-primary-500">
                 </div>
-
-                <!-- Date To -->
-                <div>
-                    <label for="date_to" class="block text-sm font-medium text-gray-700 mb-2">Date To</label>
-                    <input type="date"
-                           id="date_to"
-                           name="date_to"
-                           value="{{ request('date_to') }}"
-                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                </div>
-            </div>
-
-            <!-- Filter Actions -->
-            <div class="flex items-center justify-between pt-4 border-t border-gray-200">
-                <div class="text-sm text-gray-600">
-                    Showing {{ $logs->firstItem() ?? 0 }} to {{ $logs->lastItem() ?? 0 }} of {{ $logs->total() }} logs
-                </div>
-                <div class="flex gap-2">
-                    <a href="{{ route('settings.audit-logs') }}" class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors">
-                        Reset Filters
-                    </a>
-                    <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                 <div class="flex items-end gap-2">
+                    <button type="submit" class="flex-1 px-4 py-2.5 bg-slate-800 text-white rounded-lg hover:bg-slate-900 font-bold text-sm shadow-sm transition-colors">
                         Apply Filters
                     </button>
+                    @if(request()->anyFilled(['user_id', 'action', 'date_from', 'date_to']))
+                     <a href="{{ route('settings.audit-logs') }}" class="px-4 py-2.5 bg-white border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 font-bold text-sm transition-colors text-center">
+                        Reset
+                    </a>
+                    @endif
                 </div>
-            </div>
-        </form>
-    </div>
-
-    <!-- Audit Logs Table -->
-    <div class="bg-white rounded-lg shadow-sm overflow-hidden">
+            </form>
+        </div>
+        
         <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-gray-200">
-                <thead class="bg-gray-50">
+            <table class="w-full">
+                <thead class="bg-slate-50/50 border-b border-slate-100/50">
                     <tr>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Timestamp</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Action</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Resource</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">IP Address</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Details</th>
+                         <th class="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Timestamp</th>
+                         <th class="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">User</th>
+                         <th class="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Event</th>
+                         <th class="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Resource</th>
+                         <th class="px-6 py-3 text-right text-xs font-bold text-slate-500 uppercase tracking-wider">Details</th>
                     </tr>
                 </thead>
-                <tbody class="bg-white divide-y divide-gray-200">
+                <tbody class="divide-y divide-slate-50 bg-white">
                     @forelse($logs as $log)
-                        <tr class="hover:bg-gray-50">
-                            <!-- Timestamp -->
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                <div>{{ $log->created_at->format('M d, Y') }}</div>
-                                <div class="text-xs text-gray-500">{{ $log->created_at->format('h:i A') }}</div>
-                            </td>
-
-                            <!-- User -->
+                        <tr class="hover:bg-slate-50 transition-colors">
                             <td class="px-6 py-4 whitespace-nowrap">
-                                @if($log->user)
-                                    <div class="flex items-center">
-                                        <div class="flex-shrink-0 h-8 w-8 bg-blue-600 rounded-full flex items-center justify-center text-white text-sm font-medium">
+                                <div class="text-sm font-bold text-slate-800">{{ $log->created_at->format('M d, Y') }}</div>
+                                <div class="text-xs text-slate-500 font-mono">{{ $log->created_at->format('H:i:s') }}</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                 @if($log->user)
+                                    <div class="flex items-center gap-2">
+                                        <div class="w-6 h-6 rounded-full bg-slate-100 flex items-center justify-center text-[10px] font-bold text-slate-600">
                                             {{ substr($log->user->name, 0, 1) }}
                                         </div>
-                                        <div class="ml-3">
-                                            <div class="text-sm font-medium text-gray-900">{{ $log->user->name }}</div>
-                                            <div class="text-xs text-gray-500">{{ ucfirst($log->user->role) }}</div>
-                                        </div>
+                                         <span class="text-sm text-slate-700 font-medium">{{ $log->user->name }}</span>
                                     </div>
                                 @else
-                                    <span class="text-sm text-gray-500">System</span>
+                                    <span class="px-2 py-0.5 rounded bg-slate-100 text-slate-500 text-xs font-bold">System</span>
                                 @endif
+                                <div class="text-[10px] text-slate-400 mt-0.5 pl-8">{{ $log->ip_address ?? 'IP hidden' }}</div>
                             </td>
-
-                            <!-- Action -->
                             <td class="px-6 py-4 whitespace-nowrap">
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
-                                    {{ $log->action === 'created' ? 'bg-green-100 text-green-800' : '' }}
-                                    {{ $log->action === 'updated' ? 'bg-blue-100 text-blue-800' : '' }}
-                                    {{ $log->action === 'deleted' ? 'bg-red-100 text-red-800' : '' }}
-                                    {{ $log->action === 'login' ? 'bg-purple-100 text-purple-800' : '' }}
-                                    {{ $log->action === 'logout' ? 'bg-gray-100 text-gray-800' : '' }}
-                                    {{ !in_array($log->action, ['created', 'updated', 'deleted', 'login', 'logout']) ? 'bg-yellow-100 text-yellow-800' : '' }}">
+                                <span class="px-2.5 py-1 rounded-full text-xs font-bold border
+                                    {{ $log->action === 'created' ? 'bg-emerald-50 text-emerald-700 border-emerald-100' : '' }}
+                                    {{ $log->action === 'updated' ? 'bg-blue-50 text-blue-700 border-blue-100' : '' }}
+                                    {{ $log->action === 'deleted' ? 'bg-rose-50 text-rose-700 border-rose-100' : '' }}
+                                    {{ in_array($log->action, ['login', 'logout']) ? 'bg-slate-100 text-slate-700 border-slate-200' : '' }}">
                                     {{ ucfirst($log->action) }}
                                 </span>
                             </td>
-
-                            <!-- Resource -->
-                            <td class="px-6 py-4">
-                                <div class="text-sm text-gray-900">{{ class_basename($log->auditable_type) }}</div>
-                                @if($log->auditable_id)
-                                    <div class="text-xs text-gray-500">ID: {{ $log->auditable_id }}</div>
-                                @endif
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm text-slate-700 font-medium">{{ class_basename($log->auditable_type) }}</div>
+                                <div class="text-xs text-slate-400 font-mono">ID: {{ $log->auditable_id ?? '-' }}</div>
                             </td>
-
-                            <!-- IP Address -->
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                {{ $log->ip_address ?? 'N/A' }}
-                            </td>
-
-                            <!-- Details -->
-                            <td class="px-6 py-4">
-                                <button type="button"
-                                        @click="$dispatch('open-modal', { log: {{ json_encode($log) }} })"
-                                        class="text-blue-600 hover:text-blue-800 text-sm font-medium">
-                                    View Details
+                            <td class="px-6 py-4 whitespace-nowrap text-right">
+                                <button type="button" @click="$dispatch('open-audit-modal', { log: {{ json_encode($log) }} })" class="text-xs font-bold text-primary-600 hover:text-primary-700 hover:underline">
+                                    View Data
                                 </button>
                             </td>
                         </tr>
                     @empty
-                        <tr>
-                            <td colspan="6" class="px-6 py-12 text-center">
-                                <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                                </svg>
-                                <h3 class="mt-2 text-sm font-medium text-gray-900">No audit logs found</h3>
-                                <p class="mt-1 text-sm text-gray-500">Try adjusting your filters or check back later.</p>
+                         <tr>
+                            <td colspan="5" class="px-6 py-12 text-center text-slate-400">
+                                <p class="text-sm">No log entries found matching criteria.</p>
                             </td>
                         </tr>
                     @endforelse
                 </tbody>
             </table>
         </div>
-
-        <!-- Pagination -->
         @if($logs->hasPages())
-            <div class="px-6 py-4 border-t border-gray-200">
-                {{ $logs->links() }}
-            </div>
-        @endif
-    </div>
-
-    <!-- Information Card -->
-    <div class="mt-8 bg-blue-50 border border-blue-200 rounded-lg p-6">
-        <div class="flex items-start">
-            <svg class="w-6 h-6 text-blue-600 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
-            </svg>
-            <div class="ml-3">
-                <h4 class="text-sm font-medium text-blue-800">About Audit Logs</h4>
-                <div class="mt-2 text-sm text-blue-700">
-                    <p>Audit logs track all important activities in the system including:</p>
-                    <ul class="list-disc list-inside mt-2 space-y-1">
-                        <li>User authentication (logins and logouts)</li>
-                        <li>Data creation, updates, and deletions</li>
-                        <li>Configuration changes</li>
-                        <li>Permission and role modifications</li>
-                    </ul>
-                    <p class="mt-2">Logs are retained for compliance and security purposes. Only administrators can access this information.</p>
-                </div>
-            </div>
+        <div class="px-6 py-4 border-t border-slate-50 bg-slate-50/30">
+            {{ $logs->links() }}
         </div>
+        @endif
     </div>
 </div>
 
-<!-- Log Details Modal -->
-<div x-data="{ open: false, currentLog: null }"
-     @open-modal.window="open = true; currentLog = $event.detail.log"
+<!-- Details Modal -->
+<div x-data="{ open: false, log: null }"
+     @open-audit-modal.window="open = true; log = $event.detail.log"
      @keydown.escape.window="open = false"
      x-show="open"
-     class="fixed inset-0 z-50 overflow-y-auto"
+     class="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6"
      style="display: none;">
-    <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
-        <!-- Background overlay -->
-        <div x-show="open"
-             @click="open = false"
-             x-transition:enter="ease-out duration-300"
-             x-transition:enter-start="opacity-0"
-             x-transition:enter-end="opacity-100"
-             x-transition:leave="ease-in duration-200"
-             x-transition:leave-start="opacity-100"
-             x-transition:leave-end="opacity-0"
-             class="fixed inset-0 transition-opacity bg-gray-500 bg-opacity-75"></div>
+    
+    <div x-show="open" x-transition.opacity class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" @click="open = false"></div>
 
-        <!-- Modal panel -->
-        <div x-show="open"
-             x-transition:enter="ease-out duration-300"
-             x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-             x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
-             x-transition:leave="ease-in duration-200"
-             x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
-             x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-             class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full">
-            <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-                <div class="sm:flex sm:items-start">
-                    <div class="mt-3 text-center sm:mt-0 sm:text-left w-full">
-                        <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">
-                            Audit Log Details
-                        </h3>
-                        <div class="mt-2 space-y-4" x-show="currentLog">
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700">Timestamp</label>
-                                <p class="mt-1 text-sm text-gray-900" x-text="currentLog ? new Date(currentLog.created_at).toLocaleString() : ''"></p>
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700">User Agent</label>
-                                <p class="mt-1 text-sm text-gray-900 break-all" x-text="currentLog?.user_agent || 'N/A'"></p>
-                            </div>
-                            <div x-show="currentLog?.old_values">
-                                <label class="block text-sm font-medium text-gray-700">Old Values</label>
-                                <pre class="mt-1 text-xs text-gray-900 bg-gray-50 p-3 rounded overflow-x-auto" x-text="currentLog?.old_values ? JSON.stringify(currentLog.old_values, null, 2) : 'N/A'"></pre>
-                            </div>
-                            <div x-show="currentLog?.new_values">
-                                <label class="block text-sm font-medium text-gray-700">New Values</label>
-                                <pre class="mt-1 text-xs text-gray-900 bg-gray-50 p-3 rounded overflow-x-auto" x-text="currentLog?.new_values ? JSON.stringify(currentLog.new_values, null, 2) : 'N/A'"></pre>
-                            </div>
-                        </div>
+    <div x-show="open" 
+         x-transition:enter="transition ease-out duration-300"
+         x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+         x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
+         x-transition:leave="transition ease-in duration-200"
+         x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
+         x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+         class="relative bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh]">
+        
+        <div class="px-6 py-4 border-b border-slate-100 bg-slate-50 flex justify-between items-center flex-shrink-0">
+            <div>
+                <h3 class="font-bold text-lg text-slate-800">Change Details</h3>
+                <p class="text-xs text-slate-500">Recorded on <span x-text="log ? new Date(log.created_at).toLocaleString() : ''"></span></p>
+            </div>
+            <button @click="open = false" class="text-slate-400 hover:text-slate-600 transition-colors">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+            </button>
+        </div>
+        
+        <div class="p-6 overflow-y-auto" x-show="log">
+            <div class="space-y-6">
+                 <!-- Metadata -->
+                <div class="grid grid-cols-2 gap-4 text-sm">
+                    <div class="p-3 bg-slate-50 rounded-lg border border-slate-100">
+                        <span class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1">User Agent</span>
+                        <div class="text-slate-700 break-all text-xs" x-text="log ? log.user_agent : 'N/A'"></div>
+                    </div>
+                     <div class="p-3 bg-slate-50 rounded-lg border border-slate-100">
+                        <span class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1">IP Address</span>
+                        <div class="text-slate-700 font-mono text-xs" x-text="log ? log.ip_address : 'N/A'"></div>
                     </div>
                 </div>
+
+                <!-- Changes -->
+                <div x-show="log && log.old_values" class="space-y-2">
+                    <h4 class="text-sm font-bold text-rose-700 flex items-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4" /></svg>
+                        Old Values
+                    </h4>
+                    <pre class="bg-rose-50 text-rose-900 text-xs font-mono p-4 rounded-lg border border-rose-100 overflow-x-auto" x-text="JSON.stringify(log.old_values, null, 2)"></pre>
+                </div>
+
+                 <div x-show="log && log.new_values" class="space-y-2">
+                    <h4 class="text-sm font-bold text-emerald-700 flex items-center gap-2">
+                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
+                        New Values
+                    </h4>
+                    <pre class="bg-emerald-50 text-emerald-900 text-xs font-mono p-4 rounded-lg border border-emerald-100 overflow-x-auto" x-text="JSON.stringify(log.new_values, null, 2)"></pre>
+                </div>
+                
+                 <div x-show="log && !log.old_values && !log.new_values" class="text-center py-8 text-slate-400">
+                    <p class="text-sm">No data changes recorded for this event.</p>
+                </div>
             </div>
-            <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
-                <button type="button"
-                        @click="open = false"
-                        class="w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:ml-3 sm:w-auto sm:text-sm">
-                    Close
-                </button>
-            </div>
+        </div>
+
+        <div class="px-6 py-4 border-t border-slate-100 bg-slate-50 flex justify-end flex-shrink-0">
+             <button @click="open = false" class="px-4 py-2 bg-white border border-slate-300 rounded-lg text-slate-700 font-bold text-sm shadow-sm hover:bg-slate-50">Close</button>
         </div>
     </div>
 </div>

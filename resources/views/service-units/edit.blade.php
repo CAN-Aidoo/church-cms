@@ -3,38 +3,54 @@
 @section('title', 'Edit Service Unit')
 
 @section('content')
-<div class="container mx-auto px-4 py-6 max-w-4xl">
+<div class="container mx-auto px-4 py-8 max-w-5xl">
     <!-- Header -->
-    <div class="mb-6">
-        <div class="flex items-center gap-3 mb-2">
-            <a href="{{ route('service-units.show', $serviceUnit) }}" class="text-gray-600 hover:text-gray-900">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                </svg>
-            </a>
-            <h1 class="text-3xl font-bold text-gray-900">Edit Service Unit</h1>
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+        <div>
+            <div class="flex items-center gap-3 mb-2">
+                <a href="{{ route('service-units.show', $serviceUnit) }}" class="text-slate-500 hover:text-primary-600 transition-colors">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                    </svg>
+                </a>
+                <h1 class="text-2xl font-bold text-slate-800">Edit Service Unit</h1>
+            </div>
+            <p class="text-slate-600">Update details for <span class="font-medium text-slate-900">{{ $serviceUnit->name }}</span></p>
         </div>
-        <p class="text-gray-600">Update {{ $serviceUnit->name }} details</p>
+        <div class="flex gap-3">
+             <a href="{{ route('service-units.show', $serviceUnit) }}" 
+               class="inline-flex items-center px-4 py-2 bg-white border border-slate-300 rounded-lg text-slate-700 hover:bg-slate-50 hover:border-slate-400 transition-all shadow-sm font-medium text-sm">
+                Cancel
+            </a>
+            <button type="submit" form="edit-form"
+                    class="inline-flex items-center px-4 py-2 bg-gradient-to-r from-primary-600 to-primary-700 hover:from-primary-700 hover:to-primary-800 text-white rounded-lg shadow-sm hover:shadow-md transition-all font-medium text-sm">
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                </svg>
+                Save Changes
+            </button>
+        </div>
     </div>
 
     <!-- Form -->
-    <form action="{{ route('service-units.update', $serviceUnit) }}" method="POST" class="space-y-6">
+    <form id="edit-form" action="{{ route('service-units.update', $serviceUnit) }}" method="POST" class="space-y-8">
         @csrf
         @method('PUT')
 
         <!-- Basic Information -->
-        <div class="bg-white rounded-lg shadow-md p-6">
-            <h2 class="text-xl font-bold text-gray-900 mb-4">Basic Information</h2>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="card border border-slate-100 shadow-sm">
+            <div class="px-6 py-4 border-b border-slate-100 bg-slate-50/50">
+                <h3 class="font-bold text-slate-800 text-base">Basic Information</h3>
+            </div>
+            <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
                 <!-- Unit Name -->
                 <div class="md:col-span-2">
-                    <label for="name" class="block text-sm font-medium text-gray-700 mb-2">
-                        Unit Name <span class="text-red-500">*</span>
+                    <label for="name" class="form-label mb-1.5 block font-medium text-sm text-slate-700 required">
+                        Unit Name
                     </label>
                     <input type="text" name="name" id="name" value="{{ old('name', $serviceUnit->name) }}"
-                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('name') border-red-500 @enderror"
-                           placeholder="e.g., Ushering Unit, Choir, Technical Team" required>
+                           class="form-input w-full border-slate-200 focus:border-primary-500 focus:ring-primary-500 rounded-lg"
+                           placeholder="e.g. Ushering Unit, Choir, Technical Team" required>
                     @error('name')
                     <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                     @enderror
@@ -42,25 +58,25 @@
 
                 <!-- Unit Code -->
                 <div>
-                    <label for="code" class="block text-sm font-medium text-gray-700 mb-2">
-                        Unit Code <span class="text-red-500">*</span>
+                    <label for="code" class="form-label mb-1.5 block font-medium text-sm text-slate-700 required">
+                        Unit Code
                     </label>
                     <input type="text" name="code" id="code" value="{{ old('code', $serviceUnit->code) }}"
-                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('code') border-red-500 @enderror"
-                           placeholder="e.g., USH-001, CHR-001" required>
+                           class="form-input w-full border-slate-200 focus:border-primary-500 focus:ring-primary-500 rounded-lg uppercase"
+                           placeholder="e.g. USH-001" required>
+                    <p class="mt-1 text-xs text-slate-500">Unique identifier for this unit</p>
                     @error('code')
                     <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                     @enderror
-                    <p class="mt-1 text-xs text-gray-500">Unique identifier for this unit</p>
                 </div>
 
                 <!-- Category -->
                 <div>
-                    <label for="category" class="block text-sm font-medium text-gray-700 mb-2">
-                        Category <span class="text-red-500">*</span>
+                    <label for="category" class="form-label mb-1.5 block font-medium text-sm text-slate-700 required">
+                        Category
                     </label>
                     <select name="category" id="category"
-                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('category') border-red-500 @enderror"
+                            class="form-select w-full border-slate-200 focus:border-primary-500 focus:ring-primary-500 rounded-lg"
                             required>
                         <option value="">Select Category</option>
                         <option value="music" {{ old('category', $serviceUnit->category) === 'music' ? 'selected' : '' }}>Music</option>
@@ -79,11 +95,11 @@
 
                 <!-- Status -->
                 <div class="md:col-span-2">
-                    <label for="status" class="block text-sm font-medium text-gray-700 mb-2">
-                        Status <span class="text-red-500">*</span>
+                    <label for="status" class="form-label mb-1.5 block font-medium text-sm text-slate-700 required">
+                        Status
                     </label>
                     <select name="status" id="status"
-                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('status') border-red-500 @enderror"
+                            class="form-select w-full border-slate-200 focus:border-primary-500 focus:ring-primary-500 rounded-lg"
                             required>
                         <option value="active" {{ old('status', $serviceUnit->status) === 'active' ? 'selected' : '' }}>Active</option>
                         <option value="inactive" {{ old('status', $serviceUnit->status) === 'inactive' ? 'selected' : '' }}>Inactive</option>
@@ -96,11 +112,11 @@
 
                 <!-- Description -->
                 <div class="md:col-span-2">
-                    <label for="description" class="block text-sm font-medium text-gray-700 mb-2">
+                    <label for="description" class="form-label mb-1.5 block font-medium text-sm text-slate-700">
                         Description
                     </label>
                     <textarea name="description" id="description" rows="3"
-                              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('description') border-red-500 @enderror"
+                              class="form-textarea w-full border-slate-200 focus:border-primary-500 focus:ring-primary-500 rounded-lg"
                               placeholder="Brief description of the unit's purpose and activities">{{ old('description', $serviceUnit->description) }}</textarea>
                     @error('description')
                     <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
@@ -110,17 +126,18 @@
         </div>
 
         <!-- Leadership -->
-        <div class="bg-white rounded-lg shadow-md p-6">
-            <h2 class="text-xl font-bold text-gray-900 mb-4">Leadership</h2>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="card border border-slate-100 shadow-sm">
+            <div class="px-6 py-4 border-b border-slate-100 bg-slate-50/50">
+                <h3 class="font-bold text-slate-800 text-base">Leadership</h3>
+            </div>
+            <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
                 <!-- Leader -->
                 <div>
-                    <label for="leader_id" class="block text-sm font-medium text-gray-700 mb-2">
+                    <label for="leader_id" class="form-label mb-1.5 block font-medium text-sm text-slate-700">
                         Unit Leader
                     </label>
                     <select name="leader_id" id="leader_id"
-                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('leader_id') border-red-500 @enderror">
+                            class="form-select w-full border-slate-200 focus:border-primary-500 focus:ring-primary-500 rounded-lg">
                         <option value="">Select Leader</option>
                         @foreach($availableMembers as $member)
                         <option value="{{ $member->id }}" {{ old('leader_id', $serviceUnit->leader_id) == $member->id ? 'selected' : '' }}>
@@ -135,11 +152,11 @@
 
                 <!-- Assistant Leader -->
                 <div>
-                    <label for="assistant_leader_id" class="block text-sm font-medium text-gray-700 mb-2">
+                    <label for="assistant_leader_id" class="form-label mb-1.5 block font-medium text-sm text-slate-700">
                         Assistant Leader
                     </label>
                     <select name="assistant_leader_id" id="assistant_leader_id"
-                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('assistant_leader_id') border-red-500 @enderror">
+                            class="form-select w-full border-slate-200 focus:border-primary-500 focus:ring-primary-500 rounded-lg">
                         <option value="">Select Assistant Leader</option>
                         @foreach($availableMembers as $member)
                         <option value="{{ $member->id }}" {{ old('assistant_leader_id', $serviceUnit->assistant_leader_id) == $member->id ? 'selected' : '' }}>
@@ -154,60 +171,63 @@
             </div>
         </div>
 
-        <!-- Capacity Settings -->
-        <div class="bg-white rounded-lg shadow-md p-6">
-            <h2 class="text-xl font-bold text-gray-900 mb-4">Capacity Settings</h2>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- Capacity & Schedule -->
+        <div class="card border border-slate-100 shadow-sm">
+            <div class="px-6 py-4 border-b border-slate-100 bg-slate-50/50">
+                <h3 class="font-bold text-slate-800 text-base">Capacity & Schedule</h3>
+            </div>
+            <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
                 <!-- Minimum Members -->
                 <div>
-                    <label for="min_members" class="block text-sm font-medium text-gray-700 mb-2">
-                        Minimum Members <span class="text-red-500">*</span>
+                    <label for="min_members" class="form-label mb-1.5 block font-medium text-sm text-slate-700 required">
+                        Minimum Members
                     </label>
                     <input type="number" name="min_members" id="min_members" value="{{ old('min_members', $serviceUnit->min_members) }}"
                            min="1" max="50"
-                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('min_members') border-red-500 @enderror"
+                           class="form-input w-full border-slate-200 focus:border-primary-500 focus:ring-primary-500 rounded-lg"
                            required>
+                    <p class="mt-1 text-xs text-slate-500">Minimum needed for unit to function</p>
                     @error('min_members')
                     <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                     @enderror
-                    <p class="mt-1 text-xs text-gray-500">Minimum members needed for unit to function</p>
                 </div>
 
                 <!-- Maximum Members -->
                 <div>
-                    <label for="max_members" class="block text-sm font-medium text-gray-700 mb-2">
-                        Maximum Members <span class="text-red-500">*</span>
+                    <label for="max_members" class="form-label mb-1.5 block font-medium text-sm text-slate-700 required">
+                        Maximum Members
                     </label>
                     <input type="number" name="max_members" id="max_members" value="{{ old('max_members', $serviceUnit->max_members) }}"
                            min="1" max="100"
-                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('max_members') border-red-500 @enderror"
+                           class="form-input w-full border-slate-200 focus:border-primary-500 focus:ring-primary-500 rounded-lg"
                            required>
+                    <p class="mt-1 text-xs text-slate-500">Maximum capacity for this unit</p>
                     @error('max_members')
                     <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                     @enderror
-                    <p class="mt-1 text-xs text-gray-500">Maximum capacity for this unit</p>
                 </div>
 
                 <!-- Current Members (Read-only) -->
                 <div class="md:col-span-2">
-                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                    <label class="form-label mb-1.5 block font-medium text-sm text-slate-700">
                         Current Members
                     </label>
-                    <div class="bg-gray-50 px-4 py-2 border border-gray-300 rounded-lg">
-                        <p class="text-gray-900">{{ $serviceUnit->current_members }} members</p>
+                    <div class="bg-slate-50 px-4 py-2 border border-slate-200 rounded-lg text-slate-600 text-sm flex items-center gap-2">
+                        <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                        </svg>
+                        <span>{{ $serviceUnit->current_members }} active members</span>
                     </div>
-                    <p class="mt-1 text-xs text-gray-500">Use "Manage Members" to add or remove members</p>
                 </div>
 
                 <!-- Meeting Schedule -->
                 <div class="md:col-span-2">
-                    <label for="meeting_schedule" class="block text-sm font-medium text-gray-700 mb-2">
+                    <label for="meeting_schedule" class="form-label mb-1.5 block font-medium text-sm text-slate-700">
                         Meeting Schedule
                     </label>
                     <input type="text" name="meeting_schedule" id="meeting_schedule" value="{{ old('meeting_schedule', $serviceUnit->meeting_schedule) }}"
-                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('meeting_schedule') border-red-500 @enderror"
-                           placeholder="e.g., Every Saturday at 4:00 PM">
+                           class="form-input w-full border-slate-200 focus:border-primary-500 focus:ring-primary-500 rounded-lg"
+                           placeholder="e.g. Every Saturday at 4:00 PM">
                     @error('meeting_schedule')
                     <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                     @enderror
@@ -216,66 +236,57 @@
         </div>
 
         <!-- Requirements & Responsibilities -->
-        <div class="bg-white rounded-lg shadow-md p-6">
-            <h2 class="text-xl font-bold text-gray-900 mb-4">Requirements & Responsibilities</h2>
-
-            <div class="space-y-6">
+        <div class="card border border-slate-100 shadow-sm">
+            <div class="px-6 py-4 border-b border-slate-100 bg-slate-50/50">
+                <h3 class="font-bold text-slate-800 text-base">Requirements & Responsibilities</h3>
+            </div>
+            <div class="p-6 space-y-6">
                 <!-- Requirements -->
                 <div>
-                    <label for="requirements" class="block text-sm font-medium text-gray-700 mb-2">
+                    <label for="requirements" class="form-label mb-1.5 block font-medium text-sm text-slate-700">
                         Requirements
                     </label>
                     <textarea name="requirements" id="requirements" rows="4"
-                              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('requirements') border-red-500 @enderror"
+                              class="form-textarea w-full border-slate-200 focus:border-primary-500 focus:ring-primary-500 rounded-lg"
                               placeholder="List requirements or qualifications for members (one per line)">{{ old('requirements', $serviceUnit->requirements) }}</textarea>
+                    <p class="mt-1 text-xs text-slate-500">Skills, qualifications, or commitments needed</p>
                     @error('requirements')
                     <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                     @enderror
-                    <p class="mt-1 text-xs text-gray-500">Skills, qualifications, or commitments needed</p>
                 </div>
 
                 <!-- Responsibilities -->
                 <div>
-                    <label for="responsibilities" class="block text-sm font-medium text-gray-700 mb-2">
+                    <label for="responsibilities" class="form-label mb-1.5 block font-medium text-sm text-slate-700">
                         Responsibilities
                     </label>
                     <textarea name="responsibilities" id="responsibilities" rows="4"
-                              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('responsibilities') border-red-500 @enderror"
+                              class="form-textarea w-full border-slate-200 focus:border-primary-500 focus:ring-primary-500 rounded-lg"
                               placeholder="List key responsibilities for unit members (one per line)">{{ old('responsibilities', $serviceUnit->responsibilities) }}</textarea>
+                    <p class="mt-1 text-xs text-slate-500">Main duties and expectations for members</p>
                     @error('responsibilities')
                     <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                     @enderror
-                    <p class="mt-1 text-xs text-gray-500">Main duties and expectations for members</p>
                 </div>
             </div>
         </div>
 
         <!-- Danger Zone -->
         @can('delete', $serviceUnit)
-        <div class="bg-red-50 border-2 border-red-200 rounded-lg p-6">
-            <h2 class="text-xl font-bold text-red-900 mb-4">Danger Zone</h2>
-            <p class="text-red-700 mb-4">
+        <div class="border border-red-200 rounded-xl bg-red-50/50 p-6">
+            <h3 class="font-bold text-red-900 text-base mb-2">Danger Zone</h3>
+            <p class="text-red-700 text-sm mb-4">
                 Deleting this service unit will remove all associated data, including member assignments, duty rosters, and meetings.
                 This action cannot be undone.
             </p>
-            <button type="button" onclick="confirmDelete()"
-                    class="px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition">
-                Delete Service Unit
-            </button>
+            <div class="flex items-center gap-4">
+                <button type="button" onclick="confirmDelete()"
+                        class="px-4 py-2 bg-red-100 text-red-700 border border-red-200 rounded-lg hover:bg-red-200 hover:border-red-300 transition-colors font-medium text-sm">
+                    Delete Service Unit
+                </button>
+            </div>
         </div>
         @endcan
-
-        <!-- Form Actions -->
-        <div class="flex justify-end gap-4">
-            <a href="{{ route('service-units.show', $serviceUnit) }}"
-               class="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition">
-                Cancel
-            </a>
-            <button type="submit"
-                    class="px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 transition">
-                Update Service Unit
-            </button>
-        </div>
     </form>
 
     <!-- Delete Form (Hidden) -->

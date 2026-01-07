@@ -11,10 +11,11 @@
     childrensMinistry: false,
     welfare: false,
     media: false,
+    qrManagement: false,
     partnerships: false,
     reports: false,
     settings: false
-}" class="fixed inset-y-0 left-0 z-30 w-64 overflow-y-auto transition duration-300 transform bg-gradient-sidebar border-r border-gray-200 -translate-x-full lg:translate-x-0 shadow-xl" :class="{ 'translate-x-0': sidebarOpen }">
+}" class="fixed inset-y-0 left-0 z-30 w-64 overflow-y-auto transition-transform duration-300 transform bg-gradient-sidebar border-r border-white/5 -translate-x-full lg:translate-x-0 shadow-2xl" :class="{ 'translate-x-0': sidebarOpen }">
 
     <!-- Logo -->
     <div class="flex items-center justify-center mt-8 mb-8">
@@ -282,6 +283,24 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"/>
                     </svg>
                     <span class="mx-3 text-sm">All Equipment</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- QR MANAGEMENT -->
+        <div class="mt-4">
+            <button @click="qrManagement = !qrManagement" class="flex items-center justify-between w-full px-4 py-2 text-white/60 hover:text-white transition-colors text-xs font-semibold uppercase tracking-wider">
+                <span>QR System</span>
+                <svg :class="qrManagement ? 'rotate-180' : ''" class="w-4 h-4 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                </svg>
+            </button>
+            <div x-show="qrManagement" x-collapse class="mt-2 space-y-1">
+                <a class="flex items-center px-4 py-2.5 text-white/80 rounded-lg transition-all duration-200 {{ request()->routeIs('qr-management.*') ? 'bg-white/20 text-white shadow-lg border-l-4 border-accent-400' : 'hover:bg-white/10 hover:text-white' }}" href="{{ route('qr-management.index') }}">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"/>
+                    </svg>
+                    <span class="mx-3 text-sm">QR Codes</span>
                 </a>
             </div>
         </div>

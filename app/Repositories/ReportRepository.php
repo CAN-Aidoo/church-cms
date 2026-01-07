@@ -684,4 +684,73 @@ class ReportRepository
             'warnings' => $warnings,
         ];
     }
+
+    /**
+     * Get QR scan history data with filters
+     */
+    public function getQRScanHistoryData(array $filters): array
+    {
+        $query = \App\Models\Attendance::with(['member', 'service'])
+            ->where('check_in_method', 'qr');
+
+        if (!empty($filters['date_from'])) {
+            $query->where('created_at', '>=', $filters['date_from']);
+        }
+
+        if (!empty($filters['date_to'])) {
+            $query->where('created_at', '<=', $filters['date_to'] . ' 23:59:59');
+        }
+
+        if (!empty($filters['member_id'])) {
+            $query->where('member_id', $filters['member_id']);
+        }
+
+        if (!empty($filters['service_type'])) {
+            $query->where('service_type', $filters['service_type']);
+        }
+
+        $scans = $query->latest()->paginate(50);
+
+        // Calculate statistics
+        $statsQuery = \App\Models\Attendance::where('check_in_method', 'qr');
+
+        if (!empty($filters['date_from'])) {
+            $statsQuery->where('created_at', '>=', $filters['date_from']);
+        }
+
+        if (!empty($filters['date_to'])) {
+            $statsQuery->where('created_at', '<=', $filters['date_to'] . ' 23:59:59');
+        }
+
+        $statistics = [
+            'total_scans' => $statsQuery->count(),
+            'unique_members' => $statsQuery->distinct('member_id')->count('member_id'),
+            'date_range' => [
+                $filters['date_from'] ?? null,
+                $filters['date_to'] ?? null
+            ],
+            'by_service_type' => \App\Models\Attendance::where('check_in_method', 'qr')
+                ->when(!empty($filters['date_from']), function($q) use ($filters) {
+                    return $q->where('created_at', '>=', $filters['date_from']);
+                })
+                ->when(!empty($filters['date_to']), function($q) use ($filters) {
+                    return $q->where('created_at', '<=', $filters['date_to'] . ' 23:59:59');
+                })
+                ->select('service_type', \DB::raw('count(*) as count'))
+                ->groupBy('service_type')
+                ->get(),
+            'by_day_of_week' => \App\Models\Attendance::where('check_in_method', 'qr')
+                ->when(!empty($filters['date_from']), function($q) use ($filters) {
+                    return $q->where('created_at', '>=', $filters['date_from']);
+                })
+                ->when(!empty($filters['date_to']), function($q) use ($filters) {
+                    return $q->where('created_at', '<=', $filters['date_to'] . ' 23:59:59');
+                })
+                ->select(\DB::raw('DAYNAME(created_at) as day'), \DB::raw('count(*) as count'))
+                ->groupBy('day')
+                ->get(),
+        ];
+
+        return compact('scans', 'statistics');
+    }
 }

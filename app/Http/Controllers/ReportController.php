@@ -557,4 +557,80 @@ class ReportController extends Controller
             }
         }
     }
+
+    /**
+     * Display QR scan history report
+     */
+    public function qrScanHistory(Request $request)
+    {
+        $filters = $request->only(['date_from', 'date_to', 'member_id', 'service_type']);
+
+        $data = $this->reportRepository->getQRScanHistoryData($filters);
+
+        return view('reports.qr-scans', array_merge($data, compact('filters')));
+    }
+
+    /**
+     * Export QR scan history
+     */
+    public function exportQRScanHistory(Request $request)
+    {
+        $format = $request->get('format', 'csv');
+        $filters = $request->only(['date_from', 'date_to', 'member_id', 'service_type']);
+
+        $data = $this->reportRepository->getQRScanHistoryData($filters);
+
+        if ($format === 'excel') {
+            return $this->exportQRScansExcel($data);
+        }
+
+        return $this->exportQRScansCsv($data);
+    }
+
+    /**
+     * Export QR scans to Excel
+     */
+    private function exportQRScansExcel(array $data)
+    {
+        // For now, export as CSV since full Excel implementation requires maatwebsite/excel
+        return $this->exportQRScansCsv($data);
+    }
+
+    /**
+     * Export QR scans to CSV
+     */
+    private function exportQRScansCsv(array $data)
+    {
+        $filename = 'qr-scan-history-' . now()->format('Y-m-d') . '.csv';
+
+        $csvData = [
+            ['Timestamp', 'Member ID', 'Member Name', 'Service Type', 'Status', 'Date']
+        ];
+
+        foreach ($data['scans'] as $scan) {
+            $csvData[] = [
+                $scan->created_at->format('Y-m-d H:i:s'),
+                $scan->member->member_id ?? 'N/A',
+                $scan->member->full_name ?? 'N/A',
+                str_replace('_', ' ', ucfirst($scan->service_type)),
+                ucfirst($scan->status),
+                $scan->service_date ? $scan->service_date->format('Y-m-d') : $scan->created_at->format('Y-m-d'),
+            ];
+        }
+
+        $handle = fopen('php://output', 'w');
+        ob_start();
+
+        foreach ($csvData as $row) {
+            fputcsv($handle, $row);
+        }
+
+        fclose($handle);
+        $csv = ob_get_clean();
+
+        return response($csv, 200, [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+        ]);
+    }
 }

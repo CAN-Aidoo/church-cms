@@ -21,6 +21,8 @@
         "vite": "^5.0.8"
     },
     "dependencies": {
-        "apexcharts": "^3.45.1"
+        "apexcharts": "^3.45.1",
+        "html5-qrcode": "^2.3.8",
+        "idb": "^8.0.0"
     }
 }

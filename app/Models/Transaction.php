@@ -32,6 +32,8 @@ class Transaction extends Model
         'created_by',
         'approved_by',
         'approved_at',
+        'payment_qr_id',
+        'qr_scan_timestamp',
     ];
 
     /**
@@ -43,6 +45,7 @@ class Transaction extends Model
         'amount' => 'decimal:2',
         'transaction_date' => 'date',
         'approved_at' => 'datetime',
+        'qr_scan_timestamp' => 'datetime',
     ];
 
     /**
@@ -67,6 +70,14 @@ class Transaction extends Model
     public function approver(): BelongsTo
     {
         return $this->belongsTo(User::class, 'approved_by');
+    }
+
+    /**
+     * Get the QR code used for this payment.
+     */
+    public function paymentQR(): BelongsTo
+    {
+        return $this->belongsTo(QRCode::class, 'payment_qr_id');
     }
 
     /**

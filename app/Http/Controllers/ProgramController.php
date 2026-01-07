@@ -88,7 +88,20 @@ class ProgramController extends Controller
         $statistics = $this->programRepository->getStatistics($program);
         $registrationStats = $this->programRepository->getRegistrationStatistics($program);
 
-        return view('programs.show', compact('program', 'statistics', 'registrationStats'));
+        // QR Code Statistics
+        $qrStats = [
+            'registration_scans' => $program->registrations()
+                ->whereNotNull('qr_scanned_at')->count(),
+            'checkin_scans' => $program->registrations()
+                ->where('check_in_method', 'qr')->count(),
+            'recent_scans' => $program->registrations()
+                ->where('check_in_method', 'qr')
+                ->latest()
+                ->take(5)
+                ->get(),
+        ];
+
+        return view('programs.show', compact('program', 'statistics', 'registrationStats', 'qrStats'));
     }
 
     /**
@@ -373,5 +386,297 @@ class ProgramController extends Controller
             'attendanceStats',
             'feedbackSummary'
         ));
+    }
+
+    /**
+     * Generate registration QR code for a program.
+     */
+    public function generateRegistrationQR(Request $request, $id)
+    {
+        $program = Program::findOrFail($id);
+
+        // Generate unique registration QR code if not exists
+        if (!$program->registration_qr_code) {
+            $program->registration_qr_code = 'PROG-REG-' . strtoupper(uniqid()) . '-' . $program->id;
+            $program->qr_registration_enabled = true;
+            $program->save();
+        }
+
+        // Generate QR code image URL
+        $qrCodeUrl = route('programs.registration-qr-image', $program->id);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Registration QR code generated successfully',
+            'data' => [
+                'program_id' => $program->id,
+                'program_name' => $program->name,
+                'qr_code' => $program->registration_qr_code,
+                'qr_image_url' => $qrCodeUrl,
+                'enabled' => $program->qr_registration_enabled,
+            ],
+        ]);
+    }
+
+    /**
+     * Generate check-in QR code for a program.
+     */
+    public function generateCheckInQR(Request $request, $id)
+    {
+        $program = Program::findOrFail($id);
+
+        // Generate unique check-in QR code if not exists
+        if (!$program->check_in_qr_code) {
+            $program->check_in_qr_code = 'PROG-CHK-' . strtoupper(uniqid()) . '-' . $program->id;
+            $program->qr_checkin_enabled = true;
+            $program->save();
+        }
+
+        // Generate QR code image URL
+        $qrCodeUrl = route('programs.checkin-qr-image', $program->id);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Check-in QR code generated successfully',
+            'data' => [
+                'program_id' => $program->id,
+                'program_name' => $program->name,
+                'qr_code' => $program->check_in_qr_code,
+                'qr_image_url' => $qrCodeUrl,
+                'enabled' => $program->qr_checkin_enabled,
+            ],
+        ]);
+    }
+
+    /**
+     * Regenerate registration QR code for a program.
+     */
+    public function regenerateRegistrationQR(Request $request, $id)
+    {
+        $program = Program::findOrFail($id);
+
+        // Generate new registration QR code
+        $program->registration_qr_code = 'PROG-REG-' . strtoupper(uniqid()) . '-' . $program->id;
+        $program->qr_registration_enabled = true;
+        $program->save();
+
+        $qrCodeUrl = route('programs.registration-qr-image', $program->id);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Registration QR code regenerated successfully',
+            'data' => [
+                'program_id' => $program->id,
+                'program_name' => $program->name,
+                'qr_code' => $program->registration_qr_code,
+                'qr_image_url' => $qrCodeUrl,
+            ],
+        ]);
+    }
+
+    /**
+     * Regenerate check-in QR code for a program.
+     */
+    public function regenerateCheckInQR(Request $request, $id)
+    {
+        $program = Program::findOrFail($id);
+
+        // Generate new check-in QR code
+        $program->check_in_qr_code = 'PROG-CHK-' . strtoupper(uniqid()) . '-' . $program->id;
+        $program->qr_checkin_enabled = true;
+        $program->save();
+
+        $qrCodeUrl = route('programs.checkin-qr-image', $program->id);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Check-in QR code regenerated successfully',
+            'data' => [
+                'program_id' => $program->id,
+                'program_name' => $program->name,
+                'qr_code' => $program->check_in_qr_code,
+                'qr_image_url' => $qrCodeUrl,
+            ],
+        ]);
+    }
+
+    /**
+     * Toggle QR registration for a program.
+     */
+    public function toggleQRRegistration(Request $request, $id)
+    {
+        $program = Program::findOrFail($id);
+
+        $program->qr_registration_enabled = !$program->qr_registration_enabled;
+        $program->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'QR registration ' . ($program->qr_registration_enabled ? 'enabled' : 'disabled'),
+            'enabled' => $program->qr_registration_enabled,
+        ]);
+    }
+
+    /**
+     * Toggle QR check-in for a program.
+     */
+    public function toggleQRCheckIn(Request $request, $id)
+    {
+        $program = Program::findOrFail($id);
+
+        $program->qr_checkin_enabled = !$program->qr_checkin_enabled;
+        $program->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'QR check-in ' . ($program->qr_checkin_enabled ? 'enabled' : 'disabled'),
+            'enabled' => $program->qr_checkin_enabled,
+        ]);
+    }
+
+    /**
+     * Download program registration QR code as image.
+     */
+    public function downloadRegistrationQR(Request $request, $id)
+    {
+        $program = Program::findOrFail($id);
+
+        // Ensure registration QR code exists
+        if (!$program->registration_qr_code) {
+            $program->registration_qr_code = 'PROG-REG-' . strtoupper(uniqid()) . '-' . $program->id;
+            $program->save();
+        }
+
+        // Generate QR code image
+        $qrCode = \SimpleSoftwareIO\QrCode\Facades\QrCode::format('png')
+            ->size(500)
+            ->margin(2)
+            ->errorCorrection('H')
+            ->generate($program->registration_qr_code);
+
+        $fileName = 'program-registration-qr-' . $program->id . '.png';
+
+        return response($qrCode, 200)
+            ->header('Content-Type', 'image/png')
+            ->header('Content-Disposition', 'attachment; filename="' . $fileName . '"');
+    }
+
+    /**
+     * Download program check-in QR code as image.
+     */
+    public function downloadCheckInQR(Request $request, $id)
+    {
+        $program = Program::findOrFail($id);
+
+        // Ensure check-in QR code exists
+        if (!$program->check_in_qr_code) {
+            $program->check_in_qr_code = 'PROG-CHK-' . strtoupper(uniqid()) . '-' . $program->id;
+            $program->save();
+        }
+
+        // Generate QR code image
+        $qrCode = \SimpleSoftwareIO\QrCode\Facades\QrCode::format('png')
+            ->size(500)
+            ->margin(2)
+            ->errorCorrection('H')
+            ->generate($program->check_in_qr_code);
+
+        $fileName = 'program-checkin-qr-' . $program->id . '.png';
+
+        return response($qrCode, 200)
+            ->header('Content-Type', 'image/png')
+            ->header('Content-Disposition', 'attachment; filename="' . $fileName . '"');
+    }
+
+    /**
+     * Display program registration QR code image.
+     */
+    public function showRegistrationQRImage($id)
+    {
+        $program = Program::findOrFail($id);
+
+        // Ensure registration QR code exists
+        if (!$program->registration_qr_code) {
+            $program->registration_qr_code = 'PROG-REG-' . strtoupper(uniqid()) . '-' . $program->id;
+            $program->save();
+        }
+
+        // Generate QR code image
+        $qrCode = \SimpleSoftwareIO\QrCode\Facades\QrCode::format('png')
+            ->size(300)
+            ->margin(1)
+            ->errorCorrection('H')
+            ->generate($program->registration_qr_code);
+
+        return response($qrCode, 200)->header('Content-Type', 'image/png');
+    }
+
+    /**
+     * Display program check-in QR code image.
+     */
+    public function showCheckInQRImage($id)
+    {
+        $program = Program::findOrFail($id);
+
+        // Ensure check-in QR code exists
+        if (!$program->check_in_qr_code) {
+            $program->check_in_qr_code = 'PROG-CHK-' . strtoupper(uniqid()) . '-' . $program->id;
+            $program->save();
+        }
+
+        // Generate QR code image
+        $qrCode = \SimpleSoftwareIO\QrCode\Facades\QrCode::format('png')
+            ->size(300)
+            ->margin(1)
+            ->errorCorrection('H')
+            ->generate($program->check_in_qr_code);
+
+        return response($qrCode, 200)->header('Content-Type', 'image/png');
+    }
+
+    /**
+     * Show printable registration QR poster
+     */
+    public function printRegistrationQRPoster($id)
+    {
+        $program = \App\Models\Program::findOrFail($id);
+
+        return view('programs.print-qr-poster', [
+            'program' => $program,
+            'qrType' => 'registration',
+        ]);
+    }
+
+    /**
+     * Show printable check-in QR poster
+     */
+    public function printCheckInQRPoster($id)
+    {
+        $program = \App\Models\Program::findOrFail($id);
+
+        return view('programs.print-qr-poster', [
+            'program' => $program,
+            'qrType' => 'checkin',
+        ]);
+    }
+
+    /**
+     * Export QR poster as PDF
+     */
+    public function exportQRPosterPdf(Request $request, $id)
+    {
+        $program = \App\Models\Program::findOrFail($id);
+        $qrType = $request->get('type', 'registration'); // registration or checkin
+
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('programs.pdf.qr-poster', [
+            'program' => $program,
+            'qrType' => $qrType,
+        ]);
+
+        $pdf->setPaper('A4', 'portrait');
+
+        $filename = "program-{$qrType}-qr-{$program->id}.pdf";
+
+        return $pdf->download($filename);
     }
 }

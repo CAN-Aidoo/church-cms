@@ -18,7 +18,7 @@
                 <h3 id="userName" class="text-lg font-bold text-white">Loading...</h3>
                 <p id="userEmail" class="text-sm text-blue-100">email@example.com</p>
             </div>
-            <button onclick="window.location.href='/mobile/profile/edit'" class="text-white hover:bg-white/20 p-2 rounded-lg transition">
+            <button onclick="window.location.href='{{ url('/mobile/profile-edit') }}'" class="text-white hover:bg-white/20 p-2 rounded-lg transition">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
                 </svg>
@@ -155,7 +155,7 @@
         <h3 class="text-sm font-bold text-gray-600 uppercase mb-3 px-2">Account</h3>
         <div class="bg-white rounded-xl shadow-sm overflow-hidden divide-y divide-gray-200">
             <!-- Change Password -->
-            <button onclick="window.location.href='/mobile/change-password'" class="w-full flex items-center justify-between p-4 hover:bg-gray-50 transition">
+            <button onclick="window.location.href='{{ url('/mobile/change-password') }}'" class="w-full flex items-center justify-between p-4 hover:bg-gray-50 transition">
                 <div class="flex items-center">
                     <div class="bg-orange-100 rounded-lg p-2 mr-3">
                         <svg class="w-5 h-5 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -173,7 +173,7 @@
             </button>
 
             <!-- Privacy Settings -->
-            <button onclick="window.location.href='/mobile/privacy'" class="w-full flex items-center justify-between p-4 hover:bg-gray-50 transition">
+            <button onclick="window.location.href='{{ url('/mobile/privacy') }}'" class="w-full flex items-center justify-between p-4 hover:bg-gray-50 transition">
                 <div class="flex items-center">
                     <div class="bg-red-100 rounded-lg p-2 mr-3">
                         <svg class="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -239,7 +239,7 @@
         <h3 class="text-sm font-bold text-gray-600 uppercase mb-3 px-2">Help & Support</h3>
         <div class="bg-white rounded-xl shadow-sm overflow-hidden divide-y divide-gray-200">
             <!-- Help Center -->
-            <button onclick="window.location.href='/mobile/help'" class="w-full flex items-center justify-between p-4 hover:bg-gray-50 transition">
+            <button onclick="window.location.href='{{ url('/mobile/help') }}'" class="w-full flex items-center justify-between p-4 hover:bg-gray-50 transition">
                 <div class="flex items-center">
                     <div class="bg-blue-100 rounded-lg p-2 mr-3">
                         <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -257,7 +257,7 @@
             </button>
 
             <!-- Contact Support -->
-            <button onclick="window.location.href='/mobile/contact-support'" class="w-full flex items-center justify-between p-4 hover:bg-gray-50 transition">
+            <button onclick="window.location.href='{{ url('/mobile/contact-support') }}'" class="w-full flex items-center justify-between p-4 hover:bg-gray-50 transition">
                 <div class="flex items-center">
                     <div class="bg-green-100 rounded-lg p-2 mr-3">
                         <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -314,7 +314,7 @@
             </div>
 
             <!-- Privacy Policy -->
-            <button onclick="window.location.href='/mobile/privacy-policy'" class="w-full flex items-center justify-between p-4 hover:bg-gray-50 transition">
+            <button onclick="window.location.href='{{ url('/mobile/privacy-policy') }}'" class="w-full flex items-center justify-between p-4 hover:bg-gray-50 transition">
                 <div class="flex items-center">
                     <div class="bg-indigo-100 rounded-lg p-2 mr-3">
                         <svg class="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -332,7 +332,7 @@
             </button>
 
             <!-- Terms of Service -->
-            <button onclick="window.location.href='/mobile/terms'" class="w-full flex items-center justify-between p-4 hover:bg-gray-50 transition">
+            <button onclick="window.location.href='{{ url('/mobile/terms') }}'" class="w-full flex items-center justify-between p-4 hover:bg-gray-50 transition">
                 <div class="flex items-center">
                     <div class="bg-yellow-100 rounded-lg p-2 mr-3">
                         <svg class="w-5 h-5 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -530,7 +530,7 @@ async function downloadData() {
 
 // Report problem
 function reportProblem() {
-    window.location.href = '/mobile/report-problem';
+    window.location.href = '{{ url('/mobile/report-problem') }}';
 }
 
 // Handle logout
@@ -553,7 +553,7 @@ async function handleLogout() {
 
             // Redirect to login
             setTimeout(() => {
-                window.location.href = '/mobile/login';
+                window.location.href = '{{ url('/mobile/login') }}';
             }, 1000);
         } else {
             throw new Error(result.message || 'Logout failed');

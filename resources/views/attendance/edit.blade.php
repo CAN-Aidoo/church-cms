@@ -3,202 +3,176 @@
 @section('title', 'Edit Attendance Record')
 
 @section('content')
-<div class="page-header">
+<div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
     <div>
-        <h1 class="page-title">Edit Attendance Record</h1>
-        <nav class="breadcrumb">
-            <a href="{{ route('dashboard') }}">Dashboard</a>
+        <h1 class="text-2xl font-heading font-bold text-slate-900">Edit Attendance Record</h1>
+        <nav class="flex items-center gap-2 text-sm text-slate-500 mt-1">
+            <a href="{{ route('dashboard') }}" class="hover:text-primary-600 transition-colors">Dashboard</a>
             <span>/</span>
-            <a href="{{ route('attendance.index') }}">Attendance</a>
+            <a href="{{ route('attendance.index') }}" class="hover:text-primary-600 transition-colors">Attendance</a>
             <span>/</span>
-            <span>Edit</span>
+            <span class="text-slate-800 font-medium">Edit</span>
         </nav>
     </div>
 </div>
 
-<div class="max-w-2xl mx-auto">
-    <div class="card">
-        <div class="card-header">
-            <h2 class="text-xl font-semibold">Edit Attendance Record</h2>
+<div class="max-w-3xl mx-auto">
+    <div class="card border border-slate-100">
+        <div class="px-6 py-4 border-b border-slate-100 bg-slate-50/50">
+            <h3 class="font-bold text-slate-800 text-base">Edit Attendance Record</h3>
         </div>
 
-        <form action="{{ route('attendance.update', $attendance) }}" method="POST" class="card-body space-y-6">
+        <form action="{{ route('attendance.update', $attendance) }}" method="POST" class="p-6 space-y-8">
             @csrf
             @method('PUT')
 
             <!-- Member Information (Read-only) -->
-            <div class="p-4 bg-blue-50 rounded-lg border border-blue-200">
-                <div class="flex items-center gap-3">
-                    <div class="w-12 h-12 rounded-full bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center text-white text-lg font-bold">
-                        {{ strtoupper(substr($attendance->member->first_name, 0, 1)) }}{{ strtoupper(substr($attendance->member->last_name, 0, 1)) }}
-                    </div>
-                    <div>
-                        <p class="font-semibold text-gray-900">{{ $attendance->member->first_name }} {{ $attendance->member->last_name }}</p>
-                        <p class="text-sm text-gray-600">{{ $attendance->member->email ?? $attendance->member->phone }}</p>
-                    </div>
+            <div class="p-4 bg-primary-50 rounded-xl border border-primary-100 flex items-center gap-4">
+                <div class="w-12 h-12 rounded-full bg-white flex items-center justify-center text-primary-600 font-bold text-lg border-2 border-primary-100 shadow-sm">
+                    {{ strtoupper(substr($attendance->member->first_name, 0, 1)) }}{{ strtoupper(substr($attendance->member->last_name, 0, 1)) }}
+                </div>
+                <div>
+                    <p class="font-bold text-slate-900 text-lg">{{ $attendance->member->full_name }}</p>
+                    <p class="text-sm text-slate-500 font-mono">{{ $attendance->member->member_id }} • {{ $attendance->member->email ?? $attendance->member->phone }}</p>
                 </div>
             </div>
 
-            <!-- Service Date -->
-            <div>
-                <label for="service_date" class="block text-sm font-medium text-gray-700 mb-1">
-                    Service Date <span class="text-red-500">*</span>
-                </label>
-                <input type="date"
-                       name="service_date"
-                       id="service_date"
-                       value="{{ old('service_date', $attendance->service_date) }}"
-                       required
-                       class="form-input w-full @error('service_date') border-red-500 @enderror">
-                @error('service_date')
-                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                @enderror
-            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Service Date -->
+                <div>
+                    <label for="service_date" class="form-label required mb-1.5 block font-medium text-sm text-slate-700">Service Date</label>
+                    <input type="date"
+                           name="service_date"
+                           id="service_date"
+                           value="{{ old('service_date', $attendance->service_date->format('Y-m-d')) }}"
+                           required
+                           class="form-input w-full border-slate-200 focus:border-primary-500 focus:ring-primary-500 @error('service_date') border-red-500 focus:border-red-500 focus:ring-red-500 @enderror">
+                    @error('service_date')
+                    <p class="text-red-600 text-xs mt-1">{{ $message }}</p>
+                    @enderror
+                </div>
 
-            <!-- Service Type -->
-            <div>
-                <label for="service_type" class="block text-sm font-medium text-gray-700 mb-1">
-                    Service Type <span class="text-red-500">*</span>
-                </label>
-                <select name="service_type"
-                        id="service_type"
-                        required
-                        class="form-select w-full @error('service_type') border-red-500 @enderror">
-                    <option value="">Select Service Type</option>
-                    <option value="sunday_first" {{ old('service_type', $attendance->service_type) === 'sunday_first' ? 'selected' : '' }}>
-                        Sunday - First Service
-                    </option>
-                    <option value="sunday_second" {{ old('service_type', $attendance->service_type) === 'sunday_second' ? 'selected' : '' }}>
-                        Sunday - Second Service
-                    </option>
-                    <option value="midweek" {{ old('service_type', $attendance->service_type) === 'midweek' ? 'selected' : '' }}>
-                        Midweek Service
-                    </option>
-                    <option value="prayer_meeting" {{ old('service_type', $attendance->service_type) === 'prayer_meeting' ? 'selected' : '' }}>
-                        Prayer Meeting
-                    </option>
-                    <option value="special" {{ old('service_type', $attendance->service_type) === 'special' ? 'selected' : '' }}>
-                        Special Service
-                    </option>
-                </select>
-                @error('service_type')
-                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                @enderror
+                <!-- Service Type -->
+                <div>
+                    <label for="service_type" class="form-label required mb-1.5 block font-medium text-sm text-slate-700">Service Type</label>
+                    <select name="service_type"
+                            id="service_type"
+                            required
+                            class="form-select w-full border-slate-200 focus:border-primary-500 focus:ring-primary-500 @error('service_type') border-red-500 focus:border-red-500 focus:ring-red-500 @enderror">
+                        <option value="">Select Service Type</option>
+                        <option value="sunday_first" {{ old('service_type', $attendance->service_type) === 'sunday_first' ? 'selected' : '' }}>Sunday - First Service</option>
+                        <option value="sunday_second" {{ old('service_type', $attendance->service_type) === 'sunday_second' ? 'selected' : '' }}>Sunday - Second Service</option>
+                        <option value="midweek" {{ old('service_type', $attendance->service_type) === 'midweek' ? 'selected' : '' }}>Midweek Service</option>
+                        <option value="prayer_meeting" {{ old('service_type', $attendance->service_type) === 'prayer_meeting' ? 'selected' : '' }}>Prayer Meeting</option>
+                        <option value="special" {{ old('service_type', $attendance->service_type) === 'special' ? 'selected' : '' }}>Special Service</option>
+                    </select>
+                    @error('service_type')
+                    <p class="text-red-600 text-xs mt-1">{{ $message }}</p>
+                    @enderror
+                </div>
             </div>
 
             <!-- Status -->
             <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">
-                    Attendance Status <span class="text-red-500">*</span>
-                </label>
-                <div class="grid grid-cols-2 gap-3">
-                    <label class="flex items-center p-3 border-2 rounded-lg cursor-pointer transition-all {{ old('status', $attendance->status) === 'present' ? 'border-green-500 bg-green-50' : 'border-gray-200 hover:border-gray-300' }}">
-                        <input type="radio"
-                               name="status"
-                               value="present"
-                               {{ old('status', $attendance->status) === 'present' ? 'checked' : '' }}
-                               required
-                               class="form-radio text-green-600">
-                        <span class="ml-3">
-                            <span class="block font-medium text-gray-900">Present</span>
-                            <span class="text-xs text-gray-500">Member attended service</span>
-                        </span>
+                <label class="form-label required mb-3 block font-medium text-sm text-slate-700">Attendance Status</label>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <label class="relative flex items-start p-4 cursor-pointer rounded-xl border transition-all {{ old('status', $attendance->status) === 'present' ? 'bg-emerald-50 border-emerald-500 shadow-sm' : 'bg-white border-slate-200 hover:border-emerald-300' }}">
+                        <div class="flex items-center h-5">
+                            <input type="radio" name="status" value="present" {{ old('status', $attendance->status) === 'present' ? 'checked' : '' }} class="form-radio text-emerald-600 border-slate-300 focus:ring-emerald-500">
+                        </div>
+                        <div class="ml-3">
+                            <span class="block text-sm font-bold text-slate-900">Present</span>
+                            <span class="block text-xs text-slate-500 mt-0.5">Member attended service</span>
+                        </div>
                     </label>
 
-                    <label class="flex items-center p-3 border-2 rounded-lg cursor-pointer transition-all {{ old('status', $attendance->status) === 'absent' ? 'border-red-500 bg-red-50' : 'border-gray-200 hover:border-gray-300' }}">
-                        <input type="radio"
-                               name="status"
-                               value="absent"
-                               {{ old('status', $attendance->status) === 'absent' ? 'checked' : '' }}
-                               class="form-radio text-red-600">
-                        <span class="ml-3">
-                            <span class="block font-medium text-gray-900">Absent</span>
-                            <span class="text-xs text-gray-500">Member was absent</span>
-                        </span>
+                    <label class="relative flex items-start p-4 cursor-pointer rounded-xl border transition-all {{ old('status', $attendance->status) === 'absent' ? 'bg-red-50 border-red-500 shadow-sm' : 'bg-white border-slate-200 hover:border-red-300' }}">
+                        <div class="flex items-center h-5">
+                            <input type="radio" name="status" value="absent" {{ old('status', $attendance->status) === 'absent' ? 'checked' : '' }} class="form-radio text-red-600 border-slate-300 focus:ring-red-500">
+                        </div>
+                        <div class="ml-3">
+                            <span class="block text-sm font-bold text-slate-900">Absent</span>
+                            <span class="block text-xs text-slate-500 mt-0.5">Member was absent</span>
+                        </div>
                     </label>
 
-                    <label class="flex items-center p-3 border-2 rounded-lg cursor-pointer transition-all {{ old('status', $attendance->status) === 'excused' ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-gray-300' }}">
-                        <input type="radio"
-                               name="status"
-                               value="excused"
-                               {{ old('status', $attendance->status) === 'excused' ? 'checked' : '' }}
-                               class="form-radio text-blue-600">
-                        <span class="ml-3">
-                            <span class="block font-medium text-gray-900">Excused</span>
-                            <span class="text-xs text-gray-500">Pre-notified absence</span>
-                        </span>
+                    <label class="relative flex items-start p-4 cursor-pointer rounded-xl border transition-all {{ old('status', $attendance->status) === 'excused' ? 'bg-amber-50 border-amber-500 shadow-sm' : 'bg-white border-slate-200 hover:border-amber-300' }}">
+                        <div class="flex items-center h-5">
+                            <input type="radio" name="status" value="excused" {{ old('status', $attendance->status) === 'excused' ? 'checked' : '' }} class="form-radio text-amber-600 border-slate-300 focus:ring-amber-500">
+                        </div>
+                        <div class="ml-3">
+                            <span class="block text-sm font-bold text-slate-900">Excused</span>
+                            <span class="block text-xs text-slate-500 mt-0.5">Pre-notified absence</span>
+                        </div>
                     </label>
 
-                    <label class="flex items-center p-3 border-2 rounded-lg cursor-pointer transition-all {{ old('status', $attendance->status) === 'late' ? 'border-yellow-500 bg-yellow-50' : 'border-gray-200 hover:border-gray-300' }}">
-                        <input type="radio"
-                               name="status"
-                               value="late"
-                               {{ old('status', $attendance->status) === 'late' ? 'checked' : '' }}
-                               class="form-radio text-yellow-600">
-                        <span class="ml-3">
-                            <span class="block font-medium text-gray-900">Late</span>
-                            <span class="text-xs text-gray-500">Arrived after service started</span>
-                        </span>
+                    <label class="relative flex items-start p-4 cursor-pointer rounded-xl border transition-all {{ old('status', $attendance->status) === 'late' ? 'bg-amber-50 border-amber-500 shadow-sm' : 'bg-white border-slate-200 hover:border-amber-300' }}">
+                        <div class="flex items-center h-5">
+                            <input type="radio" name="status" value="late" {{ old('status', $attendance->status) === 'late' ? 'checked' : '' }} class="form-radio text-amber-600 border-slate-300 focus:ring-amber-500">
+                        </div>
+                        <div class="ml-3">
+                            <span class="block text-sm font-bold text-slate-900">Late</span>
+                            <span class="block text-xs text-slate-500 mt-0.5">Arrived after service started</span>
+                        </div>
                     </label>
                 </div>
                 @error('status')
-                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                <p class="text-red-600 text-xs mt-1">{{ $message }}</p>
                 @enderror
             </div>
 
             <!-- Notes -->
             <div>
-                <label for="notes" class="block text-sm font-medium text-gray-700 mb-1">
-                    Notes <span class="text-gray-500 text-xs">(Optional)</span>
-                </label>
+                <label for="notes" class="form-label mb-1.5 block font-medium text-sm text-slate-700">Notes</label>
                 <textarea name="notes"
                           id="notes"
                           rows="3"
-                          class="form-textarea w-full"
+                          class="form-textarea w-full rounded-xl border-slate-200 focus:border-primary-500 focus:ring-primary-500 transition-colors"
                           placeholder="Additional notes about this attendance record...">{{ old('notes', $attendance->notes) }}</textarea>
-                <p class="text-xs text-gray-500 mt-1">Add any relevant information about this attendance record</p>
+                <p class="text-xs text-slate-500 mt-1">Add any relevant information about this attendance record</p>
             </div>
 
             <!-- Record Information -->
-            <div class="p-4 bg-gray-50 rounded-lg border border-gray-200">
-                <h4 class="text-sm font-semibold text-gray-900 mb-2">Record Information</h4>
+            <div class="p-4 bg-slate-50 rounded-xl border border-slate-100">
+                <h4 class="text-sm font-bold text-slate-900 mb-3 flex items-center gap-2">
+                    <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    Record Information
+                </h4>
                 <div class="grid grid-cols-2 gap-4 text-sm">
                     <div>
-                        <p class="text-gray-600">Recorded By</p>
-                        <p class="font-medium text-gray-900">{{ $attendance->recordedBy->name ?? 'System' }}</p>
+                        <p class="text-slate-500 text-xs uppercase tracking-wider font-bold mb-0.5">Recorded By</p>
+                        <p class="font-medium text-slate-900">{{ $attendance->recorder->full_name ?? 'System' }}</p>
                     </div>
                     <div>
-                        <p class="text-gray-600">Recorded At</p>
-                        <p class="font-medium text-gray-900">{{ $attendance->recorded_at ? $attendance->recorded_at->format('M d, Y H:i') : 'N/A' }}</p>
+                        <p class="text-slate-500 text-xs uppercase tracking-wider font-bold mb-0.5">Recorded At</p>
+                        <p class="font-medium text-slate-900">{{ $attendance->recorded_at ? $attendance->recorded_at->format('M d, Y H:i') : 'N/A' }}</p>
                     </div>
                     @if($attendance->check_in_time)
                     <div>
-                        <p class="text-gray-600">Check-in Time</p>
-                        <p class="font-medium text-gray-900">{{ $attendance->check_in_time }}</p>
+                        <p class="text-slate-500 text-xs uppercase tracking-wider font-bold mb-0.5">Check-in Time</p>
+                        <p class="font-medium text-slate-900">{{ \Carbon\Carbon::parse($attendance->check_in_time)->format('H:i') }}</p>
                     </div>
                     @endif
                     @if($attendance->check_in_method)
                     <div>
-                        <p class="text-gray-600">Check-in Method</p>
-                        <p class="font-medium text-gray-900">{{ ucwords(str_replace('_', ' ', $attendance->check_in_method)) }}</p>
+                        <p class="text-slate-500 text-xs uppercase tracking-wider font-bold mb-0.5">Check-in Method</p>
+                        <p class="font-medium text-slate-900">{{ ucwords(str_replace('_', ' ', $attendance->check_in_method)) }}</p>
                     </div>
                     @endif
                 </div>
             </div>
 
             <!-- Submit Buttons -->
-            <div class="flex justify-between items-center pt-4">
-                <a href="{{ route('attendance.index') }}" class="text-sm text-gray-600 hover:text-gray-800">
+            <div class="pt-4 flex items-center justify-end gap-3 border-t border-slate-100">
+                <a href="{{ route('attendance.index') }}" class="btn bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 hover:text-slate-900 transition-colors">
                     Cancel
                 </a>
-                <div class="flex gap-3">
-                    <button type="submit" class="btn btn-primary">
-                        <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                            <path d="M7.707 10.293a1 1 0 10-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L11 11.586V6h5a2 2 0 012 2v7a2 2 0 01-2 2H4a2 2 0 01-2-2V8a2 2 0 012-2h5v5.586l-1.293-1.293zM9 4a1 1 0 012 0v2H9V4z"/>
-                        </svg>
-                        Update Record
-                    </button>
-                </div>
+                <button type="submit" class="btn btn-primary flex items-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                    </svg>
+                    Update Record
+                </button>
             </div>
         </form>
     </div>

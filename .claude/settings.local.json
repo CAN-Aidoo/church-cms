@@ -50,7 +50,21 @@
       "Bash(MSYS_NO_PATHCONV=1 railway variables:*)",
       "Bash(composer validate:*)",
       "Bash(composer update:*)",
-      "Bash([ -f \"README.md\" ])"
+      "Bash([ -f \"README.md\" ])",
+      "Bash([ -f \"public/manifest.json\" ])",
+      "Bash(net start:*)",
+      "Bash([ -f \".env\" ])",
+      "Bash([ -f \"vendor/autoload.php\" ])",
+      "Bash([ -f \"node_modules/.bin/vite\" ])",
+      "Bash([ -d \"public/build\" ])",
+      "Bash(redis-cli:*)",
+      "Bash(tasklist:*)",
+      "Bash(php test-db-connection.php:*)",
+      "Bash(php:*)",
+      "Bash([ -f \"public/images/icon-192x192.png\" ])",
+      "Bash([ -f \"config/qr-code.php\" ])",
+      "Bash(wc:*)",
+      "Bash(grep:*)"
     ],
     "deny": [],
     "ask": []

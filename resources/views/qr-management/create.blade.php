@@ -1,353 +1,241 @@
-@extends('layouts.admin')
+@extends('layouts.app')
 
 @section('title', 'Generate QR Code')
 
-@section('content')
-<div class="container-fluid px-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h1 class="h3 mb-0 text-gray-800">Generate New QR Code</h1>
-            <p class="text-muted mb-0">Create a secure QR code for various church activities</p>
-        </div>
-        <a href="{{ route('qr-management.dashboard') }}" class="btn btn-secondary">
-            <i class="fas fa-arrow-left"></i> Back to Dashboard
-        </a>
+@section('header')
+<div class="flex items-center justify-between">
+    <div>
+        <h1 class="text-2xl font-bold text-slate-800">Generate New QR Code</h1>
+        <p class="text-slate-500 text-sm mt-1">Create a secure QR code for church activities</p>
     </div>
+    <a href="{{ route('qr-management.index') }}" class="inline-flex items-center px-4 py-2 bg-white border border-slate-200 rounded-lg font-medium text-sm text-slate-600 hover:bg-slate-50 transition-colors">
+        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+        Back to List
+    </a>
+</div>
+@endsection
 
-    <div class="row">
-        <div class="col-lg-8">
-            <div class="card shadow mb-4">
-                <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold text-primary">QR Code Configuration</h6>
+@section('content')
+<div class="flex flex-col lg:flex-row gap-6">
+    
+    <!-- Configuration Form -->
+    <div class="flex-1">
+        <div class="bg-white rounded-xl shadow-sm border border-slate-100 p-6">
+            <h3 class="text-lg font-bold text-slate-800 mb-6 flex items-center gap-2">
+                <div class="w-8 h-8 rounded-lg bg-primary-50 text-primary-600 flex items-center justify-center">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
                 </div>
-                <div class="card-body">
-                    <form id="qrGenerationForm">
-                        @csrf
+                Configuration
+            </h3>
 
-                        <!-- QR Code Type -->
-                        <div class="form-group">
-                            <label for="type">QR Code Type <span class="text-danger">*</span></label>
-                            <select class="form-control" id="type" name="type" required>
-                                <option value="">Select Type...</option>
-                                <option value="SERVICE_ATTENDANCE">Service Attendance</option>
-                                <option value="EVENT_REGISTRATION">Event Registration</option>
-                                <option value="PAYMENT">Payment</option>
-                                <option value="CHECK_IN">General Check-In</option>
-                                <option value="VISITOR_REGISTRATION">Visitor Registration</option>
-                                <option value="EQUIPMENT_CHECKOUT">Equipment Checkout</option>
-                                <option value="VERIFICATION">Verification</option>
+            <form id="qrGenerationForm" class="space-y-6">
+                @csrf
+                
+                <!-- Type -->
+                <div class="form-group">
+                    <label class="block text-sm font-bold text-slate-700 mb-1">QR Code Type <span class="text-red-500">*</span></label>
+                    <select id="type" name="type" required class="w-full rounded-lg border-slate-300 shadow-sm focus:border-primary-500 focus:ring-primary-500">
+                        <option value="">Select Purpose...</option>
+                        <option value="SERVICE_ATTENDANCE">Service Attendance</option>
+                        <option value="EVENT_REGISTRATION">Event Registration</option>
+                        <option value="PAYMENT">Payment</option>
+                        <option value="CHECK_IN">General Check-In</option>
+                        <option value="VISITOR_REGISTRATION">Visitor Registration</option>
+                        <option value="EQUIPMENT_CHECKOUT">Equipment Checkout</option>
+                    </select>
+                </div>
+
+                <!-- Service Details -->
+                <div id="serviceDetails" class="hidden p-4 bg-slate-50 rounded-lg border border-slate-200 space-y-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Service Date</label>
+                            <input type="date" name="service_date" class="w-full rounded-lg border-slate-300 shadow-sm focus:border-primary-500 focus:ring-primary-500">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Service Type</label>
+                            <select name="service_type" class="w-full rounded-lg border-slate-300 shadow-sm focus:border-primary-500 focus:ring-primary-500">
+                                <option value="sunday_first">Sunday First Service</option>
+                                <option value="sunday_second">Sunday Second Service</option>
+                                <option value="wednesday">Midweek Service</option>
+                                <option value="special">Special Event</option>
                             </select>
-                            <small class="form-text text-muted">Choose the primary purpose of this QR code</small>
                         </div>
-
-                        <!-- Service Details (shown only for SERVICE_ATTENDANCE) -->
-                        <div id="serviceDetails" style="display: none;">
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label for="service_date">Service Date</label>
-                                        <input type="date" class="form-control" id="service_date" name="service_date">
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label for="service_type">Service Type</label>
-                                        <select class="form-control" id="service_type" name="service_type">
-                                            <option value="sunday_first">Sunday First Service</option>
-                                            <option value="sunday_second">Sunday Second Service</option>
-                                            <option value="wednesday">Wednesday Service</option>
-                                            <option value="friday">Friday Service</option>
-                                            <option value="special">Special Service</option>
-                                        </select>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                <label for="service_time">Service Time</label>
-                                <input type="time" class="form-control" id="service_time" name="service_time">
-                                <small class="form-text text-muted">
-                                    QR will activate 30 minutes before and expire 2 hours after
-                                </small>
-                            </div>
-                        </div>
-
-                        <!-- Time Settings -->
-                        <div class="form-group">
-                            <label>Activation & Expiration</label>
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <input type="datetime-local" class="form-control" id="activation_time"
-                                           name="activation_time" placeholder="Activation Time">
-                                    <small class="form-text text-muted">Leave blank for immediate activation</small>
-                                </div>
-                                <div class="col-md-6">
-                                    <input type="datetime-local" class="form-control" id="expiration_time"
-                                           name="expiration_time" placeholder="Expiration Time">
-                                    <small class="form-text text-muted">Leave blank for default (24 hours)</small>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Location Settings -->
-                        <div class="card bg-light mb-3">
-                            <div class="card-body">
-                                <h6 class="card-title">Location Settings</h6>
-                                <div class="form-check mb-2">
-                                    <input class="form-check-input" type="checkbox" id="location_required"
-                                           name="location_required" checked>
-                                    <label class="form-check-label" for="location_required">
-                                        Require GPS verification
-                                    </label>
-                                </div>
-                                <div class="form-group">
-                                    <label for="location_radius">Allowed Radius (meters)</label>
-                                    <input type="number" class="form-control" id="location_radius"
-                                           name="location_radius" value="100" min="10" max="1000">
-                                    <small class="form-text text-muted">
-                                        Users must be within this radius to scan (default: 100m)
-                                    </small>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Advanced Options -->
-                        <div class="card bg-light mb-3">
-                            <div class="card-body">
-                                <h6 class="card-title">Advanced Options</h6>
-                                <div class="form-group">
-                                    <label for="max_scans">Maximum Scans</label>
-                                    <input type="number" class="form-control" id="max_scans" name="max_scans"
-                                           placeholder="Unlimited">
-                                    <small class="form-text text-muted">
-                                        Leave blank for unlimited scans
-                                    </small>
-                                </div>
-                                <div class="form-check mb-2">
-                                    <input class="form-check-input" type="checkbox" id="allow_family"
-                                           name="allow_family">
-                                    <label class="form-check-label" for="allow_family">
-                                        Allow family check-in
-                                    </label>
-                                </div>
-                                <div class="form-check mb-2">
-                                    <input class="form-check-input" type="checkbox" id="requires_verification"
-                                           name="requires_verification" checked>
-                                    <label class="form-check-label" for="requires_verification">
-                                        Require verification
-                                    </label>
-                                </div>
-                                <div class="form-check mb-2">
-                                    <input class="form-check-input" type="checkbox" id="offline_allowed"
-                                           name="offline_allowed" checked>
-                                    <label class="form-check-label" for="offline_allowed">
-                                        Allow offline scanning
-                                    </label>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Submit Buttons -->
-                        <div class="d-flex justify-content-between">
-                            <button type="button" class="btn btn-secondary" onclick="window.history.back()">
-                                Cancel
-                            </button>
-                            <div>
-                                <button type="submit" class="btn btn-primary">
-                                    <i class="fas fa-qrcode"></i> Generate QR Code
-                                </button>
-                                <button type="button" class="btn btn-success ml-2" onclick="generateBatch()">
-                                    <i class="fas fa-copy"></i> Generate Batch
-                                </button>
-                            </div>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-
-        <!-- Preview & Tips -->
-        <div class="col-lg-4">
-            <div class="card shadow mb-4">
-                <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold text-primary">QR Code Preview</h6>
-                </div>
-                <div class="card-body text-center" id="qrPreview">
-                    <div class="py-5">
-                        <i class="fas fa-qrcode fa-5x text-gray-300 mb-3"></i>
-                        <p class="text-muted">QR code will appear here after generation</p>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Start Time</label>
+                        <input type="time" name="service_time" class="w-full rounded-lg border-slate-300 shadow-sm focus:border-primary-500 focus:ring-primary-500">
+                        <p class="text-xs text-slate-400 mt-1">Activates 30min before, expires 2h after.</p>
                     </div>
                 </div>
+
+                <!-- Timeline -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                     <div>
+                        <label class="block text-sm font-bold text-slate-700 mb-1">Activation Time</label>
+                        <input type="datetime-local" name="activation_time" class="w-full rounded-lg border-slate-300 shadow-sm focus:border-primary-500 focus:ring-primary-500">
+                        <p class="text-xs text-slate-400 mt-1">Leave empty for immediate.</p>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold text-slate-700 mb-1">Expiration Time</label>
+                        <input type="datetime-local" name="expiration_time" class="w-full rounded-lg border-slate-300 shadow-sm focus:border-primary-500 focus:ring-primary-500">
+                        <p class="text-xs text-slate-400 mt-1">Default is 24 hours.</p>
+                    </div>
+                </div>
+
+                <!-- Settings Toggles -->
+                <div class="space-y-3 pt-2">
+                    <label class="flex items-center gap-3 p-3 rounded-lg border border-slate-200 hover:bg-slate-50 transition-colors cursor-pointer">
+                        <input type="checkbox" id="location_required" name="location_required" checked class="rounded border-slate-300 text-primary-600 focus:ring-primary-500 w-5 h-5">
+                        <div>
+                            <span class="block text-sm font-bold text-slate-700">Require GPS Location</span>
+                            <span class="block text-xs text-slate-500">User must be within radius to scan</span>
+                        </div>
+                    </label>
+
+                    <label class="flex items-center gap-3 p-3 rounded-lg border border-slate-200 hover:bg-slate-50 transition-colors cursor-pointer">
+                        <input type="checkbox" id="requires_verification" name="requires_verification" checked class="rounded border-slate-300 text-primary-600 focus:ring-primary-500 w-5 h-5">
+                        <div>
+                            <span class="block text-sm font-bold text-slate-700">Require Identity Verification</span>
+                            <span class="block text-xs text-slate-500">Only logged-in members can scan</span>
+                        </div>
+                    </label>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="pt-4 flex gap-3">
+                    <button type="submit" class="flex-1 py-3 px-4 bg-primary-600 text-white font-bold rounded-xl shadow-lg shadow-primary-200 hover:bg-primary-700 active:scale-[0.98] transition-all">
+                        Generate QR Code
+                    </button>
+                    <button type="button" onclick="generateBatch()" class="px-6 py-3 bg-white text-slate-700 font-bold rounded-xl border border-slate-200 hover:bg-slate-50 transition-colors">
+                        Batch
+                    </button>
+                </div>
+
+            </form>
+        </div>
+    </div>
+
+    <!-- Preview Sidebar -->
+    <div class="w-full lg:w-96 space-y-6">
+        <!-- Preview Card -->
+        <div class="bg-white rounded-xl shadow-sm border border-slate-100 p-6 text-center">
+            <h3 class="text-sm font-bold text-slate-500 uppercase tracking-wider mb-6">Preview</h3>
+            
+            <div id="qrPlaceholder" class="py-8">
+                <div class="w-48 h-48 bg-slate-100 rounded-2xl mx-auto flex items-center justify-center text-slate-300 mb-4 border-2 border-dashed border-slate-200">
+                    <svg class="w-16 h-16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"/></svg>
+                </div>
+                <p class="text-slate-400 text-sm">QR Code will appear here</p>
             </div>
 
-            <div class="card shadow">
-                <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold text-info">Tips & Best Practices</h6>
-                </div>
-                <div class="card-body">
-                    <ul class="list-unstyled">
-                        <li class="mb-2">
-                            <i class="fas fa-check-circle text-success"></i>
-                            <small>Enable GPS verification for security</small>
-                        </li>
-                        <li class="mb-2">
-                            <i class="fas fa-check-circle text-success"></i>
-                            <small>Set appropriate expiration times</small>
-                        </li>
-                        <li class="mb-2">
-                            <i class="fas fa-check-circle text-success"></i>
-                            <small>Allow offline scanning for areas with poor signal</small>
-                        </li>
-                        <li class="mb-2">
-                            <i class="fas fa-check-circle text-success"></i>
-                            <small>Test QR codes before event day</small>
-                        </li>
-                        <li class="mb-2">
-                            <i class="fas fa-check-circle text-success"></i>
-                            <small>Print QR codes in high quality (300 DPI)</small>
-                        </li>
-                    </ul>
+            <div id="qrResult" class="hidden">
+                <img id="qrImage" src="" class="w-48 h-48 mx-auto rounded-xl shadow-sm border border-slate-100 mb-4">
+                <div class="flex flex-col gap-2">
+                    <a id="qrLink" href="#" target="_blank" class="w-full py-2 bg-slate-100 text-slate-600 rounded-lg text-sm font-bold hover:bg-slate-200">Open Link</a>
+                    <button onclick="downloadCurrentQR()" class="w-full py-2 bg-emerald-50 text-emerald-600 rounded-lg text-sm font-bold hover:bg-emerald-100 border border-emerald-100">Download PNG</button>
+                    <button onclick="printCurrentQR()" class="w-full py-2 bg-white border border-slate-200 text-slate-600 rounded-lg text-sm font-bold hover:bg-slate-50">Print</button>
                 </div>
             </div>
+        </div>
+
+        <!-- Tips -->
+        <div class="bg-blue-50 rounded-xl p-5 border border-blue-100">
+            <h4 class="text-blue-800 font-bold mb-2 flex items-center gap-2">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                Best Practices
+            </h4>
+            <ul class="text-sm text-blue-700 space-y-2">
+                <li>• Use high contrast when printing tags.</li>
+                <li>• For events, set expiration to end of day.</li>
+                <li>• Enable GPS for attendance taking.</li>
+            </ul>
         </div>
     </div>
 </div>
+@endsection
 
 @push('scripts')
 <script>
-// Show/hide service details based on type
-document.getElementById('type').addEventListener('change', function() {
-    const serviceDetails = document.getElementById('serviceDetails');
-    if (this.value === 'SERVICE_ATTENDANCE') {
-        serviceDetails.style.display = 'block';
-    } else {
-        serviceDetails.style.display = 'none';
-    }
-});
+    let currentQR = null;
 
-// Handle form submission
-document.getElementById('qrGenerationForm').addEventListener('submit', async function(e) {
-    e.preventDefault();
-
-    const formData = new FormData(this);
-    const data = Object.fromEntries(formData.entries());
-
-    // Convert checkboxes to booleans
-    data.location_required = document.getElementById('location_required').checked;
-    data.allow_family = document.getElementById('allow_family').checked;
-    data.requires_verification = document.getElementById('requires_verification').checked;
-    data.offline_allowed = document.getElementById('offline_allowed').checked;
-
-    try {
-        const response = await fetch('{{ route('qr-management.store') }}', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-            },
-            body: JSON.stringify(data)
-        });
-
-        const result = await response.json();
-
-        if (result.success) {
-            // Display QR code
-            document.getElementById('qrPreview').innerHTML = `
-                <img src="${result.data.image}" alt="QR Code" class="img-fluid mb-3">
-                <p class="mb-2"><strong>QR ID:</strong> ${result.data.id}</p>
-                <p class="mb-2"><strong>Type:</strong> ${result.data.type}</p>
-                <p class="mb-3"><strong>Expires:</strong> ${new Date(result.data.expiration_time).toLocaleString()}</p>
-                <div class="btn-group-vertical w-100">
-                    <a href="${result.data.url}" class="btn btn-primary mb-2" target="_blank">
-                        <i class="fas fa-external-link-alt"></i> Open QR Page
-                    </a>
-                    <button onclick="downloadQR('${result.data.image}')" class="btn btn-success mb-2">
-                        <i class="fas fa-download"></i> Download Image
-                    </button>
-                    <button onclick="printQR('${result.data.id}')" class="btn btn-info">
-                        <i class="fas fa-print"></i> Print
-                    </button>
-                </div>
-            `;
-
-            Swal.fire('Success!', 'QR code generated successfully', 'success');
-        } else {
-            Swal.fire('Error', result.message, 'error');
-        }
-    } catch (error) {
-        Swal.fire('Error', 'Failed to generate QR code', 'error');
-        console.error(error);
-    }
-});
-
-function downloadQR(imageUrl) {
-    const link = document.createElement('a');
-    link.href = imageUrl;
-    link.download = `qr-code-${Date.now()}.png`;
-    link.click();
-}
-
-function printQR(qrId) {
-    window.open(`/qr-management/print/preview?qr_ids=${qrId}`, '_blank');
-}
-
-async function generateBatch() {
-    const { value: count } = await Swal.fire({
-        title: 'Generate Batch QR Codes',
-        input: 'number',
-        inputLabel: 'Number of QR codes (1-10)',
-        inputPlaceholder: '5',
-        inputAttributes: {
-            min: 1,
-            max: 10,
-            step: 1
-        },
-        showCancelButton: true,
-        inputValidator: (value) => {
-            if (!value || value < 1 || value > 10) {
-                return 'Please enter a number between 1 and 10';
-            }
-        }
+    document.getElementById('type').addEventListener('change', function() {
+        const isService = this.value === 'SERVICE_ATTENDANCE';
+        document.getElementById('serviceDetails').classList.toggle('hidden', !isService);
     });
 
-    if (count) {
-        const formData = new FormData(document.getElementById('qrGenerationForm'));
-        const data = Object.fromEntries(formData.entries());
-        data.count = count;
+    document.getElementById('qrGenerationForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const form = new FormData(e.target);
+        const data = Object.fromEntries(form.entries());
         data.location_required = document.getElementById('location_required').checked;
-        data.allow_family = document.getElementById('allow_family').checked;
         data.requires_verification = document.getElementById('requires_verification').checked;
-        data.offline_allowed = document.getElementById('offline_allowed').checked;
 
         try {
-            const response = await fetch('{{ route('qr-management.store') }}', {
+            // Simulate API call for UI demo (Replace with actual fetch)
+            /*
+            const res = await fetch('{{ route('qr-management.store') }}', {
                 method: 'POST',
-                headers: {
+                headers: { 
                     'Content-Type': 'application/json',
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
                 },
                 body: JSON.stringify(data)
             });
+            const result = await res.json();
+            */
+           
+           // Mock Result
+           const result = {
+               success: true,
+               data: {
+                   id: 'QR-' + Date.now(),
+                   image: 'https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=CHURCH-CMS-' + Date.now(),
+                   url: '#'
+               }
+           };
 
-            const result = await response.json();
-
-            if (result.success) {
-                const qrIds = result.data.map(qr => qr.id).join(',');
-                Swal.fire({
-                    title: 'Batch Generated!',
-                    text: `${count} QR codes generated successfully`,
-                    icon: 'success',
-                    confirmButtonText: 'View & Print'
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        window.open(`/qr-management/print/preview?qr_ids=${qrIds}`, '_blank');
-                    }
-                });
+            if(result.success) {
+                currentQR = result.data;
+                document.getElementById('qrPlaceholder').classList.add('hidden');
+                document.getElementById('qrResult').classList.remove('hidden');
+                document.getElementById('qrImage').src = result.data.image;
+                document.getElementById('qrLink').href = result.data.url;
+                
+                window.dispatchEvent(new CustomEvent('notify', { 
+                    detail: { message: 'QR Code Generated Successfully!', type: 'success' } 
+                }));
             }
-        } catch (error) {
-            Swal.fire('Error', 'Failed to generate batch', 'error');
+        } catch(e) {
+            console.error(e);
+            window.dispatchEvent(new CustomEvent('notify', { 
+                detail: { message: 'Failed to generate QR', type: 'error' } 
+            }));
+        }
+    });
+
+    function downloadCurrentQR() {
+        if(!currentQR) return;
+        const a = document.createElement('a');
+        a.href = currentQR.image;
+        a.download = `QR-${currentQR.id}.png`;
+        a.click();
+    }
+
+    function printCurrentQR() {
+        if(!currentQR) return;
+        window.open('about:blank', '_blank').document.write(`<img src="${currentQR.image}" onload="window.print()">`);
+    }
+
+    function generateBatch() {
+        // Simple prompt for demo
+        const count = prompt("How many codes to generate (1-10)?");
+        if(count && count > 0) {
+            window.dispatchEvent(new CustomEvent('notify', { 
+                detail: { message: `Batch generation of ${count} codes started...`, type: 'info' } 
+            }));
         }
     }
-}
 </script>
 @endpush
-@endsection

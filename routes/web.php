@@ -14,6 +14,7 @@ use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PartnershipController;
 use App\Http\Controllers\PrayerController;
 use App\Http\Controllers\ProgramController;
+use App\Http\Controllers\PWAController;
 use App\Http\Controllers\QrCodeController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\ServicePlanningController;
@@ -88,6 +89,16 @@ Route::middleware('auth')->group(function () {
         // Member actions
         Route::post('members/bulk-action', [MemberController::class, 'bulkAction'])->name('members.bulk-action');
         Route::delete('members/{member}/photo', [MemberController::class, 'deletePhoto'])->name('members.delete-photo');
+
+        // Member QR Code routes
+        Route::post('members/{member}/generate-qr', [MemberController::class, 'generateQR'])->name('members.generate-qr');
+        Route::post('members/{member}/regenerate-qr', [MemberController::class, 'regenerateQR'])->name('members.regenerate-qr');
+        Route::post('members/bulk-generate-qr', [MemberController::class, 'bulkGenerateQR'])->name('members.bulk-generate-qr');
+        Route::post('members/print-qr-cards', [MemberController::class, 'printQRCards'])->name('members.print-qr-cards');
+        Route::get('members/print-cards', [MemberController::class, 'showPrintableCards'])->name('members.show-print-cards');
+        Route::get('members/{member}/download-qr', [MemberController::class, 'downloadQR'])->name('members.download-qr');
+        Route::get('members/{member}/qr-image', [MemberController::class, 'showQRImage'])->name('members.qr-image');
+        Route::post('members/export-qr-cards-pdf', [MemberController::class, 'exportQRCardsPdf'])->name('members.export-qr-cards-pdf');
     });
 
     // Attendance Routes - Staff and above
@@ -286,6 +297,21 @@ Route::middleware('auth')->group(function () {
 
         // Analytics
         Route::get('programs/{program}/analytics', [ProgramController::class, 'analytics'])->name('programs.analytics');
+
+        // Program QR Code routes
+        Route::post('programs/{program}/generate-registration-qr', [ProgramController::class, 'generateRegistrationQR'])->name('programs.generate-registration-qr');
+        Route::post('programs/{program}/generate-checkin-qr', [ProgramController::class, 'generateCheckInQR'])->name('programs.generate-checkin-qr');
+        Route::post('programs/{program}/regenerate-registration-qr', [ProgramController::class, 'regenerateRegistrationQR'])->name('programs.regenerate-registration-qr');
+        Route::post('programs/{program}/regenerate-checkin-qr', [ProgramController::class, 'regenerateCheckInQR'])->name('programs.regenerate-checkin-qr');
+        Route::post('programs/{program}/toggle-qr-registration', [ProgramController::class, 'toggleQRRegistration'])->name('programs.toggle-qr-registration');
+        Route::post('programs/{program}/toggle-qr-checkin', [ProgramController::class, 'toggleQRCheckIn'])->name('programs.toggle-qr-checkin');
+        Route::get('programs/{program}/download-registration-qr', [ProgramController::class, 'downloadRegistrationQR'])->name('programs.download-registration-qr');
+        Route::get('programs/{program}/download-checkin-qr', [ProgramController::class, 'downloadCheckInQR'])->name('programs.download-checkin-qr');
+        Route::get('programs/{program}/registration-qr-image', [ProgramController::class, 'showRegistrationQRImage'])->name('programs.registration-qr-image');
+        Route::get('programs/{program}/checkin-qr-image', [ProgramController::class, 'showCheckInQRImage'])->name('programs.checkin-qr-image');
+        Route::get('programs/{program}/print-registration-qr', [ProgramController::class, 'printRegistrationQRPoster'])->name('programs.print-registration-qr');
+        Route::get('programs/{program}/print-checkin-qr', [ProgramController::class, 'printCheckInQRPoster'])->name('programs.print-checkin-qr');
+        Route::post('programs/{program}/export-qr-poster-pdf', [ProgramController::class, 'exportQRPosterPdf'])->name('programs.export-qr-poster-pdf');
     });
 
     // Public program registration (all authenticated users)
@@ -411,6 +437,14 @@ Route::middleware('auth')->group(function () {
         Route::get('reports/financial/giving', [ReportController::class, 'financialReports'])->name('reports.financial.giving');
 
         Route::get('reports/attendance', [ReportController::class, 'attendanceReports'])->name('reports.attendance.summary');
+
+        // QR Analytics - Staff and above
+        Route::get('qr-analytics', [\App\Http\Controllers\QRAnalyticsController::class, 'index'])->name('qr-analytics.index');
+        Route::post('qr-analytics/export', [\App\Http\Controllers\QRAnalyticsController::class, 'export'])->name('qr-analytics.export');
+
+        // QR Scan History Reports
+        Route::get('reports/qr-scans', [ReportController::class, 'qrScanHistory'])->name('reports.qr-scans');
+        Route::post('reports/qr-scans/export', [ReportController::class, 'exportQRScanHistory'])->name('reports.qr-scans.export');
         Route::get('reports/attendance/trends', [ReportController::class, 'attendanceReports'])->name('reports.attendance.trends');
         Route::get('reports/attendance/absentees', [ReportController::class, 'attendanceReports'])->name('reports.attendance.absentees');
 
@@ -701,6 +735,22 @@ Route::middleware('auth')->group(function () {
         Route::get('/{id}/download', [App\Http\Controllers\QRManagementController::class, 'downloadImage'])->name('download');
     });
 
+    // PWA Scanner Routes - Authenticated users only
+    Route::prefix('pwa')->name('pwa.')->group(function () {
+        Route::get('/scanner', [App\Http\Controllers\PWAController::class, 'scanner'])->name('scanner');
+        Route::get('/scanner/config', [App\Http\Controllers\PWAController::class, 'getScannerConfig'])->name('scanner.config');
+        Route::post('/install', [App\Http\Controllers\PWAController::class, 'install'])->name('install');
+    });
+});
+
+// ============================================================================
+// PWA PUBLIC ROUTES (NO AUTH REQUIRED)
+// ============================================================================
+
+// PWA Offline and Status Routes (accessible without authentication)
+Route::prefix('pwa')->name('pwa.')->group(function () {
+    Route::get('/offline', [App\Http\Controllers\PWAController::class, 'offline'])->name('offline');
+    Route::get('/status', [App\Http\Controllers\PWAController::class, 'status'])->name('status');
 });
 
 // ============================================================================
@@ -726,6 +776,9 @@ Route::prefix('mobile')->name('mobile.')->group(function () {
     Route::get('/checkin', function () {
         return view('mobile.checkin');
     })->name('checkin');
+    Route::get('/check-in', function () {
+        return view('mobile.checkin');
+    })->name('check-in');
     Route::get('/service-checkin', function () {
         return view('mobile.service-checkin');
     })->name('service-checkin');

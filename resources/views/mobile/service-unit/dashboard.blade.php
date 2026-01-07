@@ -87,10 +87,11 @@
         }
 
         function renderUnits(units) {
+            const mobileBase = '{{ url('/mobile') }}';
             unitsList.innerHTML = units.map(unit => `
                 <div class="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm relative overflow-hidden">
                     <div class="absolute top-0 right-0 w-16 h-16 bg-gradient-to-br from-orange-100 to-white rounded-bl-full -mr-4 -mt-4"></div>
-                    
+
                     <div class="relative z-10">
                         <div class="flex justify-between items-start mb-2">
                             <h3 class="text-xl font-bold text-gray-900">${unit.name}</h3>
@@ -98,15 +99,15 @@
                                 ${unit.pivot.role}
                             </span>
                         </div>
-                        
+
                         <p class="text-gray-500 text-sm mb-4 line-clamp-1">${unit.description || 'No description'}</p>
-                        
+
                         <div class="flex gap-2">
-                            <a href="/mobile/service-unit/${unit.id}/roster" class="flex-1 py-2 bg-gray-50 hover:bg-gray-100 text-gray-700 rounded-lg text-sm font-medium text-center border border-gray-200 transition">
+                            <a href="${mobileBase}/service-unit/${unit.id}/roster" class="flex-1 py-2 bg-gray-50 hover:bg-gray-100 text-gray-700 rounded-lg text-sm font-medium text-center border border-gray-200 transition">
                                 View Roster
                             </a>
                             ${['leader', 'assistant_leader'].includes(unit.pivot.role) ? `
-                                <a href="/mobile/service-unit/${unit.id}/manage" class="flex-1 py-2 bg-orange-50 hover:bg-orange-100 text-orange-700 rounded-lg text-sm font-medium text-center border border-orange-200 transition">
+                                <a href="${mobileBase}/service-unit/${unit.id}/manage" class="flex-1 py-2 bg-orange-50 hover:bg-orange-100 text-orange-700 rounded-lg text-sm font-medium text-center border border-orange-200 transition">
                                     Manage
                                 </a>
                             ` : ''}
@@ -165,7 +166,7 @@
                                 Check In Now
                             </button>
                         ` : duty.checked_in && !duty.tasks_completed ? `
-                            <a href="/mobile/service-unit/duty/${duty.id}/tasks" class="block w-full py-2 bg-blue-50 text-blue-700 font-medium rounded-lg text-center hover:bg-blue-100 active:scale-95 transition">
+                            <a href="${mobileBase}/service-unit/duty/${duty.id}/tasks" class="block w-full py-2 bg-blue-50 text-blue-700 font-medium rounded-lg text-center hover:bg-blue-100 active:scale-95 transition">
                                 View Tasks
                             </a>
                         ` : ''}

@@ -44,7 +44,9 @@ return new class extends Migration
             $table->index('member_status');
             $table->index('join_date');
             $table->index('user_id');
-            $table->fullText(['first_name', 'last_name', 'email']);
+            if (DB::getDriverName() !== 'sqlite') {
+                $table->fullText(['first_name', 'last_name', 'email']);
+            }
         });
     }
 

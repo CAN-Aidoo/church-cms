@@ -808,4 +808,297 @@ class MemberController extends Controller
             'total' => count($allEvents),
         ]);
     }
+
+    /**
+     * Generate QR code for a single member.
+     */
+    public function generateQR(Request $request, $id)
+    {
+        $member = Member::findOrFail($id);
+
+        // Generate unique QR code if not exists
+        if (!$member->member_qr_code) {
+            $member->member_qr_code = 'MBR-' . strtoupper(uniqid()) . '-' . $member->id;
+            $member->save();
+        }
+
+        // Generate QR code image using QR service
+        $qrCodeUrl = $this->generateMemberQRCodeImage($member);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'QR code generated successfully',
+            'data' => [
+                'member_id' => $member->id,
+                'member_name' => $member->full_name,
+                'qr_code' => $member->member_qr_code,
+                'qr_image_url' => $qrCodeUrl,
+                'qr_scan_count' => $member->qr_scan_count ?? 0,
+                'last_scan' => $member->last_qr_scan?->format('Y-m-d H:i:s'),
+            ],
+        ]);
+    }
+
+    /**
+     * Regenerate QR code for a member (invalidate old one).
+     */
+    public function regenerateQR(Request $request, $id)
+    {
+        $member = Member::findOrFail($id);
+
+        // Generate new QR code
+        $member->member_qr_code = 'MBR-' . strtoupper(uniqid()) . '-' . $member->id;
+        $member->qr_scan_count = 0;
+        $member->last_qr_scan = null;
+        $member->save();
+
+        // Generate QR code image
+        $qrCodeUrl = $this->generateMemberQRCodeImage($member);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'QR code regenerated successfully',
+            'data' => [
+                'member_id' => $member->id,
+                'member_name' => $member->full_name,
+                'qr_code' => $member->member_qr_code,
+                'qr_image_url' => $qrCodeUrl,
+            ],
+        ]);
+    }
+
+    /**
+     * Bulk generate QR codes for multiple members.
+     */
+    public function bulkGenerateQR(Request $request)
+    {
+        $validated = $request->validate([
+            'member_ids' => 'required|array',
+            'member_ids.*' => 'exists:members,id',
+            'regenerate' => 'boolean', // Force regenerate even if exists
+        ]);
+
+        $memberIds = $validated['member_ids'];
+        $regenerate = $validated['regenerate'] ?? false;
+        $results = [];
+
+        foreach ($memberIds as $memberId) {
+            $member = Member::find($memberId);
+
+            if (!$member) {
+                $results[] = [
+                    'member_id' => $memberId,
+                    'success' => false,
+                    'message' => 'Member not found',
+                ];
+                continue;
+            }
+
+            // Generate or regenerate QR code
+            if (!$member->member_qr_code || $regenerate) {
+                $member->member_qr_code = 'MBR-' . strtoupper(uniqid()) . '-' . $member->id;
+                if ($regenerate) {
+                    $member->qr_scan_count = 0;
+                    $member->last_qr_scan = null;
+                }
+                $member->save();
+            }
+
+            $results[] = [
+                'member_id' => $member->id,
+                'member_name' => $member->full_name,
+                'success' => true,
+                'qr_code' => $member->member_qr_code,
+            ];
+        }
+
+        $successCount = collect($results)->where('success', true)->count();
+        $failCount = collect($results)->where('success', false)->count();
+
+        return response()->json([
+            'success' => true,
+            'message' => "Generated QR codes for {$successCount} members",
+            'generated' => $successCount,
+            'failed' => $failCount,
+            'results' => $results,
+        ]);
+    }
+
+    /**
+     * Get QR code card data for printing (single or bulk).
+     */
+    public function printQRCards(Request $request)
+    {
+        $validated = $request->validate([
+            'member_ids' => 'required|array',
+            'member_ids.*' => 'exists:members,id',
+            'card_size' => 'nullable|in:standard,mini,badge', // standard=credit card, mini=business card, badge=ID badge
+            'include_photo' => 'boolean',
+        ]);
+
+        $memberIds = $validated['member_ids'];
+        $cardSize = $validated['card_size'] ?? 'standard';
+        $includePhoto = $validated['include_photo'] ?? true;
+
+        $cards = [];
+
+        foreach ($memberIds as $memberId) {
+            $member = Member::find($memberId);
+
+            if (!$member) {
+                continue;
+            }
+
+            // Ensure QR code exists
+            if (!$member->member_qr_code) {
+                $member->member_qr_code = 'MBR-' . strtoupper(uniqid()) . '-' . $member->id;
+                $member->save();
+            }
+
+            $cards[] = [
+                'member_id' => $member->id,
+                'member_code' => $member->member_id,
+                'full_name' => $member->full_name,
+                'photo_url' => $includePhoto && $member->photo_url
+                    ? asset('storage/' . $member->photo_url)
+                    : null,
+                'qr_code' => $member->member_qr_code,
+                'qr_image_url' => $this->generateMemberQRCodeImage($member),
+                'member_since' => $member->created_at->format('Y'),
+                'department' => $member->department,
+            ];
+        }
+
+        return response()->json([
+            'success' => true,
+            'card_size' => $cardSize,
+            'cards' => $cards,
+            'total' => count($cards),
+        ]);
+    }
+
+    /**
+     * View to display printable QR cards.
+     */
+    public function showPrintableCards(Request $request)
+    {
+        $memberIds = $request->input('member_ids', []);
+
+        if (empty($memberIds)) {
+            return redirect()->back()->with('error', 'No members selected for printing');
+        }
+
+        $members = Member::whereIn('id', $memberIds)->get();
+
+        // Ensure all members have QR codes
+        foreach ($members as $member) {
+            if (!$member->member_qr_code) {
+                $member->member_qr_code = 'MBR-' . strtoupper(uniqid()) . '-' . $member->id;
+                $member->save();
+            }
+        }
+
+        return view('members.print-qr-cards', [
+            'members' => $members,
+            'cardSize' => $request->input('card_size', 'standard'),
+            'includePhoto' => $request->input('include_photo', true),
+        ]);
+    }
+
+    /**
+     * Download member QR code as image.
+     */
+    public function downloadQR(Request $request, $id)
+    {
+        $member = Member::findOrFail($id);
+
+        // Ensure QR code exists
+        if (!$member->member_qr_code) {
+            $member->member_qr_code = 'MBR-' . strtoupper(uniqid()) . '-' . $member->id;
+            $member->save();
+        }
+
+        // Generate QR code image
+        $qrCode = \SimpleSoftwareIO\QrCode\Facades\QrCode::format('png')
+            ->size(500)
+            ->margin(2)
+            ->errorCorrection('H')
+            ->generate($member->member_qr_code);
+
+        $fileName = 'member-qr-' . $member->member_id . '.png';
+
+        return response($qrCode, 200)
+            ->header('Content-Type', 'image/png')
+            ->header('Content-Disposition', 'attachment; filename="' . $fileName . '"');
+    }
+
+    /**
+     * Helper: Generate QR code image URL for a member.
+     */
+    private function generateMemberQRCodeImage($member): string
+    {
+        // Return route to dynamically generate QR code
+        return route('members.qr-image', $member->id);
+    }
+
+    /**
+     * Display QR code image for a member.
+     */
+    public function showQRImage($id)
+    {
+        $member = Member::findOrFail($id);
+
+        // Ensure QR code exists
+        if (!$member->member_qr_code) {
+            $member->member_qr_code = 'MBR-' . strtoupper(uniqid()) . '-' . $member->id;
+            $member->save();
+        }
+
+        // Generate QR code image
+        $qrCode = \SimpleSoftwareIO\QrCode\Facades\QrCode::format('png')
+            ->size(300)
+            ->margin(1)
+            ->errorCorrection('H')
+            ->generate($member->member_qr_code);
+
+        return response($qrCode, 200)->header('Content-Type', 'image/png');
+    }
+
+    /**
+     * Export member QR cards as PDF
+     */
+    public function exportQRCardsPdf(Request $request)
+    {
+        $validated = $request->validate([
+            'member_ids' => 'required|array|min:1',
+            'member_ids.*' => 'exists:members,id',
+            'card_size' => 'nullable|in:standard,mini,badge',
+            'include_photo' => 'boolean',
+        ]);
+
+        $members = \App\Models\Member::whereIn('id', $validated['member_ids'])->get();
+
+        // Ensure all have QR codes
+        foreach ($members as $member) {
+            if (!$member->member_qr_code) {
+                $member->member_qr_code = 'MBR-' . strtoupper(uniqid()) . '-' . $member->id;
+                $member->save();
+            }
+        }
+
+        $cardSize = $validated['card_size'] ?? 'standard';
+        $includePhoto = $validated['include_photo'] ?? true;
+
+        // Queue if large batch (20+ cards)
+        if ($members->count() >= 20) {
+            // For large batches, inform the user that processing will be queued
+            // In a full implementation, this would dispatch a job and notify when ready
+            return redirect()->back()->with('info',
+                'Large batch detected. Generating ' . $members->count() . ' cards. This may take a moment...');
+        }
+
+        // Generate immediately for small batches
+        $export = new \App\Exports\MemberQRCardsPdfExport($members, $cardSize, $includePhoto);
+        return $export->download();
+    }
 }

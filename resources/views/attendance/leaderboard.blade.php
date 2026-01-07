@@ -3,67 +3,57 @@
 @section('title', 'Attendance Leaderboard')
 
 @section('content')
-<div class="page-header">
+<div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
     <div>
-        <h1 class="page-title">Attendance Leaderboard</h1>
-        <nav class="breadcrumb">
-            <a href="{{ route('dashboard') }}">Dashboard</a>
+        <h1 class="text-2xl font-heading font-bold text-slate-900">Attendance Leaderboard</h1>
+        <nav class="flex items-center gap-2 text-sm text-slate-500 mt-1">
+            <a href="{{ route('dashboard') }}" class="hover:text-primary-600 transition-colors">Dashboard</a>
             <span>/</span>
-            <a href="{{ route('attendance.index') }}">Attendance</a>
+            <a href="{{ route('attendance.index') }}" class="hover:text-primary-600 transition-colors">Attendance</a>
             <span>/</span>
-            <span>Leaderboard</span>
+            <span class="text-slate-800 font-medium">Leaderboard</span>
         </nav>
     </div>
-    <div class="flex gap-3">
-        <a href="{{ route('attendance.reports') }}" class="btn btn-secondary">
-            <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                <path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z"/>
-            </svg>
+    <div class="flex items-center gap-3">
+        <a href="{{ route('attendance.reports') }}" class="btn bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 hover:text-slate-900 transition-colors flex items-center gap-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
             Full Reports
         </a>
-        <a href="{{ route('attendance.index') }}" class="btn btn-outline">
+        <a href="{{ route('attendance.index') }}" class="btn bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 hover:text-slate-900 transition-colors">
             Back to Attendance
         </a>
     </div>
 </div>
 
 <!-- Date Filter Card -->
-<div class="card mb-6">
-    <div class="card-header bg-gradient-to-r from-primary-50 to-blue-50">
-        <h3 class="text-lg font-semibold text-gray-900">Filter Period</h3>
-        <p class="text-sm text-gray-600 mt-1">Select date range to view leaderboard statistics</p>
+<div class="card border border-slate-100 mb-8">
+    <div class="px-6 py-4 border-b border-slate-100 bg-slate-50/50">
+        <h3 class="font-bold text-slate-800 text-base">Filter Period</h3>
+        <p class="text-sm text-slate-500 mt-0.5">Select date range to view leaderboard statistics</p>
     </div>
-    <div class="card-body">
-        <form method="GET" action="{{ route('attendance.leaderboard') }}" class="flex flex-wrap gap-4 items-end">
-            <div class="flex-1 min-w-[200px]">
-                <label for="date_from" class="block text-sm font-medium text-gray-700 mb-1">From Date</label>
+    <div class="p-6">
+        <form method="GET" action="{{ route('attendance.leaderboard') }}" class="flex flex-col md:flex-row gap-4 items-end">
+            <div class="w-full md:w-1/3">
+                <label for="date_from" class="form-label mb-1.5 block font-medium text-sm text-slate-700">From Date</label>
                 <input type="date"
                        name="date_from"
                        id="date_from"
                        value="{{ $dateFrom }}"
-                       class="form-input w-full">
+                       class="form-input w-full border-slate-200 focus:border-primary-500 focus:ring-primary-500">
             </div>
-            <div class="flex-1 min-w-[200px]">
-                <label for="date_to" class="block text-sm font-medium text-gray-700 mb-1">To Date</label>
+            <div class="w-full md:w-1/3">
+                <label for="date_to" class="form-label mb-1.5 block font-medium text-sm text-slate-700">To Date</label>
                 <input type="date"
                        name="date_to"
                        id="date_to"
                        value="{{ $dateTo }}"
-                       class="form-input w-full">
+                       class="form-input w-full border-slate-200 focus:border-primary-500 focus:ring-primary-500">
             </div>
-            <div>
-                <button type="submit" class="btn btn-primary">
-                    <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd"/>
-                    </svg>
+            <div class="w-full md:w-auto flex gap-2">
+                <button type="submit" class="btn btn-primary flex-1 md:flex-none">
                     Apply Filter
                 </button>
-            </div>
-            <div>
-                <a href="{{ route('attendance.leaderboard') }}" class="btn btn-outline">
-                    <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clip-rule="evenodd"/>
-                    </svg>
+                <a href="{{ route('attendance.leaderboard') }}" class="btn bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 hover:text-slate-900 transition-colors flex-1 md:flex-none">
                     Reset
                 </a>
             </div>
@@ -73,68 +63,74 @@
 
 <!-- Top 3 Members (Podium) -->
 @if(count($leaderboard) >= 3)
-<div class="mb-8">
-    <div class="text-center mb-6">
-        <h2 class="text-2xl font-bold text-gray-900">Top Performers</h2>
-        <p class="text-gray-600">{{ \Carbon\Carbon::parse($dateFrom)->format('M d, Y') }} - {{ \Carbon\Carbon::parse($dateTo)->format('M d, Y') }}</p>
+<div class="mb-10">
+    <div class="text-center mb-8">
+        <h2 class="text-2xl font-heading font-bold text-slate-900">Top Performers</h2>
+        <p class="text-slate-500 mt-1">{{ \Carbon\Carbon::parse($dateFrom)->format('M d, Y') }} - {{ \Carbon\Carbon::parse($dateTo)->format('M d, Y') }}</p>
     </div>
 
-    <div class="flex justify-center items-end gap-4 max-w-4xl mx-auto">
+    <div class="flex flex-col md:flex-row justify-center items-end gap-6 max-w-4xl mx-auto px-4">
         <!-- 2nd Place -->
         @if(isset($leaderboard[1]))
-        <div class="flex-1 max-w-[250px]">
-            <div class="bg-gradient-to-br from-gray-100 to-gray-200 rounded-xl p-6 text-center transform transition-all hover:scale-105">
-                <div class="mb-3">
-                    <div class="w-20 h-20 mx-auto rounded-full bg-gradient-to-br from-gray-400 to-gray-600 flex items-center justify-center text-white text-2xl font-bold border-4 border-gray-300 shadow-lg">
+        <div class="w-full md:flex-1 max-w-[280px] order-2 md:order-1">
+            <div class="bg-white rounded-2xl p-6 text-center border border-slate-200 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden">
+                <div class="absolute top-0 left-0 w-full h-1 bg-slate-300"></div>
+                <div class="mb-4 relative">
+                    <div class="w-20 h-20 mx-auto rounded-full bg-slate-100 flex items-center justify-center text-slate-500 text-2xl font-bold border-4 border-white shadow-lg ring-1 ring-slate-100">
                         {{ strtoupper(substr($leaderboard[1]->first_name, 0, 1)) }}{{ strtoupper(substr($leaderboard[1]->last_name, 0, 1)) }}
                     </div>
-                    <div class="mt-3 w-12 h-12 mx-auto rounded-full bg-gray-400 flex items-center justify-center text-white font-bold text-xl border-2 border-white shadow">
+                    <div class="absolute -bottom-2 left-1/2 -translate-x-1/2 w-8 h-8 rounded-full bg-slate-200 text-slate-700 flex items-center justify-center font-bold text-sm border-2 border-white shadow-sm">
                         2
                     </div>
                 </div>
-                <h3 class="text-lg font-bold text-gray-900 mb-1">{{ $leaderboard[1]->first_name }} {{ $leaderboard[1]->last_name }}</h3>
-                <p class="text-3xl font-extrabold text-gray-600 mb-1">{{ number_format($leaderboard[1]->attendance_percentage, 1) }}%</p>
-                <p class="text-sm text-gray-600">{{ $leaderboard[1]->total_present }} / {{ $leaderboard[1]->total_services }} services</p>
+                <h3 class="font-bold text-slate-900 mb-1 truncate">{{ $leaderboard[1]->first_name }} {{ $leaderboard[1]->last_name }}</h3>
+                <p class="text-2xl font-black text-slate-700 mb-1">{{ number_format($leaderboard[1]->attendance_percentage, 1) }}%</p>
+                <p class="text-xs text-slate-500 font-medium">{{ $leaderboard[1]->total_present }} / {{ $leaderboard[1]->total_services }} services</p>
             </div>
         </div>
         @endif
 
         <!-- 1st Place -->
         @if(isset($leaderboard[0]))
-        <div class="flex-1 max-w-[280px]">
-            <div class="bg-gradient-to-br from-yellow-100 to-yellow-300 rounded-xl p-6 text-center transform transition-all hover:scale-105 shadow-xl">
-                <div class="mb-3">
-                    <div class="w-24 h-24 mx-auto rounded-full bg-gradient-to-br from-yellow-400 to-yellow-600 flex items-center justify-center text-white text-3xl font-bold border-4 border-yellow-300 shadow-lg">
+        <div class="w-full md:flex-1 max-w-[320px] order-1 md:order-2 z-10 -mt-8 md:mt-0">
+            <div class="bg-white rounded-2xl p-8 text-center border border-amber-200 shadow-xl relative overflow-hidden transform md:-translate-y-4">
+                <div class="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-amber-300 via-amber-500 to-amber-300"></div>
+                <div class="mb-5 relative">
+                    <div class="w-24 h-24 mx-auto rounded-full bg-amber-50 flex items-center justify-center text-amber-600 text-3xl font-bold border-4 border-white shadow-lg ring-1 ring-amber-100">
                         {{ strtoupper(substr($leaderboard[0]->first_name, 0, 1)) }}{{ strtoupper(substr($leaderboard[0]->last_name, 0, 1)) }}
                     </div>
-                    <div class="mt-3 w-14 h-14 mx-auto rounded-full bg-yellow-500 flex items-center justify-center text-white font-bold text-2xl border-2 border-white shadow">
-                        <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 20 20">
-                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
-                        </svg>
+                    <div class="absolute -bottom-3 left-1/2 -translate-x-1/2 w-10 h-10 rounded-full bg-amber-500 text-white flex items-center justify-center font-bold text-lg border-4 border-white shadow-md">
+                        1
                     </div>
                 </div>
-                <h3 class="text-xl font-bold text-gray-900 mb-1">{{ $leaderboard[0]->first_name }} {{ $leaderboard[0]->last_name }}</h3>
-                <p class="text-4xl font-extrabold text-yellow-700 mb-1">{{ number_format($leaderboard[0]->attendance_percentage, 1) }}%</p>
-                <p class="text-sm text-gray-700">{{ $leaderboard[0]->total_present }} / {{ $leaderboard[0]->total_services }} services</p>
+                <h3 class="text-lg font-bold text-slate-900 mb-1 truncate">{{ $leaderboard[0]->first_name }} {{ $leaderboard[0]->last_name }}</h3>
+                <p class="text-4xl font-black text-amber-500 mb-1">{{ number_format($leaderboard[0]->attendance_percentage, 1) }}%</p>
+                <p class="text-sm text-slate-500 font-medium">{{ $leaderboard[0]->total_present }} / {{ $leaderboard[0]->total_services }} services</p>
+                <div class="mt-4">
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800">
+                        Top Attender
+                    </span>
+                </div>
             </div>
         </div>
         @endif
 
         <!-- 3rd Place -->
         @if(isset($leaderboard[2]))
-        <div class="flex-1 max-w-[250px]">
-            <div class="bg-gradient-to-br from-orange-100 to-orange-200 rounded-xl p-6 text-center transform transition-all hover:scale-105">
-                <div class="mb-3">
-                    <div class="w-20 h-20 mx-auto rounded-full bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center text-white text-2xl font-bold border-4 border-orange-300 shadow-lg">
+        <div class="w-full md:flex-1 max-w-[280px] order-3">
+            <div class="bg-white rounded-2xl p-6 text-center border border-orange-200 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden">
+                <div class="absolute top-0 left-0 w-full h-1 bg-orange-300"></div>
+                <div class="mb-4 relative">
+                    <div class="w-20 h-20 mx-auto rounded-full bg-orange-50 flex items-center justify-center text-orange-600 text-2xl font-bold border-4 border-white shadow-lg ring-1 ring-orange-100">
                         {{ strtoupper(substr($leaderboard[2]->first_name, 0, 1)) }}{{ strtoupper(substr($leaderboard[2]->last_name, 0, 1)) }}
                     </div>
-                    <div class="mt-3 w-12 h-12 mx-auto rounded-full bg-orange-400 flex items-center justify-center text-white font-bold text-xl border-2 border-white shadow">
+                    <div class="absolute -bottom-2 left-1/2 -translate-x-1/2 w-8 h-8 rounded-full bg-orange-400 text-white flex items-center justify-center font-bold text-sm border-2 border-white shadow-sm">
                         3
                     </div>
                 </div>
-                <h3 class="text-lg font-bold text-gray-900 mb-1">{{ $leaderboard[2]->first_name }} {{ $leaderboard[2]->last_name }}</h3>
-                <p class="text-3xl font-extrabold text-orange-600 mb-1">{{ number_format($leaderboard[2]->attendance_percentage, 1) }}%</p>
-                <p class="text-sm text-gray-600">{{ $leaderboard[2]->total_present }} / {{ $leaderboard[2]->total_services }} services</p>
+                <h3 class="font-bold text-slate-900 mb-1 truncate">{{ $leaderboard[2]->first_name }} {{ $leaderboard[2]->last_name }}</h3>
+                <p class="text-2xl font-black text-orange-600 mb-1">{{ number_format($leaderboard[2]->attendance_percentage, 1) }}%</p>
+                <p class="text-xs text-slate-500 font-medium">{{ $leaderboard[2]->total_present }} / {{ $leaderboard[2]->total_services }} services</p>
             </div>
         </div>
         @endif
@@ -143,145 +139,124 @@
 @endif
 
 <!-- Full Leaderboard Table -->
-<div class="card">
-    <div class="card-header bg-gradient-to-r from-primary-50 to-blue-50">
-        <h3 class="text-lg font-semibold text-gray-900">Complete Ranking</h3>
-        <p class="text-sm text-gray-600 mt-1">All members ranked by attendance percentage</p>
+<div class="card border border-slate-100 overflow-hidden mb-8">
+    <div class="px-6 py-4 border-b border-slate-100 bg-slate-50/50">
+        <h3 class="font-bold text-slate-800 text-base">Complete Ranking</h3>
+        <p class="text-sm text-slate-500 mt-0.5">All members ranked by attendance percentage</p>
     </div>
 
-    <div class="card-body p-0">
+    <div class="overflow-x-auto">
         @if(count($leaderboard) > 0)
-        <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-gray-200">
-                <thead class="bg-gray-50">
-                    <tr>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-20">Rank</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Member</th>
-                        <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Services Attended</th>
-                        <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Total Services</th>
-                        <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Attendance %</th>
-                        <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                    </tr>
-                </thead>
-                <tbody class="bg-white divide-y divide-gray-200">
-                    @foreach($leaderboard as $index => $member)
-                    <tr class="hover:bg-gray-50 {{ $index < 3 ? 'bg-yellow-50' : '' }}">
-                        <td class="px-6 py-4 whitespace-nowrap text-center">
-                            @if($index === 0)
-                                <div class="flex items-center justify-center">
-                                    <span class="flex items-center justify-center w-8 h-8 rounded-full bg-yellow-500 text-white font-bold shadow">
-                                        1
-                                    </span>
-                                </div>
-                            @elseif($index === 1)
-                                <div class="flex items-center justify-center">
-                                    <span class="flex items-center justify-center w-8 h-8 rounded-full bg-gray-400 text-white font-bold shadow">
-                                        2
-                                    </span>
-                                </div>
-                            @elseif($index === 2)
-                                <div class="flex items-center justify-center">
-                                    <span class="flex items-center justify-center w-8 h-8 rounded-full bg-orange-400 text-white font-bold shadow">
-                                        3
-                                    </span>
-                                </div>
-                            @else
-                                <span class="text-gray-600 font-semibold">{{ $index + 1 }}</span>
-                            @endif
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            <div class="flex items-center">
-                                <div class="w-10 h-10 rounded-full bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center text-white font-semibold">
-                                    {{ strtoupper(substr($member->first_name, 0, 1)) }}{{ strtoupper(substr($member->last_name, 0, 1)) }}
-                                </div>
-                                <div class="ml-3">
-                                    <a href="{{ route('members.show', $member->id) }}" class="text-sm font-medium text-primary-600 hover:text-primary-800">
-                                        {{ $member->first_name }} {{ $member->last_name }}
-                                    </a>
-                                    <div class="text-xs text-gray-500">{{ $member->member_id }}</div>
+        <table class="w-full text-left border-collapse">
+            <thead class="bg-slate-50 text-slate-500 text-xs uppercase tracking-wider">
+                <tr>
+                    <th class="px-6 py-3 font-semibold border-b border-slate-100 w-20 text-center">Rank</th>
+                    <th class="px-6 py-3 font-semibold border-b border-slate-100">Member</th>
+                    <th class="px-6 py-3 font-semibold border-b border-slate-100 text-center">Services Attended</th>
+                    <th class="px-6 py-3 font-semibold border-b border-slate-100 text-center">Total Services</th>
+                    <th class="px-6 py-3 font-semibold border-b border-slate-100 text-center">Attendance %</th>
+                    <th class="px-6 py-3 font-semibold border-b border-slate-100 text-center">Status</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-50 bg-white">
+                @foreach($leaderboard as $index => $member)
+                <tr class="hover:bg-slate-50/50 transition-colors {{ $index < 3 ? 'bg-amber-50/30' : '' }}">
+                    <td class="px-6 py-4 text-center">
+                        @if($index === 0)
+                            <div class="w-8 h-8 rounded-full bg-amber-100 text-amber-700 flex items-center justify-center font-bold text-sm mx-auto ring-1 ring-amber-200">1</div>
+                        @elseif($index === 1)
+                            <div class="w-8 h-8 rounded-full bg-slate-100 text-slate-600 flex items-center justify-center font-bold text-sm mx-auto ring-1 ring-slate-200">2</div>
+                        @elseif($index === 2)
+                            <div class="w-8 h-8 rounded-full bg-orange-100 text-orange-700 flex items-center justify-center font-bold text-sm mx-auto ring-1 ring-orange-200">3</div>
+                        @else
+                            <span class="text-slate-500 font-medium">{{ $index + 1 }}</span>
+                        @endif
+                    </td>
+                    <td class="px-6 py-4">
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-xs font-bold text-slate-500">
+                                {{ strtoupper(substr($member->first_name, 0, 1)) }}{{ strtoupper(substr($member->last_name, 0, 1)) }}
+                            </div>
+                            <div>
+                                <a href="{{ route('members.show', $member->id) }}" class="font-medium text-slate-900 hover:text-primary-600 transition-colors">
+                                    {{ $member->first_name }} {{ $member->last_name }}
+                                </a>
+                                <div class="text-xs text-slate-500 font-mono">{{ $member->member_id }}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="px-6 py-4 text-center">
+                        <span class="font-bold text-slate-700">{{ $member->total_present }}</span>
+                    </td>
+                    <td class="px-6 py-4 text-center">
+                        <span class="text-slate-500">{{ $member->total_services }}</span>
+                    </td>
+                    <td class="px-6 py-4">
+                        <div class="flex flex-col items-center gap-1">
+                            <span class="font-bold cursor-default
+                                @if($member->attendance_percentage >= 90) text-emerald-600
+                                @elseif($member->attendance_percentage >= 70) text-blue-600
+                                @elseif($member->attendance_percentage >= 50) text-amber-600
+                                @else text-red-600
+                                @endif">
+                                {{ number_format($member->attendance_percentage, 1) }}%
+                            </span>
+                            <div class="w-24 bg-slate-100 rounded-full h-1.5 overflow-hidden">
+                                <div class="h-1.5 rounded-full transition-all duration-500
+                                    @if($member->attendance_percentage >= 90) bg-emerald-500
+                                    @elseif($member->attendance_percentage >= 70) bg-blue-500
+                                    @elseif($member->attendance_percentage >= 50) bg-amber-500
+                                    @else bg-red-500
+                                    @endif"
+                                    style="width: {{ min($member->attendance_percentage, 100) }}%">
                                 </div>
                             </div>
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-center">
-                            <span class="text-lg font-semibold text-green-600">{{ $member->total_present }}</span>
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-center">
-                            <span class="text-sm text-gray-700">{{ $member->total_services }}</span>
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-center">
-                            <div class="flex flex-col items-center">
-                                <span class="text-xl font-bold
-                                    @if($member->attendance_percentage >= 90) text-green-600
-                                    @elseif($member->attendance_percentage >= 70) text-blue-600
-                                    @elseif($member->attendance_percentage >= 50) text-yellow-600
-                                    @else text-red-600
-                                    @endif">
-                                    {{ number_format($member->attendance_percentage, 1) }}%
-                                </span>
-                                <!-- Progress Bar -->
-                                <div class="w-full max-w-[100px] bg-gray-200 rounded-full h-2 mt-1">
-                                    <div class="h-2 rounded-full
-                                        @if($member->attendance_percentage >= 90) bg-green-600
-                                        @elseif($member->attendance_percentage >= 70) bg-blue-600
-                                        @elseif($member->attendance_percentage >= 50) bg-yellow-600
-                                        @else bg-red-600
-                                        @endif"
-                                        style="width: {{ min($member->attendance_percentage, 100) }}%">
-                                    </div>
-                                </div>
-                            </div>
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-center">
-                            @if($member->attendance_percentage >= 80)
-                                <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                    <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
-                                    </svg>
-                                    Committed
-                                </span>
-                            @elseif($member->attendance_percentage >= 50)
-                                <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                                    Regular
-                                </span>
-                            @else
-                                <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
-                                    <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
-                                    </svg>
-                                    At Risk
-                                </span>
-                            @endif
-                        </td>
-                    </tr>
-                    @endforeach
-                </tbody>
-            </table>
-        </div>
+                        </div>
+                    </td>
+                    <td class="px-6 py-4 text-center">
+                        @if($member->attendance_percentage >= 80)
+                            <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-100 text-emerald-700 ring-1 ring-inset ring-emerald-600/20">
+                                Committed
+                            </span>
+                        @elseif($member->attendance_percentage >= 50)
+                            <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-700 ring-1 ring-inset ring-blue-600/20">
+                                Regular
+                            </span>
+                        @else
+                            <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-red-100 text-red-700 ring-1 ring-inset ring-red-600/20">
+                                At Risk
+                            </span>
+                        @endif
+                    </td>
+                </tr>
+                @endforeach
+            </tbody>
+        </table>
         @else
-        <div class="p-12 text-center text-gray-500">
-            <svg class="w-16 h-16 mx-auto mb-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
-                <path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z"/>
-            </svg>
-            <h3 class="text-lg font-semibold text-gray-900 mb-2">No Data Available</h3>
-            <p class="text-gray-600">No attendance records found for the selected period. Try adjusting the date range.</p>
+        <div class="p-12 text-center text-slate-400">
+            <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-slate-100 flex items-center justify-center text-slate-300">
+                 <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+            </div>
+            <h3 class="text-lg font-bold text-slate-900 mb-1">No Data Available</h3>
+            <p class="text-slate-500">No attendance records found for the selected period.</p>
         </div>
         @endif
     </div>
 
     @if(count($leaderboard) > 0)
-    <div class="card-footer bg-gray-50">
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
-            <div>
-                <p class="text-sm text-gray-600">Total Members</p>
-                <p class="text-2xl font-bold text-gray-900">{{ count($leaderboard) }}</p>
+    <div class="bg-slate-50 border-t border-slate-100 p-6">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-center divide-y md:divide-y-0 md:divide-x divide-slate-200">
+            <div class="pb-4 md:pb-0 md:px-4">
+                <p class="text-xs font-bold text-slate-500 uppercase tracking-wider">Total Members</p>
+                <p class="text-3xl font-heading font-bold text-slate-900 mt-1">{{ count($leaderboard) }}</p>
             </div>
-            <div>
-                <p class="text-sm text-gray-600">Average Attendance</p>
-                <p class="text-2xl font-bold text-primary-600">{{ number_format(collect($leaderboard)->avg('attendance_percentage'), 1) }}%</p>
+            <div class="py-4 md:py-0 md:px-4">
+                <p class="text-xs font-bold text-slate-500 uppercase tracking-wider">Average Attendance</p>
+                <p class="text-3xl font-heading font-bold text-primary-600 mt-1">{{ number_format(collect($leaderboard)->avg('attendance_percentage'), 1) }}%</p>
             </div>
-            <div>
-                <p class="text-sm text-gray-600">Committed Members (80%+)</p>
-                <p class="text-2xl font-bold text-green-600">{{ collect($leaderboard)->filter(fn($m) => $m->attendance_percentage >= 80)->count() }}</p>
+            <div class="pt-4 md:pt-0 md:px-4">
+                <p class="text-xs font-bold text-slate-500 uppercase tracking-wider">Committed Members</p>
+                <p class="text-3xl font-heading font-bold text-emerald-600 mt-1">{{ collect($leaderboard)->filter(fn($m) => $m->attendance_percentage >= 80)->count() }}</p>
             </div>
         </div>
     </div>
@@ -289,26 +264,26 @@
 </div>
 
 <!-- Legend -->
-<div class="mt-6 p-4 bg-white rounded-lg shadow-sm border border-gray-200">
-    <h4 class="text-sm font-semibold text-gray-700 mb-3">Status Legend</h4>
+<div class="card border border-slate-100 p-4">
+    <h4 class="text-sm font-bold text-slate-800 mb-3">Status Legend</h4>
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-        <div class="flex items-center">
-            <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 mr-2">
+        <div class="flex items-center p-3 rounded-lg bg-emerald-50/50 border border-emerald-100">
+            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-bold bg-emerald-100 text-emerald-800 mr-2">
                 Committed
             </span>
-            <span class="text-gray-600">80% or higher attendance</span>
+            <span class="text-slate-600">80% or higher attendance</span>
         </div>
-        <div class="flex items-center">
-            <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 mr-2">
+        <div class="flex items-center p-3 rounded-lg bg-blue-50/50 border border-blue-100">
+            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-bold bg-blue-100 text-blue-800 mr-2">
                 Regular
             </span>
-            <span class="text-gray-600">50-79% attendance</span>
+            <span class="text-slate-600">50-79% attendance</span>
         </div>
-        <div class="flex items-center">
-            <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800 mr-2">
+        <div class="flex items-center p-3 rounded-lg bg-red-50/50 border border-red-100">
+            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-bold bg-red-100 text-red-800 mr-2">
                 At Risk
             </span>
-            <span class="text-gray-600">Below 50% attendance</span>
+            <span class="text-slate-600">Below 50% attendance</span>
         </div>
     </div>
 </div>

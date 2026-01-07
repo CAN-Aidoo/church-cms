@@ -32,6 +32,10 @@ class Program extends Model
         'flyer_path',
         'additional_info',
         'created_by',
+        'registration_qr_code',
+        'check_in_qr_code',
+        'qr_registration_enabled',
+        'qr_checkin_enabled',
     ];
 
     protected $casts = [
@@ -43,6 +47,8 @@ class Program extends Model
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
         'deleted_at' => 'datetime',
+        'qr_registration_enabled' => 'boolean',
+        'qr_checkin_enabled' => 'boolean',
     ];
 
     /**

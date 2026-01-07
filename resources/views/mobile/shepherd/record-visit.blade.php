@@ -148,7 +148,7 @@
 
                 if (res.success) {
                     ChurchApp.showToast('Visitation recorded successfully!', 'success');
-                    setTimeout(() => window.location.href = '/mobile/shepherd', 1500);
+                    setTimeout(() => window.location.href = '{{ url('/mobile/shepherd') }}', 1500);
                 } else {
                     throw new Error(res.message || 'Failed to record');
                 }

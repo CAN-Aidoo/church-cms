@@ -2,63 +2,103 @@
 
 @section('title', 'Create Event')
 
-@section('header')
-    <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-        {{ __('Create Event') }}
-    </h2>
-@endsection
-
 @section('content')
-    <div class="max-w-4xl mx-auto bg-white overflow-hidden shadow-sm sm:rounded-lg">
-        <div class="p-6 border-b border-gray-200">
-            <form method="POST" action="{{ route('childrens-ministry.events.store') }}">
+<!-- Header -->
+<div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+    <div>
+        <h1 class="text-2xl font-heading font-bold text-slate-900">Create Event</h1>
+        <nav class="flex items-center gap-2 text-sm text-slate-500 mt-1">
+            <a href="{{ route('dashboard') }}" class="hover:text-primary-600 transition-colors">Dashboard</a>
+            <span>/</span>
+            <a href="{{ route('childrens-ministry.events') }}" class="hover:text-primary-600 transition-colors">Events</a>
+            <span>/</span>
+            <span class="text-slate-800 font-medium">Create</span>
+        </nav>
+    </div>
+</div>
+
+<div class="max-w-4xl mx-auto">
+    <div class="card border border-slate-100 shadow-sm">
+        <div class="px-6 py-4 border-b border-slate-100 bg-slate-50/50">
+            <h3 class="font-bold text-slate-800 text-base">New Event Details</h3>
+        </div>
+        <div class="p-6">
+            <form method="POST" action="{{ route('childrens-ministry.events.store') }}" class="space-y-6">
                 @csrf
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div class="col-span-2">
-                        <label class="block text-sm font-medium text-gray-700">Event Name</label>
-                        <input type="text" name="event_name" value="{{ old('event_name') }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50" required>
+                         <label for="event_name" class="form-label mb-1.5 block font-medium text-sm text-slate-700 required">Event Name</label>
+                        <input type="text" 
+                               name="event_name" 
+                               id="event_name" 
+                               value="{{ old('event_name') }}" 
+                               class="form-input w-full border-slate-200 focus:border-primary-500 focus:ring-primary-500 rounded-lg" 
+                               placeholder="e.g. Summer Vacation Bible School"
+                               required>
                     </div>
                     
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700">Event Type</label>
-                        <select name="event_type" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50" required>
-                            @foreach($eventTypes as $type => $label)
+                     <div>
+                        <label for="event_type" class="form-label mb-1.5 block font-medium text-sm text-slate-700 required">Event Type</label>
+                        <select name="event_type" id="event_type" class="form-select w-full border-slate-200 focus:border-primary-500 focus:ring-primary-500 rounded-lg" required>
+                             @foreach($eventTypes as $type => $label)
                                 <option value="{{ $type }}" {{ old('event_type') == $type ? 'selected' : '' }}>{{ ucfirst(str_replace('_', ' ', $type)) }}</option>
                             @endforeach
                         </select>
                     </div>
 
                     <div>
-                        <label class="block text-sm font-medium text-gray-700">Coordinator (User ID)</label>
-                        {{-- Demo input, normally a select of users --}}
-                        <input type="number" name="coordinator_id" value="{{ old('coordinator_id', auth()->id()) }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50" required>
+                         <label for="coordinator_id" class="form-label mb-1.5 block font-medium text-sm text-slate-700 required">Coordinator (User ID)</label>
+                        {{-- Ideally a user select with search --}}
+                         <input type="number" 
+                                name="coordinator_id" 
+                                id="coordinator_id" 
+                                value="{{ old('coordinator_id', auth()->id()) }}" 
+                                class="form-input w-full border-slate-200 focus:border-primary-500 focus:ring-primary-500 rounded-lg" 
+                                required>
+                        <p class="text-xs text-slate-500 mt-1">Enter user ID of the event lead.</p>
                     </div>
 
                     <div>
-                        <label class="block text-sm font-medium text-gray-700">Start Date</label>
-                        <input type="date" name="start_date" value="{{ old('start_date') }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50" required>
+                        <label for="start_date" class="form-label mb-1.5 block font-medium text-sm text-slate-700 required">Start Date</label>
+                        <input type="date" 
+                               name="start_date" 
+                               id="start_date" 
+                               value="{{ old('start_date') }}" 
+                               class="form-input w-full border-slate-200 focus:border-primary-500 focus:ring-primary-500 rounded-lg" 
+                               required>
                     </div>
 
                      <div>
-                        <label class="block text-sm font-medium text-gray-700">Start Time</label>
-                        <input type="time" name="start_time" value="{{ old('start_time') }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50" required>
+                        <label for="start_time" class="form-label mb-1.5 block font-medium text-sm text-slate-700 required">Start Time</label>
+                        <input type="time" 
+                               name="start_time" 
+                               id="start_time" 
+                               value="{{ old('start_time') }}" 
+                               class="form-input w-full border-slate-200 focus:border-primary-500 focus:ring-primary-500 rounded-lg" 
+                               required>
                     </div>
 
                     <div class="col-span-2">
-                        <label class="block text-sm font-medium text-gray-700">Description</label>
-                        <textarea name="description" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50">{{ old('description') }}</textarea>
+                        <label for="description" class="form-label mb-1.5 block font-medium text-sm text-slate-700">Description</label>
+                        <textarea name="description" 
+                                  id="description" 
+                                  rows="4" 
+                                  class="form-textarea w-full border-slate-200 focus:border-primary-500 focus:ring-primary-500 rounded-xl"
+                                  placeholder="Event details, activities involved, items to bring...">{{ old('description') }}</textarea>
                     </div>
                 </div>
 
-                <div class="flex justify-end gap-4">
-                    <a href="{{ route('childrens-ministry.events') }}" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded">
+                <div class="flex items-center justify-end gap-3 pt-6 border-t border-slate-100">
+                    <a href="{{ route('childrens-ministry.events') }}" class="btn bg-white border border-slate-200 text-slate-700 hover:bg-slate-50">
                         Cancel
                     </a>
-                    <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                    <button type="submit" class="btn btn-primary shadow-lg shadow-primary-500/30">
                         Create Event
                     </button>
                 </div>
             </form>
         </div>
     </div>
+</div>
 @endsection

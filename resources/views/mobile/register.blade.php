@@ -171,7 +171,7 @@
         <div class="mt-6 text-center">
             <p class="text-blue-100 text-sm">
                 Already have an account?
-                <a href="/mobile/login" class="text-white font-semibold hover:underline">Sign in</a>
+                <a href="{{ url('/mobile/login') }}" class="text-white font-semibold hover:underline">Sign in</a>
             </p>
         </div>
     </div>
@@ -288,7 +288,7 @@ document.getElementById('detailsForm').addEventListener('submit', async (e) => {
         if (result.success) {
             ChurchApp.showToast('Registration successful!', 'success');
             setTimeout(() => {
-                window.location.href = '/mobile';
+                window.location.href = '{{ url('/mobile') }}';
             }, 1000);
         }
     } catch (error) {

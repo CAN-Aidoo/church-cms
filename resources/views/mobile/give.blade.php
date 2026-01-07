@@ -4,217 +4,107 @@
 @section('header', 'Give')
 
 @section('content')
-<div class="bg-gray-50 min-h-screen pb-20">
-    <!-- Welcome Banner -->
-    <div class="bg-gradient-to-r from-blue-600 to-blue-800 text-white px-4 py-8">
+<div class="pb-24">
+    <!-- Header Banner -->
+    <div class="bg-primary-600 text-white px-6 py-8 rounded-b-[2.5rem] shadow-lg shadow-primary-900/20 mb-6">
         <div class="text-center">
-            <svg class="w-16 h-16 mx-auto mb-3 text-white/90" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-            </svg>
-            <h2 class="text-2xl font-bold mb-2">Give Cheerfully</h2>
-            <p class="text-blue-100 text-sm">God loves a cheerful giver - 2 Cor 9:7</p>
+            <div class="w-16 h-16 bg-white/10 backdrop-blur-md rounded-2xl flex items-center justify-center mx-auto mb-4 border border-white/20">
+                <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+            </div>
+            <h2 class="text-2xl font-bold tracking-tight">Give Cheerfully</h2>
+            <p class="text-blue-100 text-sm mt-1 opacity-90">"God loves a cheerful giver" - 2 Cor 9:7</p>
         </div>
     </div>
 
-    <!-- Giving Form -->
-    <div class="px-4 py-6">
-        <form id="givingForm" class="bg-white rounded-xl shadow-lg p-6 space-y-6">
+    <div class="px-4">
+        <form id="givingForm" class="space-y-6">
+            
             <!-- Amount Selection -->
-            <div>
-                <label class="block text-gray-700 font-semibold mb-3">Amount (GHS)</label>
-
-                <!-- Quick Amount Buttons -->
-                <div class="grid grid-cols-3 gap-3 mb-3">
-                    <button type="button" onclick="selectAmount(50)" class="amount-btn px-4 py-3 border-2 border-gray-300 rounded-lg font-semibold text-gray-700 hover:border-blue-600 hover:text-blue-600 transition">
-                        50
+            <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-100">
+                <label class="block text-sm font-bold text-slate-700 mb-3 uppercase tracking-wide">Select Amount (GHS)</label>
+                
+                <div class="grid grid-cols-3 gap-3 mb-4">
+                    @foreach([50, 100, 200, 500, 1000] as $amt)
+                    <button type="button" onclick="selectAmount({{ $amt }}, this)" class="amount-btn h-12 rounded-xl border-2 border-slate-100 font-bold text-slate-600 hover:border-primary-500 hover:bg-primary-50 hover:text-primary-700 transition-all active:scale-95">
+                        {{ $amt }}
                     </button>
-                    <button type="button" onclick="selectAmount(100)" class="amount-btn px-4 py-3 border-2 border-gray-300 rounded-lg font-semibold text-gray-700 hover:border-blue-600 hover:text-blue-600 transition">
-                        100
-                    </button>
-                    <button type="button" onclick="selectAmount(200)" class="amount-btn px-4 py-3 border-2 border-gray-300 rounded-lg font-semibold text-gray-700 hover:border-blue-600 hover:text-blue-600 transition">
-                        200
-                    </button>
-                    <button type="button" onclick="selectAmount(500)" class="amount-btn px-4 py-3 border-2 border-gray-300 rounded-lg font-semibold text-gray-700 hover:border-blue-600 hover:text-blue-600 transition">
-                        500
-                    </button>
-                    <button type="button" onclick="selectAmount(1000)" class="amount-btn px-4 py-3 border-2 border-gray-300 rounded-lg font-semibold text-gray-700 hover:border-blue-600 hover:text-blue-600 transition">
-                        1000
-                    </button>
-                    <button type="button" onclick="toggleCustomAmount()" class="amount-btn px-4 py-3 border-2 border-gray-300 rounded-lg font-semibold text-gray-700 hover:border-blue-600 hover:text-blue-600 transition">
+                    @endforeach
+                    <button type="button" onclick="toggleCustomAmount(this)" class="amount-btn h-12 rounded-xl border-2 border-slate-100 font-bold text-slate-600 hover:border-primary-500 hover:bg-primary-50 hover:text-primary-700 transition-all active:scale-95" id="btn-custom">
                         Other
                     </button>
                 </div>
 
-                <!-- Custom Amount Input -->
-                <div id="customAmountDiv" class="hidden">
-                    <input type="number" id="customAmount" name="custom_amount"
-                           class="w-full px-4 py-3 border-2 border-blue-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                           placeholder="Enter custom amount" min="1" step="0.01">
-                </div>
-
-                <!-- Selected Amount Display -->
-                <div class="mt-4 bg-blue-50 border border-blue-200 rounded-lg p-4">
-                    <p class="text-sm text-gray-600 mb-1">Selected Amount</p>
-                    <p class="text-3xl font-bold text-blue-600">GHS <span id="selectedAmount">0.00</span></p>
-                </div>
-            </div>
-
-            <!-- Category Selection -->
-            <div>
-                <label class="block text-gray-700 font-semibold mb-3">Category</label>
-                <div class="space-y-2">
-                    <label class="flex items-center p-4 bg-gray-50 rounded-lg hover:bg-gray-100 cursor-pointer border-2 border-transparent category-option">
-                        <input type="radio" name="category" value="tithe" required class="text-blue-600 focus:ring-blue-500 mr-3">
-                        <div class="flex-1">
-                            <p class="font-semibold text-gray-900">Tithe</p>
-                            <p class="text-sm text-gray-500">10% of your income</p>
-                        </div>
-                    </label>
-
-                    <label class="flex items-center p-4 bg-gray-50 rounded-lg hover:bg-gray-100 cursor-pointer border-2 border-transparent category-option">
-                        <input type="radio" name="category" value="offering" required class="text-blue-600 focus:ring-blue-500 mr-3">
-                        <div class="flex-1">
-                            <p class="font-semibold text-gray-900">Offering</p>
-                            <p class="text-sm text-gray-500">General church offering</p>
-                        </div>
-                    </label>
-
-                    <label class="flex items-center p-4 bg-gray-50 rounded-lg hover:bg-gray-100 cursor-pointer border-2 border-transparent category-option">
-                        <input type="radio" name="category" value="special_offering" required class="text-blue-600 focus:ring-blue-500 mr-3">
-                        <div class="flex-1">
-                            <p class="font-semibold text-gray-900">Special Offering</p>
-                            <p class="text-sm text-gray-500">For special purposes</p>
-                        </div>
-                    </label>
-
-                    <label class="flex items-center p-4 bg-gray-50 rounded-lg hover:bg-gray-100 cursor-pointer border-2 border-transparent category-option">
-                        <input type="radio" name="category" value="donation" required class="text-blue-600 focus:ring-blue-500 mr-3">
-                        <div class="flex-1">
-                            <p class="font-semibold text-gray-900">Donation</p>
-                            <p class="text-sm text-gray-500">One-time donation</p>
-                        </div>
-                    </label>
-                </div>
-            </div>
-
-            <!-- Payment Method -->
-            <div>
-                <label class="block text-gray-700 font-semibold mb-3">Payment Method</label>
-                <div class="space-y-2">
-                    <label class="flex items-center p-4 bg-gray-50 rounded-lg hover:bg-gray-100 cursor-pointer border-2 border-transparent payment-option">
-                        <input type="radio" name="payment_method" value="mobile_money" required class="text-blue-600 focus:ring-blue-500 mr-3">
-                        <div class="flex items-center flex-1">
-                            <svg class="w-8 h-8 mr-3 text-yellow-600" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M20 4H4c-1.11 0-1.99.89-1.99 2L2 18c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/>
-                            </svg>
-                            <div>
-                                <p class="font-semibold text-gray-900">Mobile Money</p>
-                                <p class="text-sm text-gray-500">MTN, Vodafone, AirtelTigo</p>
-                            </div>
-                        </div>
-                    </label>
-
-                    <label class="flex items-center p-4 bg-gray-50 rounded-lg hover:bg-gray-100 cursor-pointer border-2 border-transparent payment-option">
-                        <input type="radio" name="payment_method" value="card" required class="text-blue-600 focus:ring-blue-500 mr-3">
-                        <div class="flex items-center flex-1">
-                            <svg class="w-8 h-8 mr-3 text-blue-600" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M20 4H4c-1.11 0-1.99.89-1.99 2L2 18c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/>
-                            </svg>
-                            <div>
-                                <p class="font-semibold text-gray-900">Debit/Credit Card</p>
-                                <p class="text-sm text-gray-500">Visa, Mastercard</p>
-                            </div>
-                        </div>
-                    </label>
-                </div>
-            </div>
-
-            <!-- Notes (Optional) -->
-            <div>
-                <label class="block text-gray-700 font-semibold mb-2">Notes (Optional)</label>
-                <textarea name="notes" rows="3"
-                          class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                          placeholder="Add a note to your giving..."></textarea>
-            </div>
-
-            <!-- Recurring Option -->
-            <div>
-                <label class="flex items-start p-4 bg-blue-50 border border-blue-200 rounded-lg cursor-pointer">
-                    <input type="checkbox" id="makeRecurring" name="recurring"
-                           class="mt-1 rounded border-gray-300 text-blue-600 focus:ring-blue-500">
-                    <div class="ml-3">
-                        <p class="font-semibold text-gray-900">Make this recurring</p>
-                        <p class="text-sm text-gray-600">Set up automatic giving on a schedule</p>
+                <div id="customAmountWrapper" class="hidden mb-4">
+                    <div class="relative">
+                        <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold">GHS</span>
+                        <input type="number" id="customAmount" class="w-full pl-14 pr-4 py-3 rounded-xl border-2 border-primary-500 focus:ring-0 focus:outline-none text-lg font-bold text-slate-800 bg-slate-50" placeholder="Enter amount">
                     </div>
-                </label>
+                </div>
 
-                <!-- Recurring Options (shown when checkbox is checked) -->
-                <div id="recurringOptions" class="hidden mt-3 p-4 bg-gray-50 border border-gray-200 rounded-lg">
-                    <label class="block text-gray-700 font-medium mb-2">Frequency</label>
-                    <select name="frequency" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                        <option value="weekly">Weekly</option>
-                        <option value="monthly" selected>Monthly</option>
-                        <option value="quarterly">Quarterly</option>
-                    </select>
+                <!-- Total Display -->
+                <div class="bg-slate-50 rounded-xl p-4 flex items-center justify-between border border-slate-100">
+                    <span class="text-sm font-medium text-slate-500">Total Contribution</span>
+                    <span class="text-2xl font-bold text-primary-600">GHS <span id="displayAmount">0.00</span></span>
                 </div>
             </div>
 
-            <!-- Submit Button -->
-            <button type="submit"
-                    class="w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white font-bold py-4 px-6 rounded-lg hover:from-blue-700 hover:to-blue-800 transition duration-200 shadow-lg">
-                <svg class="w-6 h-6 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                </svg>
-                Proceed to Payment
-            </button>
-        </form>
-    </div>
-
-    <!-- Recent Giving History -->
-    <div class="px-4 pb-6">
-        <div class="flex items-center justify-between mb-4">
-            <h3 class="text-lg font-bold text-gray-900">Recent Giving</h3>
-            <a href="/mobile/giving-history" class="text-blue-600 text-sm font-medium">
-                View All
-            </a>
-        </div>
-
-        <div id="recentGiving" class="space-y-3">
-            <!-- Will be populated by JavaScript -->
-            <div class="text-center py-8 text-gray-500">
-                <svg class="w-12 h-12 mx-auto mb-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                </svg>
-                <p>Loading giving history...</p>
+            <!-- Category -->
+            <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-100">
+                <label class="block text-sm font-bold text-slate-700 mb-3 uppercase tracking-wide">Category</label>
+                <div class="space-y-3">
+                    @foreach([
+                        ['id' => 'tithe', 'label' => 'Tithe', 'desc' => '10% of income'],
+                        ['id' => 'offering', 'label' => 'Offering', 'desc' => 'General offering'],
+                        ['id' => 'project', 'label' => 'Projects', 'desc' => 'Building & Development'],
+                    ] as $cat)
+                    <label class="category-card relative flex items-center p-4 rounded-xl border-2 border-slate-100 cursor-pointer transition-all hover:bg-slate-50">
+                        <input type="radio" name="category" value="{{ $cat['id'] }}" class="peer sr-only">
+                        <div class="flex-1">
+                            <h4 class="font-bold text-slate-800">{{ $cat['label'] }}</h4>
+                            <p class="text-xs text-slate-500">{{ $cat['desc'] }}</p>
+                        </div>
+                        <div class="w-5 h-5 rounded-full border-2 border-slate-300 peer-checked:border-primary-600 peer-checked:bg-primary-600 transition-all flex items-center justify-center">
+                            <div class="w-2 h-2 bg-white rounded-full opacity-0 peer-checked:opacity-100"></div>
+                        </div>
+                        <!-- Active styling applied via JS or peer-checked CSS -->
+                        <div class="absolute inset-0 rounded-xl border-2 border-primary-600 opacity-0 peer-checked:opacity-100 pointer-events-none"></div>
+                    </label>
+                    @endforeach
+                </div>
             </div>
-        </div>
-    </div>
 
-    <!-- Giving Stats -->
-    <div class="px-4 pb-6">
-        <h3 class="text-lg font-bold text-gray-900 mb-4">My Giving Summary</h3>
-
-        <div class="bg-white rounded-xl shadow-lg p-6 space-y-4">
-            <div class="flex items-center justify-between pb-4 border-b border-gray-200">
+            <!-- Recurring Toggle -->
+            <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-100 flex items-center justify-between">
                 <div>
-                    <p class="text-sm text-gray-600">This Month</p>
-                    <p class="text-2xl font-bold text-gray-900">GHS <span id="monthlyGiving">0.00</span></p>
+                    <h4 class="font-bold text-slate-800 text-sm">Make this recurring?</h4>
+                    <p class="text-xs text-slate-500">Schedule automatic monthly giving</p>
                 </div>
-                <div class="text-right">
-                    <p class="text-sm text-gray-600">This Year</p>
-                    <p class="text-2xl font-bold text-gray-900">GHS <span id="yearlyGiving">0.00</span></p>
-                </div>
+                <!-- Toggle Switch -->
+                <label class="relative inline-flex items-center cursor-pointer">
+                    <input type="checkbox" name="recurring" class="sr-only peer">
+                    <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600"></div>
+                </label>
             </div>
 
-            <div>
-                <div class="flex items-center justify-between mb-2">
-                    <span class="text-sm text-gray-600">Total Contributions</span>
-                    <span class="text-sm font-semibold text-gray-900" id="totalContributions">0</span>
-                </div>
-                <div class="flex items-center justify-between">
-                    <span class="text-sm text-gray-600">Last Contribution</span>
-                    <span class="text-sm font-semibold text-gray-900" id="lastContribution">Never</span>
-                </div>
+            <!-- Submit -->
+            <button type="submit" class="w-full bg-primary-600 text-white font-bold py-4 rounded-xl shadow-lg shadow-primary-600/30 active:scale-[0.98] transition-transform flex items-center justify-center gap-2 text-lg">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+                Proceed to Pay
+            </button>
+
+        </form>
+
+        <!-- Giving History Teaser -->
+        <div class="mt-8 mb-4">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="font-bold text-slate-800">Recent Activity</h3>
+                <a href="{{ url('/mobile/giving-history') }}" class="text-sm font-semibold text-primary-600">See All</a>
+            </div>
+            <div id="recentGiving" class="space-y-3">
+                 <!-- Loading skeleton -->
+                 <div class="h-16 bg-slate-100 rounded-xl animate-pulse"></div>
             </div>
         </div>
     </div>
@@ -223,242 +113,95 @@
 
 @push('scripts')
 <script>
-let selectedAmountValue = 0;
+    let currentAmount = 0;
 
-// Amount Selection Functions
-function selectAmount(amount) {
-    selectedAmountValue = amount;
-    updateSelectedAmount();
+    function selectAmount(amount, btn) {
+        currentAmount = amount;
+        updateDisplay();
+        
+        // UI State
+        document.querySelectorAll('.amount-btn').forEach(b => {
+             b.classList.remove('border-primary-500', 'bg-primary-50', 'text-primary-700');
+             b.classList.add('border-slate-100', 'text-slate-600');
+        });
+        btn.classList.remove('border-slate-100', 'text-slate-600');
+        btn.classList.add('border-primary-500', 'bg-primary-50', 'text-primary-700');
+        
+        // Hide custom
+        document.getElementById('customAmountWrapper').classList.add('hidden');
+    }
 
-    // Hide custom amount input
-    document.getElementById('customAmountDiv').classList.add('hidden');
-    document.getElementById('customAmount').value = '';
+    function toggleCustomAmount(btn) {
+        currentAmount = 0;
+        updateDisplay();
+        
+        document.querySelectorAll('.amount-btn').forEach(b => {
+             b.classList.remove('border-primary-500', 'bg-primary-50', 'text-primary-700');
+             b.classList.add('border-slate-100', 'text-slate-600');
+        });
+        btn.classList.remove('border-slate-100', 'text-slate-600');
+        btn.classList.add('border-primary-500', 'bg-primary-50', 'text-primary-700');
 
-    // Update button states
-    document.querySelectorAll('.amount-btn').forEach(btn => {
-        btn.classList.remove('border-blue-600', 'text-blue-600', 'bg-blue-50');
-        btn.classList.add('border-gray-300', 'text-gray-700');
-    });
-    event.target.classList.remove('border-gray-300', 'text-gray-700');
-    event.target.classList.add('border-blue-600', 'text-blue-600', 'bg-blue-50');
-}
-
-function toggleCustomAmount() {
-    const customDiv = document.getElementById('customAmountDiv');
-    const isHidden = customDiv.classList.contains('hidden');
-
-    if (isHidden) {
-        customDiv.classList.remove('hidden');
+        document.getElementById('customAmountWrapper').classList.remove('hidden');
         document.getElementById('customAmount').focus();
-    } else {
-        customDiv.classList.add('hidden');
-        document.getElementById('customAmount').value = '';
-        selectedAmountValue = 0;
-        updateSelectedAmount();
     }
 
-    // Update button states
-    document.querySelectorAll('.amount-btn').forEach(btn => {
-        btn.classList.remove('border-blue-600', 'text-blue-600', 'bg-blue-50');
-        btn.classList.add('border-gray-300', 'text-gray-700');
+    document.getElementById('customAmount').addEventListener('input', (e) => {
+        currentAmount = parseFloat(e.target.value) || 0;
+        updateDisplay();
     });
-    if (isHidden) {
-        event.target.classList.remove('border-gray-300', 'text-gray-700');
-        event.target.classList.add('border-blue-600', 'text-blue-600', 'bg-blue-50');
-    }
-}
 
-// Custom amount input handler
-document.addEventListener('DOMContentLoaded', () => {
-    const customAmountInput = document.getElementById('customAmount');
-    if (customAmountInput) {
-        customAmountInput.addEventListener('input', (e) => {
-            selectedAmountValue = parseFloat(e.target.value) || 0;
-            updateSelectedAmount();
-        });
-    }
-});
-
-function updateSelectedAmount() {
-    document.getElementById('selectedAmount').textContent = selectedAmountValue.toFixed(2);
-}
-
-// Category selection highlighting
-document.querySelectorAll('.category-option input').forEach(radio => {
-    radio.addEventListener('change', (e) => {
-        document.querySelectorAll('.category-option').forEach(opt => {
-            opt.classList.remove('border-blue-600', 'bg-blue-50');
-        });
-        e.target.closest('.category-option').classList.add('border-blue-600', 'bg-blue-50');
-    });
-});
-
-// Payment method selection highlighting
-document.querySelectorAll('.payment-option input').forEach(radio => {
-    radio.addEventListener('change', (e) => {
-        document.querySelectorAll('.payment-option').forEach(opt => {
-            opt.classList.remove('border-blue-600', 'bg-blue-50');
-        });
-        e.target.closest('.payment-option').classList.add('border-blue-600', 'bg-blue-50');
-    });
-});
-
-// Recurring checkbox handler
-document.getElementById('makeRecurring').addEventListener('change', (e) => {
-    const recurringOptions = document.getElementById('recurringOptions');
-    if (e.target.checked) {
-        recurringOptions.classList.remove('hidden');
-    } else {
-        recurringOptions.classList.add('hidden');
-    }
-});
-
-// Form submission
-document.getElementById('givingForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
-
-    if (selectedAmountValue <= 0) {
-        ChurchApp.showToast('Please select or enter an amount', 'error');
-        return;
+    function updateDisplay() {
+        document.getElementById('displayAmount').textContent = currentAmount.toFixed(2);
     }
 
-    const formData = new FormData(e.target);
-    const category = formData.get('category');
-    const paymentMethod = formData.get('payment_method');
-    const notes = formData.get('notes');
-    const isRecurring = formData.get('recurring') === 'on';
-    const frequency = formData.get('frequency');
-
-    if (!category) {
-        ChurchApp.showToast('Please select a category', 'error');
-        return;
-    }
-
-    if (!paymentMethod) {
-        ChurchApp.showToast('Please select a payment method', 'error');
-        return;
-    }
-
-    const paymentData = {
-        amount: selectedAmountValue,
-        category: category,
-        payment_method: paymentMethod,
-        notes: notes,
-        is_recurring: isRecurring,
-        frequency: isRecurring ? frequency : null
-    };
-
-    ChurchApp.showLoading(true);
-
-    try {
-        const result = await ChurchApp.initiatePayment(paymentData);
-
-        if (result.success) {
-            // Redirect to payment gateway or show success
-            if (result.data.payment_url) {
-                window.location.href = result.data.payment_url;
-            } else if (result.data.authorization_url) {
-                window.location.href = result.data.authorization_url;
-            } else {
-                ChurchApp.showToast('Payment initiated successfully!', 'success');
-                setTimeout(() => {
-                    window.location.reload();
-                }, 1000);
-            }
-        }
-    } catch (error) {
-        ChurchApp.showToast(error.message || 'Payment failed', 'error');
-    } finally {
-        ChurchApp.showLoading(false);
-    }
-});
-
-// Load Recent Giving History
-async function loadGivingHistory() {
-    try {
-        const result = await ChurchApp.getPaymentHistory(5); // Last 5 payments
-
-        if (result.success && result.data.length > 0) {
-            const historyHTML = result.data.map(payment => {
-                const date = new Date(payment.created_at);
-                const formattedDate = date.toLocaleDateString('en-US', {
-                    month: 'short',
-                    day: 'numeric',
-                    year: 'numeric'
-                });
-
-                const statusColors = {
-                    'completed': 'bg-green-100 text-green-800',
-                    'pending': 'bg-yellow-100 text-yellow-800',
-                    'failed': 'bg-red-100 text-red-800'
-                };
-
-                const statusColor = statusColors[payment.status] || 'bg-gray-100 text-gray-800';
-
-                return `
-                    <div class="bg-white rounded-lg p-4 shadow-sm border border-gray-200">
-                        <div class="flex items-center justify-between mb-2">
-                            <div>
-                                <p class="font-semibold text-gray-900">${payment.category_label || payment.category}</p>
-                                <p class="text-sm text-gray-500">${formattedDate}</p>
-                            </div>
-                            <div class="text-right">
-                                <p class="text-lg font-bold text-gray-900">GHS ${parseFloat(payment.amount).toFixed(2)}</p>
-                                <span class="inline-block px-2 py-1 text-xs font-semibold rounded ${statusColor}">
-                                    ${payment.status}
-                                </span>
-                            </div>
+    // Giving History
+    async function loadHistory() {
+        try {
+            const res = await ChurchApp.getPaymentHistory(3);
+            const container = document.getElementById('recentGiving');
+            
+            if(res.success && res.data.length > 0) {
+                container.innerHTML = res.data.map(p => `
+                    <div class="bg-white p-4 rounded-xl border border-slate-100 shadow-sm flex items-center justify-between">
+                        <div>
+                            <p class="font-bold text-slate-800 text-sm">${p.category_label || 'Offering'}</p>
+                            <p class="text-xs text-slate-400">${new Date(p.created_at).toLocaleDateString()}</p>
+                        </div>
+                        <div class="text-right">
+                            <span class="block font-bold text-slate-800">GHS ${parseFloat(p.amount).toFixed(2)}</span>
+                            <span class="text-[10px] uppercase font-bold text-emerald-600 tracking-wide">${p.status}</span>
                         </div>
                     </div>
-                `;
-            }).join('');
-
-            document.getElementById('recentGiving').innerHTML = historyHTML;
-        } else {
-            document.getElementById('recentGiving').innerHTML = `
-                <div class="text-center py-8 text-gray-500">
-                    <svg class="w-12 h-12 mx-auto mb-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                    </svg>
-                    <p>No giving history yet</p>
-                </div>
-            `;
-        }
-    } catch (error) {
-        console.error('Failed to load giving history:', error);
-    }
-}
-
-// Load Giving Stats
-async function loadGivingStats() {
-    try {
-        const result = await ChurchApp.getGivingStats();
-
-        if (result.success) {
-            const stats = result.data;
-
-            document.getElementById('monthlyGiving').textContent = parseFloat(stats.monthly_total || 0).toFixed(2);
-            document.getElementById('yearlyGiving').textContent = parseFloat(stats.yearly_total || 0).toFixed(2);
-            document.getElementById('totalContributions').textContent = stats.total_count || 0;
-
-            if (stats.last_contribution_date) {
-                const lastDate = new Date(stats.last_contribution_date);
-                document.getElementById('lastContribution').textContent = lastDate.toLocaleDateString('en-US', {
-                    month: 'short',
-                    day: 'numeric',
-                    year: 'numeric'
-                });
+                `).join('');
+            } else {
+                container.innerHTML = '<div class="text-center text-slate-400 text-sm py-4">No recent history</div>';
             }
-        }
-    } catch (error) {
-        console.error('Failed to load giving stats:', error);
+        } catch(e) { console.error(e); }
     }
-}
 
-// Initialize on page load
-document.addEventListener('DOMContentLoaded', () => {
-    loadGivingHistory();
-    loadGivingStats();
-});
+    document.addEventListener('DOMContentLoaded', loadHistory);
+
+    // Form Submit
+    document.getElementById('givingForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        if(currentAmount <= 0) {
+            window.dispatchEvent(new CustomEvent('notify', { detail: { message: "Please enter a valid amount", type: 'error' } }));
+            return;
+        }
+
+        const formData = new FormData(e.target);
+        if(!formData.get('category')) {
+             window.dispatchEvent(new CustomEvent('notify', { detail: { message: "Please select a category", type: 'error' } }));
+             return;
+        }
+
+        // Mock payment flow
+        ChurchApp.showLoading(true);
+        setTimeout(() => {
+            ChurchApp.showLoading(false);
+            window.dispatchEvent(new CustomEvent('notify', { detail: { message: "Payment initiated successfully!", type: 'success' } }));
+        }, 1500);
+    });
 </script>
 @endpush

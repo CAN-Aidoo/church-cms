@@ -155,8 +155,9 @@
                 return;
             }
 
+            const mobileBase = '{{ url('/mobile') }}';
             flockList.innerHTML = members.map(member => `
-                <div class="bg-white p-4 rounded-xl border border-gray-100 shadow-sm flex items-center gap-4 active:bg-gray-50 transition" onclick="window.location.href='/mobile/shepherd/member/${member.id}'">
+                <div class="bg-white p-4 rounded-xl border border-gray-100 shadow-sm flex items-center gap-4 active:bg-gray-50 transition" onclick="window.location.href='${mobileBase}/shepherd/member/${member.id}'">
                     <div class="w-12 h-12 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center font-bold text-lg">
                         ${member.first_name[0]}${member.last_name[0]}
                     </div>
