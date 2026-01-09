@@ -82,7 +82,6 @@ class MobileCheckInController extends Controller
     {
         $validated = $request->validate([
             'token' => 'required|string',
-            'member_id' => 'required|exists:members,id',
         ]);
 
         $tokenData = $this->qrCodeService->validateToken($validated['token'], 'service');
@@ -94,7 +93,14 @@ class MobileCheckInController extends Controller
             ], 400);
         }
 
-        $member = Member::find($validated['member_id']);
+        $member = $request->user()->member;
+        
+        if (! $member) {
+             return response()->json([
+                'success' => false,
+                'message' => 'Member profile not linked to this user account.',
+            ], 404);
+        }
 
         // Check for duplicate check-in
         $existingAttendance = Attendance::where('member_id', $member->id)
@@ -157,18 +163,24 @@ class MobileCheckInController extends Controller
         $checkedIn = [];
         $alreadyCheckedIn = [];
 
-        DB::transaction(function () use ($validated, $tokenData, &$checkedIn, &$alreadyCheckedIn) {
+        // Eager load members to avoid N+1 lookup
+        $members = Member::whereIn('id', $validated['family_members'])->get()->keyBy('id');
+
+        // Check existing attendances for this service/date in one query
+        $existingAttendances = Attendance::whereIn('member_id', $validated['family_members'])
+            ->where('service_date', $tokenData['service_date'])
+            ->where('service_type', $tokenData['service_type'])
+            ->pluck('member_id')
+            ->toArray();
+
+        DB::transaction(function () use ($validated, $tokenData, $members, $existingAttendances, &$checkedIn, &$alreadyCheckedIn) {
             foreach ($validated['family_members'] as $memberId) {
+                $member = $members->get($memberId);
+                if (!$member) continue;
+
                 // Check for duplicate
-                $existing = Attendance::where('member_id', $memberId)
-                    ->where('service_date', $tokenData['service_date'])
-                    ->where('service_type', $tokenData['service_type'])
-                    ->first();
-
-                if ($existing) {
-                    $member = Member::find($memberId);
+                if (in_array($memberId, $existingAttendances)) {
                     $alreadyCheckedIn[] = $member->first_name.' '.$member->last_name;
-
                     continue;
                 }
 
@@ -185,7 +197,6 @@ class MobileCheckInController extends Controller
                 // Broadcast attendance event for real-time updates
                 broadcast(new AttendanceRecorded($attendance))->toOthers();
 
-                $member = Member::find($memberId);
                 $checkedIn[] = $member->first_name.' '.$member->last_name;
             }
         });

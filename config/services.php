@@ -19,4 +19,21 @@ return [
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
 
+    'twilio' => [
+        'sid' => env('TWILIO_SID'),
+        'token' => env('TWILIO_AUTH_TOKEN'),
+        'phone' => env('TWILIO_PHONE_NUMBER'),
+    ],
+
+    'paystack' => [
+        'public_key' => env('PAYSTACK_PUBLIC_KEY'),
+        'secret_key' => env('PAYSTACK_SECRET_KEY'),
+    ],
+
+    'hubtel' => [
+        'client_id' => env('HUBTEL_CLIENT_ID'),
+        'client_secret' => env('HUBTEL_CLIENT_SECRET'),
+        'merchant_id' => env('HUBTEL_MERCHANT_ID'),
+    ],
+
 ];

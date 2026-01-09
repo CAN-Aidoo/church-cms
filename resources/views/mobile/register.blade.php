@@ -213,7 +213,17 @@ document.getElementById('phoneForm').addEventListener('submit', async (e) => {
         const result = await ChurchApp.register({ phone: phoneNumber, email: emailAddress });
 
         if (result.success) {
-            ChurchApp.showToast('Verification code sent!', 'success');
+            // Show OTP in dev mode
+            if (result.data.dev_mode && result.data.otp) {
+                ChurchApp.showToast(`DEV MODE - OTP: ${result.data.otp}`, 'success', 10000);
+                console.log('=== DEVELOPMENT MODE ===');
+                console.log('OTP Code:', result.data.otp);
+                console.log('SMS Error:', result.data.sms_error);
+                console.log('=====================');
+            } else {
+                ChurchApp.showToast(result.message || 'Verification code sent!', 'success');
+            }
+
             document.getElementById('phone-display').textContent = phoneNumber;
             goToStep(2);
         }
@@ -249,7 +259,16 @@ document.getElementById('resendOtp').addEventListener('click', async () => {
         }, false);
 
         if (result.success) {
-            ChurchApp.showToast('New code sent!', 'success');
+            // Show OTP in dev mode
+            if (result.data.dev_mode && result.data.otp) {
+                ChurchApp.showToast(`DEV MODE - NEW OTP: ${result.data.otp}`, 'success', 10000);
+                console.log('=== DEVELOPMENT MODE ===');
+                console.log('Resent OTP Code:', result.data.otp);
+                console.log('SMS Error:', result.data.sms_error);
+                console.log('=====================');
+            } else {
+                ChurchApp.showToast(result.message || 'New code sent!', 'success');
+            }
         }
     } catch (error) {
         ChurchApp.showToast(error.message || 'Failed to resend code', 'error');

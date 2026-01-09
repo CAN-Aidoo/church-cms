@@ -12,7 +12,8 @@ class AuthServiceProvider extends ServiceProvider
      * @var array<class-string, class-string>
      */
     protected $policies = [
-        //
+        \App\Models\Shepherd::class => \App\Policies\ShepherdPolicy::class,
+        \App\Models\ServiceUnit::class => \App\Policies\ServiceUnitPolicy::class,
     ];
 
     /**

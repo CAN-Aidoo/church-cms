@@ -17,10 +17,16 @@ class AuthController extends Controller
     /**
      * Show the login form.
      */
-    public function showLoginForm()
+    public function showLoginForm(Request $request)
     {
         if (Auth::check()) {
             return redirect()->route('dashboard');
+        }
+
+        // If coming from mobile route or URL path contains 'mobile', redirect to mobile login
+        $intendedUrl = url()->previous();
+        if (str_contains($intendedUrl, '/mobile/') || $request->is('mobile/*')) {
+            return redirect('/mobile/login');
         }
 
         return view('auth.login');
@@ -181,6 +187,85 @@ class AuthController extends Controller
     }
 
     /**
+     * Handle mobile web login request (session-based).
+     */
+    public function mobileLogin(Request $request)
+    {
+        $request->validate([
+            'email' => 'required|email',
+            'password' => 'required',
+        ]);
+
+        $email = $request->email;
+        $lockoutKey = "login_attempts:{$email}";
+
+        // Check for account lockout
+        $failedAttempts = Cache::get($lockoutKey, 0);
+        if ($failedAttempts >= 5) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Too many login attempts. Please try again in 15 minutes.',
+            ], 429);
+        }
+
+        $user = User::where('email', $email)->first();
+
+        // Check credentials
+        if (! $user || ! Hash::check($request->password, $user->password)) {
+            Cache::put($lockoutKey, $failedAttempts + 1, now()->addMinutes(15));
+
+            return response()->json([
+                'success' => false,
+                'message' => 'The provided credentials are incorrect.',
+            ], 401);
+        }
+
+        // Check if user is active
+        if (! $user->is_active) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Your account has been deactivated. Please contact the administrator.',
+            ], 403);
+        }
+
+        // Clear failed attempts
+        Cache::forget($lockoutKey);
+
+        // Login user with session
+        Auth::login($user, $request->boolean('remember', false));
+
+        // Update last login
+        $user->updateLastLogin();
+
+        // Log successful login
+        AuditLog::create([
+            'user_id' => $user->id,
+            'action' => 'mobile_web_login',
+            'table_name' => 'users',
+            'record_id' => $user->id,
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+        ]);
+
+        // Regenerate session
+        $request->session()->regenerate();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Login successful',
+            'data' => [
+                'user' => [
+                    'id' => $user->id,
+                    'full_name' => $user->full_name,
+                    'email' => $user->email,
+                    'role' => $user->role,
+                    'avatar_url' => $user->avatar_url,
+                ],
+            ],
+        ]);
+    }
+
+    /**
      * Show the registration form.
      */
     public function showRegisterForm()
@@ -237,7 +322,7 @@ class AuthController extends Controller
     }
 
     /**
-     * Handle logout request.
+     * Handle logout request (works for both web and API/mobile).
      */
     public function logout(Request $request)
     {
@@ -259,6 +344,14 @@ class AuthController extends Controller
 
         $request->session()->invalidate();
         $request->session()->regenerateToken();
+
+        // Return JSON for API/mobile requests, redirect for web
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Logged out successfully',
+            ]);
+        }
 
         return redirect()->route('login')
             ->with('success', 'You have been logged out successfully.');

@@ -28,11 +28,12 @@
         .hide-scrollbar::-webkit-scrollbar { display: none; }
         .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
         
-        /* Glassmorphism utilities */
-        .glass {
-            background: rgba(255, 255, 255, 0.8);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
+        /* Minimalist Utilities */
+        .glass-nav {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-top: 1px solid #f1f5f9;
         }
     </style>
     @stack('styles')
@@ -109,9 +110,23 @@
             @endif
         });
     </script>
+    <!-- Splash Screen -->
+    <div id="app-splash" class="fixed inset-0 bg-primary-600 z-[100] flex flex-col items-center justify-center transition-opacity duration-500">
+        <div class="w-24 h-24 bg-white rounded-full flex items-center justify-center mb-6 shadow-2xl animate-pulse">
+            <svg class="w-12 h-12 text-primary-600" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M10 3.5a1.5 1.5 0 013 0V4a1 1 0 001 1h3a1 1 0 011 1v3a1 1 0 01-1 1h-.5a1.5 1.5 0 000 3h.5a1 1 0 011 1v3a1 1 0 01-1 1h-3a1 1 0 01-1-1v-.5a1.5 1.5 0 00-3 0v.5a1 1 0 01-1 1H6a1 1 0 01-1-1v-3a1 1 0 00-1-1h-.5a1.5 1.5 0 010-3H4a1 1 0 001-1V6a1 1 0 011-1h3a1 1 0 001-1v-.5z"/>
+            </svg>
+        </div>
+        <h1 class="text-2xl font-bold text-white tracking-tight">Church App</h1>
+    </div>
+
     @stack('scripts')
 
     <!-- Bottom Navigation -->
-    @include('layouts.partials.mobile-nav')
+    @auth
+        @unless(View::hasSection('hide_nav'))
+            @include('layouts.partials.mobile-nav')
+        @endunless
+    @endauth
 </body>
 </html>

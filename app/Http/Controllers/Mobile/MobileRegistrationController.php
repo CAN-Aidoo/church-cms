@@ -51,17 +51,39 @@ class MobileRegistrationController extends Controller
             'expires_at' => $expiresAt,
         ], $expiresAt);
 
+        // Always log OTP for debugging
+        \Log::info("OTP Generated for {$validated['phone']}: {$otp}");
+
         // Send OTP via SMS
         $message = "Your Church CMS verification code is: {$otp}. Valid for 10 minutes.";
-        $this->smsService->sendSms($validated['phone'], $message);
+        $smsResult = $this->smsService->sendSms($validated['phone'], $message);
+
+        // Prepare response
+        $responseData = [
+            'phone' => $validated['phone'],
+            'expires_in_minutes' => 10,
+        ];
+
+        // Development mode: Include OTP in response if SMS fails or not configured
+        if (! $smsResult['success']) {
+            \Log::warning("SMS failed for {$validated['phone']}: {$smsResult['error']}");
+
+            // In development, show OTP in response
+            if (config('app.env') !== 'production') {
+                $responseData['otp'] = $otp;
+                $responseData['dev_mode'] = true;
+                $responseData['sms_error'] = $smsResult['error'];
+            }
+        }
 
         return response()->json([
             'success' => true,
-            'message' => 'Verification code sent to your phone',
-            'data' => [
-                'phone' => $validated['phone'],
-                'expires_in_minutes' => 10,
-            ],
+            'message' => $smsResult['success']
+                ? 'Verification code sent to your phone'
+                : (config('app.env') !== 'production'
+                    ? 'SMS service not configured. OTP shown below (dev mode)'
+                    : 'Failed to send SMS. Please contact support.'),
+            'data' => $responseData,
         ]);
     }
 
@@ -139,8 +161,8 @@ class MobileRegistrationController extends Controller
             // Notify admin about new registration
             $this->notificationService->notifyAdminOfNewMobileRegistration($member);
 
-            // Create access token
-            $token = $user->createToken('mobile-app', ['limited-access'])->plainTextToken;
+            // Login user with session (instead of creating token)
+            auth()->login($user);
 
             DB::commit();
 
@@ -150,9 +172,10 @@ class MobileRegistrationController extends Controller
                 'data' => [
                     'user' => [
                         'id' => $user->id,
-                        'name' => $user->name,
+                        'full_name' => $user->name,
                         'email' => $user->email,
                         'phone' => $user->phone,
+                        'role' => $user->role,
                         'is_verified' => $user->is_verified,
                     ],
                     'member' => [
@@ -161,8 +184,6 @@ class MobileRegistrationController extends Controller
                         'full_name' => $member->full_name,
                         'status' => $member->member_status,
                     ],
-                    'access_token' => $token,
-                    'token_type' => 'Bearer',
                     'permissions' => [
                         'can_view_announcements' => true,
                         'can_update_profile' => true,
@@ -294,17 +315,39 @@ class MobileRegistrationController extends Controller
             'expires_at' => $expiresAt,
         ], $expiresAt);
 
+        // Always log OTP for debugging
+        \Log::info("OTP Resent for {$validated['phone']}: {$otp}");
+
         // Send OTP via SMS
         $message = "Your new Church CMS verification code is: {$otp}. Valid for 10 minutes.";
-        $this->smsService->sendSms($validated['phone'], $message);
+        $smsResult = $this->smsService->sendSms($validated['phone'], $message);
+
+        // Prepare response
+        $responseData = [
+            'phone' => $validated['phone'],
+            'expires_in_minutes' => 10,
+        ];
+
+        // Development mode: Include OTP in response if SMS fails or not configured
+        if (! $smsResult['success']) {
+            \Log::warning("SMS resend failed for {$validated['phone']}: {$smsResult['error']}");
+
+            // In development, show OTP in response
+            if (config('app.env') !== 'production') {
+                $responseData['otp'] = $otp;
+                $responseData['dev_mode'] = true;
+                $responseData['sms_error'] = $smsResult['error'];
+            }
+        }
 
         return response()->json([
             'success' => true,
-            'message' => 'New verification code sent to your phone',
-            'data' => [
-                'phone' => $validated['phone'],
-                'expires_in_minutes' => 10,
-            ],
+            'message' => $smsResult['success']
+                ? 'New verification code sent to your phone'
+                : (config('app.env') !== 'production'
+                    ? 'SMS service not configured. OTP shown below (dev mode)'
+                    : 'Failed to send SMS. Please contact support.'),
+            'data' => $responseData,
         ]);
     }
 

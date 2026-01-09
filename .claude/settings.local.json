@@ -64,7 +64,10 @@
       "Bash([ -f \"public/images/icon-192x192.png\" ])",
       "Bash([ -f \"config/qr-code.php\" ])",
       "Bash(wc:*)",
-      "Bash(grep:*)"
+      "Bash(grep:*)",
+      "Bash(timeout 3 tail:*)",
+      "Bash(del \"C:\\\\xampp\\\\htdocs\\\\church-cms-docs\\\\database\\\\migrations\\\\2026_01_09_075442_create_service_unit_meetings_table.php\")",
+      "Bash(del \"C:\\\\xampp\\\\htdocs\\\\church-cms-docs\\\\database\\\\migrations\\\\2026_01_09_075446_create_service_unit_trainings_table.php\")"
     ],
     "deny": [],
     "ask": []

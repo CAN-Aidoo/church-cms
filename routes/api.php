@@ -40,20 +40,19 @@ use Illuminate\Support\Facades\Route;
 
 // Public API Routes (No Authentication)
 Route::prefix('v1')->group(function () {
-    // Authentication
+    // Authentication (Token-based for API clients)
     Route::post('/login', [AuthController::class, 'apiLogin'])->middleware('throttle:5,1');
     Route::post('/register', [AuthController::class, 'register'])->middleware('throttle:3,1');
     Route::post('/forgot-password', [AuthController::class, 'sendResetLink'])->middleware('throttle:3,1');
     Route::post('/reset-password', [AuthController::class, 'resetPassword'])->middleware('throttle:3,1');
 });
 
-// Authenticated API Routes
+// Authenticated API Routes (Token-based)
 Route::prefix('v1')->middleware('auth:sanctum')->group(function () {
-    // User info
-    Route::get('/user', function (Request $request) {
+    // User info (for token-based API clients)
+    Route::get('/user-token', function (Request $request) {
         return $request->user()->load('member');
     });
-    Route::post('/logout', [AuthController::class, 'logout']);
 
     // Dashboard
     Route::get('/dashboard/stats', [DashboardController::class, 'stats']);
@@ -349,18 +348,20 @@ Route::prefix('mobile/v1')->group(function () {
     // Mobile Registration & Authentication
     Route::post('/register/member', [MobileRegistrationController::class, 'registerMember']);
     Route::post('/register/visitor', [MobileRegistrationController::class, 'registerVisitor']);
-    Route::post('/verify-otp', [MobileRegistrationController::class, 'verifyOtp']);
     Route::post('/resend-otp', [MobileRegistrationController::class, 'resendOtp']);
 
     // QR Code Check-in (Public)
-    Route::post('/check-in/member', [MobileCheckInController::class, 'memberCheckIn']);
-    Route::post('/check-in/service', [MobileCheckInController::class, 'serviceCheckIn']);
-    Route::post('/check-in/family', [MobileCheckInController::class, 'familyCheckIn']);
+    // QR Code Check-in routes moved to authenticated section
 
     // AUTHENTICATED MOBILE ROUTES (Requires Token)
     Route::middleware(['auth:sanctum'])->group(function () {
         // Registration Status
         Route::get('/registration/status', [MobileRegistrationController::class, 'checkStatus']);
+
+        // QR Code Check-in (Authenticated)
+        Route::post('/check-in/member', [MobileCheckInController::class, 'memberCheckIn']);
+        Route::post('/check-in/service', [MobileCheckInController::class, 'serviceCheckIn']);
+        Route::post('/check-in/family', [MobileCheckInController::class, 'familyCheckIn']);
 
         // Member Portal APIs
         Route::get('/my/profile', [MemberController::class, 'getMyProfile']);

@@ -53,6 +53,14 @@ class SmsBroadcast extends Model
     }
 
     /**
+     * Alias for creator (compatibility)
+     */
+    public function sender(): BelongsTo
+    {
+        return $this->creator();
+    }
+
+    /**
      * Get all recipients for this broadcast.
      */
     public function recipients(): HasMany

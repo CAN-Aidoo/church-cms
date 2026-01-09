@@ -754,6 +754,34 @@ Route::prefix('pwa')->name('pwa.')->group(function () {
 });
 
 // ============================================================================
+// MOBILE WEB API ROUTES (Session-based, must be in web.php)
+// ============================================================================
+
+// CSRF Cookie endpoint for SPA authentication
+Route::get('/sanctum/csrf-cookie', function () {
+    return response()->json(['message' => 'CSRF cookie set']);
+});
+
+// Mobile web authentication endpoints (session-based, returns JSON)
+Route::prefix('api/v1')->group(function () {
+    // Login endpoint
+    Route::post('/login-mobile', [AuthController::class, 'mobileLogin'])->middleware('throttle:5,1');
+
+    // Authenticated endpoints
+    Route::middleware(['auth'])->group(function () {
+        Route::get('/user', function (Request $request) {
+            return response()->json($request->user()->load('member'));
+        });
+        Route::post('/logout', [AuthController::class, 'logout']);
+    });
+});
+
+// Mobile registration endpoints (session-based)
+Route::prefix('api/mobile/v1')->group(function () {
+    Route::post('/verify-otp', [MobileRegistrationController::class, 'verifyOtp']);
+});
+
+// ============================================================================
 // MOBILE PWA ROUTES (OUTSIDE AUTH MIDDLEWARE)
 // ============================================================================
 
@@ -814,8 +842,8 @@ Route::prefix('mobile')->name('mobile.')->group(function () {
     })->name('church-info');
 });
 
-// Mobile Authenticated Routes (authentication checked in JavaScript via token)
-Route::prefix('mobile')->name('mobile.')->group(function () {
+// Mobile Authenticated Routes (protected by Laravel session auth)
+Route::prefix('mobile')->name('mobile.')->middleware(['auth'])->group(function () {
     // Core member features
     Route::get('/dashboard', function () {
         return view('mobile.dashboard');

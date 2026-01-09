@@ -259,7 +259,7 @@ async function loadTransactions(page = 1, append = false) {
             ...currentFilters
         });
 
-        const result = await ChurchApp.apiCall(`/api/mobile/v1/payments/history?${params}`, 'GET');
+        const result = await ChurchApp.apiCall(`/api/mobile/v1/payment/history?${params}`, 'GET');
 
         if (result.success) {
             const transactions = result.data.data || result.data;
@@ -280,34 +280,33 @@ async function loadTransactions(page = 1, append = false) {
 
             const transactionHTML = transactions.map(transaction => {
                 const statusColors = {
-                    'completed': 'bg-green-100 text-green-800',
-                    'pending': 'bg-yellow-100 text-yellow-800',
-                    'failed': 'bg-red-100 text-red-800'
+                    'completed': 'bg-emerald-50 text-emerald-600 border-emerald-100',
+                    'pending': 'bg-amber-50 text-amber-600 border-amber-100',
+                    'failed': 'bg-rose-50 text-rose-600 border-rose-100'
                 };
 
                 const date = new Date(transaction.created_at);
+                const day = date.getDate();
+                const month = date.toLocaleDateString('en-US', { month: 'short' });
+
                 return `
-                    <div onclick="showTransactionDetail('${transaction.id}')" class="bg-white rounded-lg p-4 shadow-sm border border-gray-200 cursor-pointer hover:border-blue-600 transition">
-                        <div class="flex items-center justify-between mb-2">
-                            <div class="flex-1">
-                                <p class="font-semibold text-gray-900">${transaction.category_label || transaction.category}</p>
-                                <p class="text-sm text-gray-500">${date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</p>
-                            </div>
-                            <div class="text-right">
-                                <p class="text-lg font-bold text-gray-900">GHS ${parseFloat(transaction.amount).toFixed(2)}</p>
-                                <span class="inline-block px-2 py-1 text-xs font-semibold rounded ${statusColors[transaction.status]}">
+                    <div onclick="showTransactionDetail('${transaction.id}')" class="bg-white rounded-2xl p-4 shadow-sm border border-slate-100 cursor-pointer active:scale-[0.98] transition-transform flex items-center justify-between">
+                        <div class="flex items-center gap-4">
+                             <div class="w-12 h-12 rounded-xl bg-slate-50 flex flex-col items-center justify-center text-slate-500 border border-slate-100 font-bold leading-none">
+                                <span class="text-xs uppercase">${month}</span>
+                                <span class="text-lg text-slate-800">${day}</span>
+                             </div>
+                             <div>
+                                <p class="font-bold text-slate-800 text-base">${transaction.category_label || transaction.category}</p>
+                                <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wide border ${statusColors[transaction.status] || 'bg-slate-50 text-slate-500'}">
                                     ${transaction.status}
                                 </span>
-                            </div>
+                             </div>
                         </div>
-                        ${transaction.is_recurring ? `
-                            <div class="flex items-center text-xs text-blue-600 mt-2">
-                                <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clip-rule="evenodd"/>
-                                </svg>
-                                Recurring ${transaction.frequency}
-                            </div>
-                        ` : ''}
+                        <div class="text-right">
+                            <p class="text-lg font-bold text-slate-900 tracking-tight">GHS ${parseFloat(transaction.amount).toFixed(2)}</p>
+                             ${transaction.is_recurring ? `<div class="text-[10px] text-indigo-500 font-bold uppercase tracking-wider flex items-center justify-end gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg> Auto</div>` : ''}
+                        </div>
                     </div>
                 `;
             }).join('');
@@ -457,7 +456,7 @@ async function showTransactionDetail(id) {
     document.getElementById('detailModal').classList.remove('hidden');
 
     try {
-        const result = await ChurchApp.apiCall(`/api/mobile/v1/payments/${id}`, 'GET');
+        const result = await ChurchApp.apiCall(`/api/mobile/v1/payment/${id}`, 'GET');
 
         if (result.success) {
             const payment = result.data;
@@ -519,10 +518,10 @@ async function exportHistory() {
 
     try {
         const params = new URLSearchParams(currentFilters);
-        const response = await fetch(`/api/mobile/v1/payments/export?${params}`, {
+        const response = await fetch(`/api/mobile/v1/payment/export?${params}`, {
             method: 'GET',
+            credentials: 'same-origin',
             headers: {
-                'Authorization': `Bearer ${ChurchApp.token}`,
                 'Accept': 'text/csv'
             }
         });
