@@ -12,159 +12,118 @@
 @endsection
 
 @section('content')
-<div class="bg-gray-50 min-h-screen pb-20">
-    <!-- Event Banner -->
-    <div id="bannerSection" class="relative h-64 bg-gradient-to-br from-blue-600 to-blue-700">
-        <img id="bannerImage" class="hidden w-full h-full object-cover" alt="Event banner">
-        <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
-
-        <!-- Featured Badge -->
-        <div id="featuredBadge" class="hidden absolute top-4 right-4">
-            <span class="bg-yellow-400 text-yellow-900 px-4 py-2 rounded-full text-sm font-bold shadow-lg">
-                ⭐ Featured Event
-            </span>
+<div class="bg-white min-h-screen pb-24">
+    <!-- Immersive Header -->
+    <div class="relative h-96 w-full overflow-hidden">
+        <div id="bannerPlaceholder" class="absolute inset-0 bg-slate-900">
+             <img id="bannerImage" class="hidden w-full h-full object-cover opacity-80" alt="Event banner">
+             <!-- Fallback Gradient -->
+             <div id="bannerGradient" class="absolute inset-0 bg-gradient-to-br from-slate-800 to-slate-900 opacity-100"></div>
+        </div>
+        <div class="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/60 to-transparent"></div>
+        
+        <!-- Navigation Overlay -->
+        <div class="absolute top-0 left-0 right-0 p-4 pt-safe flex justify-between items-start z-10">
+            <button onclick="history.back()" class="w-10 h-10 rounded-full bg-black/20 backdrop-blur-md flex items-center justify-center text-white border border-white/10 active:scale-90 transition-transform">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+            </button>
+            <div class="flex gap-2">
+                 <button onclick="shareEvent()" class="w-10 h-10 rounded-full bg-black/20 backdrop-blur-md flex items-center justify-center text-white border border-white/10 active:scale-90 transition-transform">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/></svg>
+                </button>
+            </div>
         </div>
 
-        <!-- Countdown Timer -->
-        <div id="countdownSection" class="hidden absolute bottom-4 left-4 right-4">
-            <div class="bg-white/95 backdrop-blur rounded-xl p-4 shadow-xl">
-                <p class="text-xs text-gray-600 mb-2 text-center">Event starts in:</p>
-                <div class="grid grid-cols-4 gap-2 text-center">
-                    <div>
-                        <p id="countdownDays" class="text-2xl font-bold text-blue-600">0</p>
-                        <p class="text-xs text-gray-600">Days</p>
-                    </div>
-                    <div>
-                        <p id="countdownHours" class="text-2xl font-bold text-blue-600">0</p>
-                        <p class="text-xs text-gray-600">Hours</p>
-                    </div>
-                    <div>
-                        <p id="countdownMinutes" class="text-2xl font-bold text-blue-600">0</p>
-                        <p class="text-xs text-gray-600">Mins</p>
-                    </div>
-                    <div>
-                        <p id="countdownSeconds" class="text-2xl font-bold text-blue-600">0</p>
-                        <p class="text-xs text-gray-600">Secs</p>
-                    </div>
-                </div>
+        <!-- content overlay -->
+        <div class="absolute bottom-0 left-0 right-0 p-6 z-10">
+            <div class="flex items-center gap-2 mb-3">
+                <span id="categoryBadge" class="px-3 py-1 rounded-lg text-xs font-bold uppercase tracking-wider bg-white/10 backdrop-blur-md text-white border border-white/20">
+                    Category
+                </span>
+                <span id="statusBadge" class="hidden px-2 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider bg-emerald-500 text-white shadow-lg shadow-emerald-500/30">
+                    Upcoming
+                </span>
+            </div>
+            
+            <h1 id="eventTitle" class="text-3xl font-black text-white leading-tight mb-2 drop-shadow-sm">Event Title</h1>
+            
+            <div class="flex items-center text-white/80 text-sm font-medium gap-4">
+                 <div class="flex items-center gap-1.5">
+                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                     <span id="eventDateDisplay">Loading...</span>
+                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Event Info -->
-    <div class="px-4 -mt-4">
-        <div class="bg-white rounded-xl shadow-xl p-6">
-            <!-- Category & Status -->
-            <div class="flex items-center justify-between mb-4">
-                <span id="categoryBadge" class="px-3 py-1 rounded-full text-sm font-semibold bg-blue-100 text-blue-800 border border-blue-200">
-                    Category
-                </span>
-                <span id="statusBadge" class="px-3 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-800">
-                    Upcoming
-                </span>
+    <!-- Main Content -->
+    <div class="px-6 py-8 -mt-6 bg-white rounded-t-[2rem] relative z-10">
+        <!-- Countdown -->
+        <div id="countdownSection" class="hidden mb-8">
+            <div class="bg-indigo-50 rounded-2xl p-4 flex justify-between items-center text-center">
+                 <div>
+                    <span class="block text-2xl font-bold text-indigo-600" id="countdownDays">0</span>
+                    <span class="text-[10px] font-bold text-indigo-400 uppercase tracking-wider">Days</span>
+                 </div>
+                 <div class="w-px h-8 bg-indigo-200"></div>
+                 <div>
+                    <span class="block text-2xl font-bold text-indigo-600" id="countdownHours">0</span>
+                    <span class="text-[10px] font-bold text-indigo-400 uppercase tracking-wider">Hrs</span>
+                 </div>
+                 <div class="w-px h-8 bg-indigo-200"></div>
+                 <div>
+                    <span class="block text-2xl font-bold text-indigo-600" id="countdownMinutes">0</span>
+                    <span class="text-[10px] font-bold text-indigo-400 uppercase tracking-wider">Mins</span>
+                 </div>
             </div>
+        </div>
 
-            <!-- Title -->
-            <h1 id="eventTitle" class="text-2xl font-bold text-gray-900 mb-3">Event Title</h1>
+        <!-- Description -->
+        <div class="mb-8">
+            <h3 class="text-sm font-bold text-slate-900 uppercase tracking-widest mb-3">About Event</h3>
+            <p id="eventDescription" class="text-slate-600 leading-relaxed text-base">Event description...</p>
+        </div>
 
-            <!-- Description -->
-            <p id="eventDescription" class="text-gray-700 mb-6 leading-relaxed">Event description...</p>
-
-            <!-- Key Details Grid -->
-            <div class="grid grid-cols-1 gap-4 mb-6">
-                <!-- Date & Time -->
-                <div class="flex items-start">
-                    <div class="bg-blue-100 rounded-lg p-3 mr-4">
-                        <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-                        </svg>
-                    </div>
-                    <div class="flex-1">
-                        <p class="text-sm text-gray-600">Date & Time</p>
-                        <p id="eventDateTime" class="font-semibold text-gray-900">Loading...</p>
-                    </div>
+        <!-- Info Grid -->
+        <div class="space-y-6 mb-8">
+            <!-- Location -->
+            <div class="flex gap-4">
+                <div class="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 border border-slate-100 flex-shrink-0">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
                 </div>
-
-                <!-- Location -->
-                <div id="locationSection" class="flex items-start">
-                    <div class="bg-green-100 rounded-lg p-3 mr-4">
-                        <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
-                        </svg>
-                    </div>
-                    <div class="flex-1">
-                        <p class="text-sm text-gray-600">Location</p>
-                        <p id="eventLocation" class="font-semibold text-gray-900">Loading...</p>
-                        <button id="getDirectionsBtn" class="hidden text-blue-600 text-sm mt-1 font-medium hover:underline">
-                            Get Directions →
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Capacity -->
-                <div id="capacitySection" class="flex items-start">
-                    <div class="bg-purple-100 rounded-lg p-3 mr-4">
-                        <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
-                        </svg>
-                    </div>
-                    <div class="flex-1">
-                        <p class="text-sm text-gray-600">Capacity</p>
-                        <div class="flex items-center">
-                            <p id="eventCapacity" class="font-semibold text-gray-900">Loading...</p>
-                            <span id="spotsLeftBadge" class="hidden ml-2 text-orange-600 text-sm font-semibold"></span>
-                        </div>
-                        <div id="capacityProgress" class="hidden mt-2 bg-gray-200 rounded-full h-2">
-                            <div id="capacityBar" class="bg-blue-600 h-2 rounded-full transition-all duration-300" style="width: 0%"></div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Cost -->
-                <div id="costSection" class="hidden flex items-start">
-                    <div class="bg-yellow-100 rounded-lg p-3 mr-4">
-                        <svg class="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                        </svg>
-                    </div>
-                    <div class="flex-1">
-                        <p class="text-sm text-gray-600">Registration Fee</p>
-                        <p id="eventCost" class="font-semibold text-gray-900">Loading...</p>
-                    </div>
-                </div>
-
-                <!-- Organizer -->
-                <div id="organizerSection" class="flex items-start">
-                    <div class="bg-pink-100 rounded-lg p-3 mr-4">
-                        <svg class="w-6 h-6 text-pink-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
-                        </svg>
-                    </div>
-                    <div class="flex-1">
-                        <p class="text-sm text-gray-600">Organizer</p>
-                        <p id="eventOrganizer" class="font-semibold text-gray-900">Loading...</p>
-                        <p id="organizerContact" class="text-sm text-gray-600 mt-1"></p>
-                    </div>
+                <div>
+                     <h4 class="font-bold text-slate-900 text-sm">Location</h4>
+                     <p id="eventLocation" class="text-slate-500 text-sm mt-0.5">Loading...</p>
+                     <button id="getDirectionsBtn" class="hidden text-primary-600 text-xs font-bold mt-1 hover:underline">Get Directions</button>
                 </div>
             </div>
 
-            <!-- Requirements/Notes -->
-            <div id="requirementsSection" class="hidden bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-                <div class="flex items-start">
-                    <svg class="w-5 h-5 text-blue-600 mt-0.5 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
-                    </svg>
-                    <div>
-                        <p class="font-semibold text-blue-900 mb-2">Important Information</p>
-                        <p id="eventRequirements" class="text-sm text-blue-800"></p>
-                    </div>
+            <!-- Organizer -->
+            <div class="flex gap-4">
+                <div class="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 border border-slate-100 flex-shrink-0">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                </div>
+                <div>
+                     <h4 class="font-bold text-slate-900 text-sm">Organizer</h4>
+                     <p id="eventOrganizer" class="text-slate-500 text-sm mt-0.5">Loading...</p>
                 </div>
             </div>
 
-            <!-- Registration Button -->
-            <div id="registrationSection">
-                <!-- Will be populated dynamically -->
+            <!-- Cost -->
+            <div id="costSection" class="hidden flex gap-4">
+                <div class="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 border border-slate-100 flex-shrink-0">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                </div>
+                <div>
+                     <h4 class="font-bold text-slate-900 text-sm">Cost</h4>
+                     <p id="eventCost" class="text-slate-500 text-sm mt-0.5">Free</p>
+                </div>
+            </div>
+            
+            <!-- Requirements / Important -->
+            <div id="requirementsSection" class="hidden rounded-xl bg-amber-50 p-4 border border-amber-100">
+                <p class="text-xs font-bold text-amber-800 uppercase tracking-wide mb-1">Important Info</p>
+                <p id="eventRequirements" class="text-sm text-amber-900/80 leading-relaxed">Requirements...</p>
             </div>
         </div>
     </div>
@@ -287,27 +246,13 @@ function renderEventDetails(event) {
     }
 
     // Category badge
-    const categoryColors = {
-        service: 'bg-blue-100 text-blue-800 border-blue-200',
-        conference: 'bg-purple-100 text-purple-800 border-purple-200',
-        seminar: 'bg-green-100 text-green-800 border-green-200',
-        fellowship: 'bg-yellow-100 text-yellow-800 border-yellow-200',
-        outreach: 'bg-pink-100 text-pink-800 border-pink-200'
-    };
     const categoryBadge = document.getElementById('categoryBadge');
     categoryBadge.textContent = event.category_label || event.category;
-    categoryBadge.className = `px-3 py-1 rounded-full text-sm font-semibold border ${categoryColors[event.category] || 'bg-gray-100 text-gray-800 border-gray-200'}`;
 
-    // Status badge
-    const statusColors = {
-        upcoming: 'bg-green-100 text-green-800',
-        ongoing: 'bg-blue-100 text-blue-800',
-        completed: 'bg-gray-100 text-gray-800',
-        cancelled: 'bg-red-100 text-red-800'
-    };
-    const statusBadge = document.getElementById('statusBadge');
-    statusBadge.textContent = event.status_label || event.status;
-    statusBadge.className = `px-3 py-1 rounded-full text-xs font-semibold ${statusColors[event.status] || 'bg-gray-100 text-gray-800'}`;
+    // Status badge (only if upcoming)
+    if(event.status === 'upcoming') {
+         document.getElementById('statusBadge').classList.remove('hidden');
+    }
 
     // Title & Description
     document.getElementById('eventTitle').textContent = event.title;
@@ -315,11 +260,8 @@ function renderEventDetails(event) {
 
     // Date & Time
     const startDate = new Date(event.start_date);
-    const endDate = event.end_date ? new Date(event.end_date) : null;
-    const dateStr = startDate.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
-    const timeStr = startDate.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
-    const endTimeStr = endDate ? ' - ' + endDate.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }) : '';
-    document.getElementById('eventDateTime').textContent = `${dateStr} at ${timeStr}${endTimeStr}`;
+    const dateStr = startDate.toLocaleTimeString('en-US', { weekday: 'short', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+    document.getElementById('eventDateDisplay').textContent = dateStr;
 
     // Location
     if (event.location) {
@@ -331,26 +273,6 @@ function renderEventDetails(event) {
         }
     }
 
-    // Capacity
-    if (event.max_participants) {
-        const registered = event.registered_count || 0;
-        const max = event.max_participants;
-        const spotsLeft = max - registered;
-        const percentage = (registered / max) * 100;
-
-        document.getElementById('eventCapacity').textContent = `${registered} / ${max} registered`;
-        document.getElementById('capacityProgress').classList.remove('hidden');
-        document.getElementById('capacityBar').style.width = `${percentage}%`;
-
-        if (spotsLeft <= 10 && spotsLeft > 0) {
-            const spotsLeftBadge = document.getElementById('spotsLeftBadge');
-            spotsLeftBadge.textContent = `(${spotsLeft} spots left!)`;
-            spotsLeftBadge.classList.remove('hidden');
-        }
-    } else {
-        document.getElementById('eventCapacity').textContent = `${event.registered_count || 0} registered`;
-    }
-
     // Cost
     if (event.registration_fee && parseFloat(event.registration_fee) > 0) {
         document.getElementById('costSection').classList.remove('hidden');
@@ -359,9 +281,6 @@ function renderEventDetails(event) {
 
     // Organizer
     document.getElementById('eventOrganizer').textContent = event.organizer_name || 'Church Admin';
-    if (event.organizer_contact) {
-        document.getElementById('organizerContact').textContent = event.organizer_contact;
-    }
 
     // Requirements
     if (event.requirements) {

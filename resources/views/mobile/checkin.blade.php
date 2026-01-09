@@ -224,18 +224,96 @@
 @endsection
 
 @push('scripts')
+<script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
 <script>
+let html5QrCode = null;
+
 // QR Scanner Functions
-function openQRScanner() {
+async function openQRScanner() {
     document.getElementById('qrScannerModal').classList.remove('hidden');
-    // TODO: Initialize QR scanner library (html5-qrcode)
-    // For now, show placeholder
-    ChurchApp.showToast('QR Scanner will be available soon. Please use "Show My QR Code" option.', 'info');
+    
+    // Initialize Scanner if not already
+    if (!html5QrCode) {
+        html5QrCode = new Html5Qrcode("qrScanner");
+    }
+
+    const config = { fps: 10, qrbox: { width: 250, height: 250 } };
+    
+    try {
+        await html5QrCode.start(
+            { facingMode: "environment" },
+            config,
+            onScanSuccess,
+            onScanFailure // optional
+        );
+        document.getElementById('qrScanner').classList.remove('bg-gray-100');
+    } catch (err) {
+        console.error("Error starting scanner", err);
+        ChurchApp.showToast("Camera access failed. Please ensure permissions are granted.", "error");
+    }
 }
 
-function closeQRScanner() {
+async function onScanSuccess(decodedText, decodedResult) {
+    // Stop scanning
+    if(html5QrCode) {
+        await html5QrCode.stop();
+        document.getElementById('qrScannerModal').classList.add('hidden');
+    }
+    
+    // Process Check-in
+    handleCheckIn(decodedText);
+}
+
+function onScanFailure(error) {
+    // console.warn(`Code scan error = ${error}`);
+}
+
+async function handleCheckIn(qrData) {
+    ChurchApp.showLoading(true);
+    try {
+        let token = qrData;
+        let endpoint = '/api/mobile/v1/check-in/service'; // Default
+        
+        // Try to parse JSON data if it's a JSON string
+        try {
+            const data = JSON.parse(qrData);
+            if (data.token) {
+                token = data.token;
+            }
+            
+            // Determine endpoint based on type if available
+            if (data.type === 'member_checkin') {
+                endpoint = '/api/mobile/v1/check-in/member';
+            } else if (data.type === 'service_checkin') {
+                endpoint = '/api/mobile/v1/check-in/service';
+            }
+        } catch (e) {
+            // Not JSON, treat as raw token
+            console.log('Scanned data is not JSON, using as raw token');
+        }
+
+        const res = await ChurchApp.apiCall(endpoint, 'POST', { token: token });
+        
+        if(res.success) {
+            ChurchApp.showToast(res.message || 'Check-in Successful!', 'success');
+            loadCheckInHistory(); // Refresh history
+        } else {
+            throw new Error(res.message || 'Check-in failed');
+        }
+    } catch(e) {
+        ChurchApp.showToast(e.message || 'Invalid QR Code', 'error');
+    } finally {
+        ChurchApp.showLoading(false);
+    }
+}
+
+async function closeQRScanner() {
     document.getElementById('qrScannerModal').classList.add('hidden');
-    // TODO: Stop QR scanner camera
+    if (html5QrCode) {
+        try {
+            await html5QrCode.stop();
+        } catch(e) { console.log(e); }
+    }
 }
 
 // My QR Code Functions

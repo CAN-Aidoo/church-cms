@@ -115,23 +115,24 @@ class SmsBroadcastController extends Controller
         $estimatedCost = $totalSms * 0.05;
 
         // Create broadcast record
+        // Create broadcast record
         $broadcast = SmsBroadcast::create([
             'title' => $validated['title'],
             'message' => $validated['message'],
-            'recipient_type' => $validated['recipient_type'],
-            'recipient_filter' => ! empty($validated['recipient_filter']) ? json_encode($validated['recipient_filter']) : null,
+            'recipient_group' => $validated['recipient_type'],
+            // 'recipient_filter' is not in DB
             'recipient_count' => $totalRecipients,
-            'status' => $validated['schedule_type'] === 'send_now' ? 'pending' : 'scheduled',
-            'scheduled_at' => $validated['schedule_type'] === 'schedule' ? $validated['scheduled_at'] : null,
-            'sent_by' => Auth::id(),
-            'estimated_cost' => $estimatedCost,
-            'message_segments' => $segmentsPerSms,
+            'status' => $validated['schedule_type'] === 'send_now' ? 'sending' : 'scheduled',
+            'scheduled_for' => $validated['schedule_type'] === 'schedule' ? $validated['scheduled_at'] : null,
+            'created_by' => Auth::id(),
+            'cost' => $estimatedCost,
+            // 'message_segments' is not in DB
         ]);
 
         // Store recipients
         $recipientData = $recipients->map(function ($member) use ($broadcast) {
             return [
-                'sms_broadcast_id' => $broadcast->id,
+                'broadcast_id' => $broadcast->id,
                 'member_id' => $member->id,
                 'phone_number' => $member->phone,
                 'status' => 'pending',
@@ -140,7 +141,7 @@ class SmsBroadcastController extends Controller
             ];
         })->toArray();
 
-        DB::table('sms_recipients')->insert($recipientData);
+        DB::table('sms_broadcast_recipients')->insert($recipientData);
 
         // If send now, dispatch to queue
         if ($validated['schedule_type'] === 'send_now') {
@@ -164,8 +165,8 @@ class SmsBroadcastController extends Controller
         $broadcast->load('sender');
 
         // Get recipient statistics
-        $recipientStats = DB::table('sms_recipients')
-            ->where('sms_broadcast_id', $broadcast->id)
+        $recipientStats = DB::table('sms_broadcast_recipients')
+            ->where('broadcast_id', $broadcast->id)
             ->select(
                 DB::raw('COUNT(*) as total'),
                 DB::raw('SUM(CASE WHEN status = "sent" THEN 1 ELSE 0 END) as sent'),
@@ -175,11 +176,11 @@ class SmsBroadcastController extends Controller
             ->first();
 
         // Get recent recipients (for display)
-        $recentRecipients = DB::table('sms_recipients')
-            ->join('members', 'sms_recipients.member_id', '=', 'members.id')
-            ->where('sms_recipients.sms_broadcast_id', $broadcast->id)
-            ->select('members.first_name', 'members.last_name', 'sms_recipients.phone_number', 'sms_recipients.status', 'sms_recipients.sent_at', 'sms_recipients.error_message')
-            ->orderBy('sms_recipients.sent_at', 'desc')
+        $recentRecipients = DB::table('sms_broadcast_recipients')
+            ->join('members', 'sms_broadcast_recipients.member_id', '=', 'members.id')
+            ->where('sms_broadcast_recipients.broadcast_id', $broadcast->id)
+            ->select('members.first_name', 'members.last_name', 'sms_broadcast_recipients.phone_number', 'sms_broadcast_recipients.status', 'sms_broadcast_recipients.delivery_timestamp as sent_at', 'sms_broadcast_recipients.error_message')
+            ->orderBy('sms_broadcast_recipients.created_at', 'desc')
             ->limit(50)
             ->get();
 
@@ -199,7 +200,7 @@ class SmsBroadcastController extends Controller
 
         $broadcast->update([
             'status' => 'pending',
-            'scheduled_at' => null,
+            'scheduled_for' => null, // Changed from scheduled_at to match DB
         ]);
 
         // TODO: Dispatch job to send SMS
@@ -215,8 +216,8 @@ class SmsBroadcastController extends Controller
      */
     public function status(SmsBroadcast $broadcast)
     {
-        $recipientStats = DB::table('sms_recipients')
-            ->where('sms_broadcast_id', $broadcast->id)
+        $recipientStats = DB::table('sms_broadcast_recipients')
+            ->where('broadcast_id', $broadcast->id)
             ->select(
                 DB::raw('COUNT(*) as total'),
                 DB::raw('SUM(CASE WHEN status = "sent" THEN 1 ELSE 0 END) as sent'),
@@ -228,9 +229,9 @@ class SmsBroadcastController extends Controller
         return response()->json([
             'broadcast' => [
                 'status' => $broadcast->status,
-                'sent_count' => $broadcast->sent_count,
-                'failed_count' => $broadcast->failed_count,
-                'actual_cost' => $broadcast->actual_cost,
+                'sent_count' => $broadcast->success_count,
+                'failed_count' => $broadcast->failure_count,
+                'actual_cost' => $broadcast->cost,
             ],
             'recipients' => $recipientStats,
         ]);

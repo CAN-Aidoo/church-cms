@@ -192,7 +192,8 @@ class MobileContentController extends Controller
 
         $query = Program::where('status', 'published')
             ->where('start_date', '>=', now())
-            ->orderBy('start_date');
+            ->orderBy('start_date')
+            ->withCount('registrations'); // Eager load count
 
         if ($category) {
             $query->where('category', $category);
@@ -209,7 +210,8 @@ class MobileContentController extends Controller
 
                     $spotsAvailable = null;
                     if ($program->max_participants) {
-                        $registered = $program->registrations()->count();
+                        // Use eager loaded count
+                        $registered = $program->registrations_count;
                         $spotsAvailable = $program->max_participants - $registered;
                     }
 

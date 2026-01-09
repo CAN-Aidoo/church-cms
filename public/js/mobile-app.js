@@ -7,14 +7,34 @@ class ChurchMobileApp {
     constructor() {
         this.apiBase = window.API_BASE_URL || '/api/v1';
         this.mobileApiBase = window.MOBILE_API_BASE_URL || '/api/mobile/v1';
-        this.token = localStorage.getItem('auth_token');
         this.user = JSON.parse(localStorage.getItem('user') || 'null');
         this.isOnline = navigator.onLine;
+
+        // Prevent redirect loops
+        this.isLoginPage = window.location.pathname.includes('/login') || window.location.pathname.includes('/register');
 
         this.init();
     }
 
     init() {
+        // No need to check auth here - Laravel middleware handles it server-side
+        // If user reaches protected pages, they're already authenticated
+        // Just refresh user data from localStorage if available
+        if (!this.isLoginPage) {
+            this.refreshAuth();
+        }
+
+        // Hide Splash Screen
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                const splash = document.getElementById('app-splash');
+                if (splash) {
+                    splash.style.opacity = '0';
+                    setTimeout(() => splash.remove(), 500);
+                }
+            }, 800); // Short delay for branding
+        });
+
         // Register service worker
         if ('serviceWorker' in navigator) {
             this.registerServiceWorker();
@@ -123,19 +143,20 @@ class ChurchMobileApp {
         const headers = {
             'Content-Type': 'application/json',
             'Accept': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest', // Important for SPA mode
         };
 
-        if (this.csrfToken) {
-            headers['X-CSRF-TOKEN'] = this.csrfToken;
+        // CSRF token from meta tag
+        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
+        if (csrfToken) {
+            headers['X-CSRF-TOKEN'] = csrfToken;
         }
 
-        if (useAuth && this.token) {
-            headers['Authorization'] = `Bearer ${this.token}`;
-        }
-
+        // Use session cookies instead of Bearer token
         const options = {
             method,
             headers,
+            credentials: 'same-origin', // Important! Include cookies
         };
 
         if (data && (method === 'POST' || method === 'PUT' || method === 'PATCH')) {
@@ -148,7 +169,11 @@ class ChurchMobileApp {
 
             if (!response.ok) {
                 if (response.status === 401) {
-                    this.handleUnauthorized();
+                    // Don't loop if already on login
+                    if (!this.isLoginPage) {
+                        this.handleUnauthorized();
+                    }
+                    // If on login page, just throw error so form handles it (invalid creds)
                 }
                 throw new Error(result.message || 'Request failed');
             }
@@ -165,16 +190,17 @@ class ChurchMobileApp {
     // Authentication
     async login(email, password) {
         try {
-            const result = await this.apiCall(`${this.apiBase}/login`, 'POST', {
+            // First, get CSRF cookie
+            await fetch('/sanctum/csrf-cookie', { credentials: 'same-origin' });
+
+            // Then login (session-based)
+            const result = await this.apiCall(`${this.apiBase}/login-mobile`, 'POST', {
                 email,
                 password
             }, false);
 
             if (result.success) {
-                this.token = result.data.access_token;
                 this.user = result.data.user;
-
-                localStorage.setItem('auth_token', this.token);
                 localStorage.setItem('user', JSON.stringify(this.user));
 
                 return result;
@@ -196,6 +222,9 @@ class ChurchMobileApp {
 
     async verifyOtp(phone, otp, memberData) {
         try {
+            // Get CSRF cookie first
+            await fetch('/sanctum/csrf-cookie', { credentials: 'same-origin' });
+
             const result = await this.apiCall(`${this.mobileApiBase}/verify-otp`, 'POST', {
                 phone,
                 otp,
@@ -203,10 +232,8 @@ class ChurchMobileApp {
             }, false);
 
             if (result.success) {
-                this.token = result.data.access_token;
+                // Session created server-side, just store user info
                 this.user = result.data.user;
-
-                localStorage.setItem('auth_token', this.token);
                 localStorage.setItem('user', JSON.stringify(this.user));
             }
 
@@ -216,25 +243,39 @@ class ChurchMobileApp {
         }
     }
 
-    logout() {
-        this.token = null;
+    async logout() {
+        try {
+            // Call server logout
+            await this.apiCall(`${this.apiBase}/logout`, 'POST');
+        } catch (error) {
+            // Ignore errors
+        }
+
+        // Clear local data
         this.user = null;
-        localStorage.removeItem('auth_token');
         localStorage.removeItem('user');
         window.location.href = '/mobile/login';
     }
 
     handleUnauthorized() {
-        this.logout();
+        // DO NOT auto-redirect - Laravel middleware handles this
+        // If we get a 401, it means an API call failed, not that we need to redirect the whole page
+        // The page itself is already protected by Laravel middleware
+        console.log('API call returned 401 - session may have expired');
     }
 
     isAuthenticated() {
-        return !!this.token && !!this.user;
+        return !!this.user;
     }
 
     refreshAuth() {
-        this.token = localStorage.getItem('auth_token');
         this.user = JSON.parse(localStorage.getItem('user') || 'null');
+    }
+
+    async checkAuth() {
+        // Simple check - Laravel middleware handles actual auth on server
+        // This is just for checking if we have user data cached
+        return this.isAuthenticated();
     }
 
     // Check-in methods
@@ -242,8 +283,8 @@ class ChurchMobileApp {
         const endpoint = type === 'family'
             ? `${this.mobileApiBase}/check-in/family`
             : type === 'service'
-            ? `${this.mobileApiBase}/check-in/service`
-            : `${this.mobileApiBase}/check-in/member`;
+                ? `${this.mobileApiBase}/check-in/service`
+                : `${this.mobileApiBase}/check-in/member`;
 
         return await this.apiCall(endpoint, 'POST', {
             token,
@@ -253,6 +294,29 @@ class ChurchMobileApp {
 
     async generatePersonalQr() {
         return await this.apiCall(`${this.mobileApiBase}/qr-code/personal`, 'GET');
+    }
+
+    async getMyQRCode() {
+        return await this.generatePersonalQr();
+    }
+
+    async getFamilyMembers() {
+        return await this.apiCall(`${this.apiBase}/my/family`, 'GET');
+    }
+
+    async checkInFamily(serviceType, familyMemberIds) {
+        return await this.apiCall(`${this.mobileApiBase}/check-in/family`, 'POST', {
+            service_type: serviceType,
+            member_ids: familyMemberIds
+        });
+    }
+
+    async getCheckInHistory(limit = 10) {
+        return await this.apiCall(`${this.mobileApiBase}/check-in/history?limit=${limit}`, 'GET');
+    }
+
+    async getAttendanceStats() {
+        return await this.apiCall(`${this.apiBase}/my/attendance`, 'GET');
     }
 
     // Payment methods
@@ -305,6 +369,10 @@ class ChurchMobileApp {
 
     async getMyContributions() {
         return await this.apiCall(`${this.apiBase}/my/contributions`, 'GET');
+    }
+
+    async getGivingStats() {
+        return await this.apiCall(`${this.mobileApiBase}/payment/stats`, 'GET');
     }
 
     // Utility methods

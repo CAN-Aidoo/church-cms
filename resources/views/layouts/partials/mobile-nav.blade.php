@@ -25,13 +25,13 @@
 
         <!-- Scan / Check-in (Center Action) -->
         <div class="relative flex flex-col items-center justify-center w-full h-full">
-            <a href="{{ url('/mobile/check-in') }}" class="absolute -top-5 group">
-                <div class="w-14 h-14 bg-gradient-to-br from-primary-600 to-indigo-600 rounded-full shadow-lg shadow-primary-500/40 flex items-center justify-center text-white transform transition-transform group-active:scale-95 border-[3px] border-slate-50 z-50">
+            <a href="{{ url('/mobile/check-in') }}" class="absolute -top-6 group">
+                <div class="w-14 h-14 bg-primary-600 rounded-full shadow-lg shadow-primary-900/20 flex items-center justify-center text-white transform transition-transform group-active:scale-95 border-4 border-white z-50">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 17h.01M9 20h.01M12 20h.01M12 17h.01M12 14h.01M15 11h.01M15 14h.01" />
                     </svg>
                 </div>
-                <span class="absolute top-16 left-1/2 transform -translate-x-1/2 text-[10px] font-medium text-slate-500 whitespace-nowrap">Scan</span>
+                <span class="absolute top-9 left-1/2 transform -translate-x-1/2 text-[10px] font-medium text-slate-500 whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity">Scan</span>
             </a>
         </div>
 
