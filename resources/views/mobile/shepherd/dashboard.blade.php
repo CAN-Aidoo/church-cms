@@ -142,14 +142,36 @@
             }
         } catch (error) {
             console.error('Failed to load shepherd data:', error);
-            ChurchApp.showToast('Failed to load data', 'error');
+            flockList.innerHTML = `
+                <div class="text-center py-12 px-4">
+                    <div class="w-20 h-20 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <svg class="w-10 h-10 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                        </svg>
+                    </div>
+                    <h3 class="text-lg font-bold text-gray-900 mb-2">Unable to Load Data</h3>
+                    <p class="text-gray-600 text-sm mb-4">There was an issue loading your shepherd dashboard. This feature may not be available for your account.</p>
+                    <a href="${'{{ url('/mobile/dashboard') }}'}" class="inline-block bg-blue-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-blue-700">
+                        Return to Dashboard
+                    </a>
+                </div>
+            `;
         }
 
         function renderFlockList(members) {
-            if (members.length === 0) {
+            if (!members || members.length === 0) {
                 flockList.innerHTML = `
-                    <div class="text-center py-10 text-gray-500">
-                        <p>No members found in your flock.</p>
+                    <div class="text-center py-12 px-4">
+                        <div class="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <svg class="w-10 h-10 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
+                            </svg>
+                        </div>
+                        <h3 class="text-lg font-bold text-gray-900 mb-2">No Flock Members Yet</h3>
+                        <p class="text-gray-600 text-sm mb-4">You haven't been assigned any flock members yet. Contact your church administrator to get started with pastoral care.</p>
+                        <a href="${'{{ url('/mobile/dashboard') }}'}" class="inline-block bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold text-sm hover:bg-blue-700">
+                            Return to Dashboard
+                        </a>
                     </div>
                 `;
                 return;

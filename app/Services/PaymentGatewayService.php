@@ -8,20 +8,20 @@ use Illuminate\Support\Str;
 
 class PaymentGatewayService
 {
-    protected string $paystackSecretKey;
+    protected ?string $paystackSecretKey;
 
-    protected string $paystackPublicKey;
+    protected ?string $paystackPublicKey;
 
-    protected string $hubtelClientId;
+    protected ?string $hubtelClientId;
 
-    protected string $hubtelClientSecret;
+    protected ?string $hubtelClientSecret;
 
     public function __construct()
     {
-        $this->paystackSecretKey = config('services.paystack.secret_key', '');
-        $this->paystackPublicKey = config('services.paystack.public_key', '');
-        $this->hubtelClientId = config('services.hubtel.client_id', '');
-        $this->hubtelClientSecret = config('services.hubtel.client_secret', '');
+        $this->paystackSecretKey = config('services.paystack.secret_key');
+        $this->paystackPublicKey = config('services.paystack.public_key');
+        $this->hubtelClientId = config('services.hubtel.client_id');
+        $this->hubtelClientSecret = config('services.hubtel.client_secret');
     }
 
     /**

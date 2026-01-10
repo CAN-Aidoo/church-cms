@@ -1,0 +1,49 @@
+# Version Control
+.git
+.gitignore
+.gitattributes
+
+# Dependencies
+/node_modules
+/vendor
+
+# Environment
+.env
+.env.backup
+.env.example
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+*.swn
+.DS_Store
+
+# Testing
+/tests
+phpunit.xml
+.phpunit.result.cache
+
+# Documentation
+README.md
+*.md
+!MOBILE_FEATURES_STATUS.md
+
+# Build artifacts
+/public/hot
+/public/storage
+/storage/*.key
+/storage/logs/*.log
+
+# Misc
+.editorconfig
+.styleci.yml
+Homestead.json
+Homestead.yaml
+npm-debug.log
+yarn-error.log
+
+# Deployment configs for other platforms
+railway.json
+Procfile

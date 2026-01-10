@@ -25,6 +25,7 @@ use App\Http\Controllers\SmsBroadcastController;
 use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\VisitorController;
 use App\Http\Controllers\WelfareController;
+use App\Http\Controllers\Mobile\MobileRegistrationController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -900,8 +901,8 @@ Route::prefix('mobile')->name('mobile.')->middleware(['auth'])->group(function (
         return view('mobile.equipment-management');
     })->name('equipment-management');
 
-    // Shepherd Tools (Pastor and Shepherds only)
-    Route::middleware(['role:admin,pastor'])->prefix('shepherd')->name('shepherd.')->group(function () {
+    // Shepherd Tools - Accessible to all authenticated users (API will filter based on shepherd assignment)
+    Route::prefix('shepherd')->name('shepherd.')->group(function () {
         Route::get('/dashboard', function () {
             return view('mobile.shepherd.dashboard');
         })->name('dashboard');
@@ -919,8 +920,8 @@ Route::prefix('mobile')->name('mobile.')->middleware(['auth'])->group(function (
         })->name('performance');
     });
 
-    // Service Unit Tools (Staff and above)
-    Route::middleware(['role:admin,pastor,staff'])->prefix('service-unit')->name('service-unit.')->group(function () {
+    // Service Unit Tools - Accessible to all authenticated users (API will filter based on unit assignment)
+    Route::prefix('service-unit')->name('service-unit.')->group(function () {
         Route::get('/dashboard', function () {
             return view('mobile.service-unit.dashboard');
         })->name('dashboard');

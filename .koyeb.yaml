@@ -1,0 +1,85 @@
+# Koyeb Service Configuration
+# Learn more: https://www.koyeb.com/docs
+
+services:
+  - name: church-cms
+    type: web
+    instance_type: nano  # Change to 'small' or 'medium' in production
+
+    # Build configuration
+    build:
+      builder: docker
+      dockerfile: Dockerfile
+      buildpack_build_command: ""
+
+    # Runtime configuration
+    ports:
+      - port: 80
+        protocol: http
+
+    # Environment variables (set these in Koyeb dashboard)
+    env:
+      - name: APP_NAME
+        value: "Church CMS"
+      - name: APP_ENV
+        value: production
+      - name: APP_DEBUG
+        value: "false"
+      - name: LOG_CHANNEL
+        value: stack
+      - name: LOG_LEVEL
+        value: error
+
+      # Database - Set these in Koyeb dashboard
+      # DB_CONNECTION=mysql
+      # DB_HOST=your-koyeb-mysql-host
+      # DB_PORT=3306
+      # DB_DATABASE=church_cms
+      # DB_USERNAME=your-username
+      # DB_PASSWORD=your-password
+
+      # Session & Cache
+      - name: SESSION_DRIVER
+        value: database
+      - name: CACHE_DRIVER
+        value: database
+      - name: QUEUE_CONNECTION
+        value: database
+
+      # Security - GENERATE NEW KEYS IN KOYEB DASHBOARD!
+      # APP_KEY=base64:...  (generate with: php artisan key:generate --show)
+
+    # Health check
+    health_checks:
+      - http:
+          path: /
+          port: 80
+          interval: 30
+          timeout: 5
+          success_threshold: 1
+          failure_threshold: 3
+
+    # Auto-scaling (optional)
+    scaling:
+      min: 1
+      max: 1  # Increase for auto-scaling
+
+    # Regions
+    regions:
+      - fra  # Frankfurt - change to your preferred region
+
+    # Restart policy
+    auto_deploy: true
+
+    # Resource limits
+    resources:
+      memory: 512Mi  # Minimum for Laravel
+      cpu: 0.5       # 0.5 vCPU
+
+# Notes for deployment:
+# 1. Set APP_KEY in Koyeb dashboard (run: php artisan key:generate --show)
+# 2. Configure database connection in Koyeb dashboard
+# 3. Set APP_URL to your Koyeb URL (e.g., https://your-app.koyeb.app)
+# 4. Add payment gateway credentials (Paystack, Hubtel)
+# 5. Configure Twilio for SMS (optional)
+# 6. Set ASSET_URL to your Koyeb URL for proper asset loading
