@@ -22,6 +22,44 @@ class PaymentGatewayService
         $this->paystackPublicKey = config('services.paystack.public_key');
         $this->hubtelClientId = config('services.hubtel.client_id');
         $this->hubtelClientSecret = config('services.hubtel.client_secret');
+
+        // Validate that at least one payment gateway is configured
+        $missingCredentials = [];
+
+        // Check Paystack configuration
+        if (empty($this->paystackSecretKey)) {
+            $missingCredentials[] = 'PAYSTACK_SECRET_KEY';
+        }
+        if (empty($this->paystackPublicKey)) {
+            $missingCredentials[] = 'PAYSTACK_PUBLIC_KEY';
+        }
+
+        // Check Hubtel configuration
+        if (empty($this->hubtelClientId)) {
+            $missingCredentials[] = 'HUBTEL_CLIENT_ID';
+        }
+        if (empty($this->hubtelClientSecret)) {
+            $missingCredentials[] = 'HUBTEL_CLIENT_SECRET';
+        }
+
+        // Only throw exception if ALL payment gateways are unconfigured
+        $paystackConfigured = !empty($this->paystackSecretKey) && !empty($this->paystackPublicKey);
+        $hubtelConfigured = !empty($this->hubtelClientId) && !empty($this->hubtelClientSecret);
+
+        if (!$paystackConfigured && !$hubtelConfigured) {
+            throw new \InvalidArgumentException(
+                'Payment gateway configuration incomplete. At least one payment gateway (Paystack or Hubtel) must be configured. Missing credentials: '.implode(', ', $missingCredentials).'. Please check config/services.php and your .env file.'
+            );
+        }
+
+        // Log warning if only one gateway is configured
+        if ($missingCredentials) {
+            Log::warning('Some payment gateway credentials are missing', [
+                'missing' => $missingCredentials,
+                'paystack_configured' => $paystackConfigured,
+                'hubtel_configured' => $hubtelConfigured,
+            ]);
+        }
     }
 
     /**

@@ -151,7 +151,7 @@
                     </div>
                     <h3 class="text-lg font-bold text-gray-900 mb-2">Unable to Load Data</h3>
                     <p class="text-gray-600 text-sm mb-4">There was an issue loading your shepherd dashboard. This feature may not be available for your account.</p>
-                    <a href="${'{{ url('/mobile/dashboard') }}'}" class="inline-block bg-blue-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-blue-700">
+                    <a href="{{ url('/mobile/dashboard') }}" class="inline-block bg-blue-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-blue-700">
                         Return to Dashboard
                     </a>
                 </div>
@@ -169,7 +169,7 @@
                         </div>
                         <h3 class="text-lg font-bold text-gray-900 mb-2">No Flock Members Yet</h3>
                         <p class="text-gray-600 text-sm mb-4">You haven't been assigned any flock members yet. Contact your church administrator to get started with pastoral care.</p>
-                        <a href="${'{{ url('/mobile/dashboard') }}'}" class="inline-block bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold text-sm hover:bg-blue-700">
+                        <a href="{{ url('/mobile/dashboard') }}" class="inline-block bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold text-sm hover:bg-blue-700">
                             Return to Dashboard
                         </a>
                     </div>

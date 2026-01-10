@@ -72,8 +72,13 @@ Copy the output (should look like: `base64:xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx`)
 #### Session & Cache (REQUIRED):
 - [ ] `SESSION_DRIVER` = database
 - [ ] `SESSION_LIFETIME` = 120
+- [ ] `SESSION_SECURE_COOKIE` = true
 - [ ] `CACHE_DRIVER` = database
 - [ ] `QUEUE_CONNECTION` = database
+
+#### Production Settings (REQUIRED):
+- [ ] `APP_TIMEZONE` = UTC (or your church timezone)
+- [ ] `TRUSTED_PROXIES` = * (Required for Koyeb)
 
 #### Logging (REQUIRED):
 - [ ] `LOG_CHANNEL` = stack
@@ -100,6 +105,17 @@ Copy the output (should look like: `base64:xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx`)
 - [ ] `TWILIO_SID` = your-sid
 - [ ] `TWILIO_AUTH_TOKEN` = your-token
 - [ ] `TWILIO_PHONE_NUMBER` = +1234567890
+
+#### Performance Optimization (Optional):
+**Note:** For better performance in production, consider using Redis or Memcached instead of database drivers for sessions, cache, and queues:
+- [ ] `REDIS_HOST` = your-redis-host (if using Redis)
+- [ ] `REDIS_PASSWORD` = your-redis-password
+- [ ] `REDIS_PORT` = 6379
+- [ ] `SESSION_DRIVER` = redis (instead of database)
+- [ ] `CACHE_DRIVER` = redis (instead of database)
+- [ ] `QUEUE_CONNECTION` = redis (instead of database)
+
+**Benefits:** Redis provides faster session/cache lookups and better scalability. However, database drivers work perfectly for small to medium churches.
 
 ### 4. Service Configuration
 - [ ] Instance type selected (Nano for testing, Small for production)
