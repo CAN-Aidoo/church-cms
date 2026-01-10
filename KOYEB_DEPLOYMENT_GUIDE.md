@@ -8,7 +8,9 @@ Complete guide to deploy your Church CMS to Koyeb from GitHub.
 
 - [x] Koyeb account (https://koyeb.com)
 - [x] GitHub repository with your code
-- [x] Database ready (MySQL/PostgreSQL)
+- [x] **External MySQL database** (PlanetScale, Railway, Aiven, etc.)
+  - **IMPORTANT:** Koyeb's database service only supports PostgreSQL
+  - You MUST use an external MySQL provider for this Laravel app
 
 ---
 
@@ -22,31 +24,49 @@ git commit -m "feat: Add Koyeb deployment configuration"
 git push origin main
 ```
 
-### 1.2 Files Added for Koyeb
+### 1.2 Required Files for Buildpack Deployment
 
-✅ `Dockerfile` - Docker container configuration
-✅ `docker-entrypoint.sh` - Startup script
-✅ `.dockerignore` - Files to exclude from build
-✅ `.koyeb.yaml` - Koyeb service configuration
+✅ `Procfile` - Defines how to run your Laravel app (uses Apache)
+✅ `.koyeb.yaml` - Koyeb service configuration (optional but recommended)
+✅ `composer.json` & `composer.lock` - PHP dependencies
+
+**Note:** Koyeb uses **buildpack** (NOT Docker) for automatic PHP/Laravel detection.
 
 ---
 
-## 🗄️ Step 2: Set Up Database
+## 🗄️ Step 2: Set Up External MySQL Database
 
-### Option A: Koyeb Managed Database (Recommended)
+**CRITICAL:** Koyeb's managed database service **ONLY supports PostgreSQL**, NOT MySQL.
+Since this Laravel app requires MySQL, you **MUST** use an external MySQL provider.
 
-1. Go to Koyeb Dashboard → Database
-2. Create a new MySQL database
-3. Note down the connection details:
-   - Host
-   - Port
-   - Database name
-   - Username
-   - Password
+### Recommended External MySQL Providers:
 
-### Option B: External Database (PlanetScale, Railway, etc.)
+#### Option A: PlanetScale (Recommended - Free Tier Available)
+1. Go to https://planetscale.com
+2. Create free account
+3. Create new database
+4. Get connection string (host, username, password)
+5. **Benefits:** Serverless, auto-scaling, generous free tier
 
-Use your existing database credentials.
+#### Option B: Railway MySQL
+1. Go to https://railway.app
+2. Create new project
+3. Add MySQL database
+4. Copy connection details
+5. **Benefits:** Simple setup, good free tier
+
+#### Option C: Aiven MySQL
+1. Go to https://aiven.io
+2. Create MySQL service
+3. Note connection details
+4. **Benefits:** Managed, reliable, multiple regions
+
+### Save These Database Credentials:
+- Host (e.g., `us-east.connect.psdb.cloud`)
+- Port (usually `3306`)
+- Database name
+- Username
+- Password
 
 ---
 
@@ -66,9 +86,13 @@ Use your existing database credentials.
 
 ### 3.3 Build Settings
 
-- **Builder**: Docker
-- **Dockerfile**: `Dockerfile` (auto-detected)
-- **Build command**: Leave empty (handled by Dockerfile)
+- **Builder**: **Buildpack** (NOT Docker!)
+- **Buildpack**: Automatic detection (Koyeb will detect PHP/Laravel)
+- **Build command**: Leave as default or use:
+  ```
+  composer install --no-dev --optimize-autoloader && php artisan config:cache
+  ```
+- **Run command**: Defined in `Procfile` (auto-detected)
 
 ### 3.4 Environment Variables
 
@@ -81,23 +105,33 @@ APP_NAME=Church CMS
 APP_ENV=production
 APP_DEBUG=false
 APP_URL=https://your-app-name.koyeb.app
+ASSET_URL=https://your-app-name.koyeb.app  # REQUIRED for CSS/JS loading
 
 # Generate this with: php artisan key:generate --show
 APP_KEY=base64:GENERATE_THIS_KEY_LOCALLY
 
-# Database (use your Koyeb database or external)
+# External MySQL Database (from PlanetScale, Railway, etc.)
 DB_CONNECTION=mysql
-DB_HOST=your-database-host.koyeb.app
+DB_HOST=us-east.connect.psdb.cloud  # Your external MySQL host
 DB_PORT=3306
 DB_DATABASE=church_cms
-DB_USERNAME=koyeb
-DB_PASSWORD=your-secure-password
+DB_USERNAME=your-mysql-username
+DB_PASSWORD=your-mysql-password
 
-# Session & Cache
+# Session & Cache (using database driver for simplicity)
 SESSION_DRIVER=database
 SESSION_LIFETIME=120
+SESSION_SECURE_COOKIE=true
 CACHE_DRIVER=database
 QUEUE_CONNECTION=database
+
+# Production Settings
+APP_TIMEZONE=UTC  # or your church timezone
+TRUSTED_PROXIES=*  # Required for Koyeb proxy detection
+
+# Logging
+LOG_CHANNEL=stack
+LOG_LEVEL=error
 
 # Mail (for password resets, notifications)
 MAIL_MAILER=smtp

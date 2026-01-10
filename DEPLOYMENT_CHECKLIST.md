@@ -13,17 +13,27 @@ Use this checklist to ensure your Church CMS deploys successfully to Koyeb.
 - [ ] No `.env` file in repository (should be in `.gitignore`)
 
 ### 2. Configuration Files
-- [ ] `Dockerfile` exists and is configured
-- [ ] `docker-entrypoint.sh` exists and is executable
-- [ ] `.dockerignore` exists
+- [ ] `Procfile` exists for buildpack deployment
 - [ ] `.koyeb.yaml` exists (optional but recommended)
 - [ ] `.env.example` updated with Koyeb-specific settings
+- [ ] `composer.json` and `composer.lock` are committed
 
-### 3. Database Preparation
-- [ ] MySQL/PostgreSQL database created
-- [ ] Database credentials noted down
-- [ ] Database accepts external connections
+### 3. External Database Preparation (IMPORTANT!)
+**NOTE:** Koyeb's web service uses buildpack (not Docker), and their managed database service only supports PostgreSQL.
+You MUST use an external MySQL database provider.
+
+**Recommended MySQL Providers:**
+- [ ] PlanetScale (https://planetscale.com) - Free tier available, serverless MySQL
+- [ ] Railway (https://railway.app) - MySQL database service with free tier
+- [ ] Aiven (https://aiven.io) - Managed MySQL
+- [ ] Any other MySQL hosting provider
+
+**Database Setup:**
+- [ ] External MySQL database created
+- [ ] Database credentials saved (host, port, name, username, password)
+- [ ] Database accepts external connections from Koyeb
 - [ ] Test database connection works
+- [ ] Database host is accessible over internet
 
 ### 4. Generate APP_KEY
 
@@ -47,9 +57,10 @@ Copy the output (should look like: `base64:xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx`)
 - [ ] Branch selected (usually `main`)
 
 ### 2. Build Configuration
-- [ ] Builder: Docker
-- [ ] Dockerfile path: `Dockerfile` (or `/Dockerfile`)
-- [ ] Build command: (leave empty)
+- [ ] Builder: **Buildpack** (NOT Docker!)
+- [ ] Buildpack: Automatic detection (Koyeb will detect PHP/Laravel)
+- [ ] Build command: (use default or specify in .koyeb.yaml)
+- [ ] `Procfile` must exist in repository root
 
 ### 3. Environment Variables Set
 
@@ -129,26 +140,32 @@ Copy the output (should look like: `base64:xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx`)
 ## 🔄 During Deployment
 
 ### Watch the Logs
-- [ ] Build logs show success
+- [ ] Build logs show success (buildpack detection)
+- [ ] Composer dependencies installed successfully
 - [ ] No errors in deployment logs
-- [ ] Database migrations run successfully
-- [ ] Admin user seeded
-- [ ] Storage link created
 - [ ] Application starts without errors
+- [ ] Can access the application URL
 
 ### Common Build Issues
 
 **If build fails:**
-1. Check Dockerfile syntax
-2. Verify all files are committed
-3. Check build logs for specific error
-4. Ensure composer.json is valid
+1. Check `composer.json` and `composer.lock` are valid and committed
+2. Verify `Procfile` exists in repository root
+3. Check build logs for specific error (composer dependencies, PHP version, etc.)
+4. Ensure all files are committed and pushed to GitHub
 
 **If deployment fails:**
-1. Check environment variables are set
-2. Verify database credentials
-3. Ensure APP_KEY is set
-4. Check docker-entrypoint.sh is executable
+1. Check environment variables are set (especially APP_KEY, APP_URL, ASSET_URL)
+2. Verify external MySQL database credentials are correct
+3. Ensure database host is accessible from Koyeb
+4. Check `Procfile` syntax is correct
+5. Verify PHP version compatibility (check composer.json)
+
+**Database Connection Issues:**
+1. Verify external MySQL database is running
+2. Check database credentials in Koyeb secrets
+3. Ensure database accepts connections from Koyeb IPs
+4. Test database connection from another tool first
 
 ---
 

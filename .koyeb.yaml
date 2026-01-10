@@ -6,11 +6,10 @@ services:
     type: web
     instance_type: nano  # Change to 'small' or 'medium' in production
 
-    # Build configuration
+    # Build configuration - Using Buildpack for PHP/Laravel
     build:
-      builder: docker
-      dockerfile: Dockerfile
-      buildpack_build_command: ""
+      builder: buildpack
+      buildpack_build_command: "composer install --no-dev --optimize-autoloader && php artisan config:cache && php artisan route:cache && php artisan view:cache"
 
     # Runtime configuration
     ports:
@@ -42,19 +41,25 @@ services:
       - name: ASSET_URL
         value: https://your-app-name.koyeb.app  # Replace with your actual Koyeb URL
 
-      # Database - REQUIRED (create these as Koyeb secrets)
+      # Database - REQUIRED (use external MySQL database)
+      # NOTE: Koyeb's managed database service only supports PostgreSQL
+      # You MUST use an external MySQL provider like:
+      # - PlanetScale (https://planetscale.com) - Free tier available
+      # - Railway (https://railway.app) - MySQL database service
+      # - Aiven (https://aiven.io) - Managed MySQL
+      # - Or any other MySQL hosting provider
       - name: DB_CONNECTION
         value: mysql
       - name: DB_HOST
-        secret: DB_HOST  # Create secret in Koyeb dashboard
+        secret: DB_HOST  # Your external MySQL host (create secret in Koyeb)
       - name: DB_PORT
         value: "3306"
       - name: DB_DATABASE
-        secret: DB_DATABASE  # Create secret in Koyeb dashboard
+        secret: DB_DATABASE  # Your database name (create secret in Koyeb)
       - name: DB_USERNAME
-        secret: DB_USERNAME  # Create secret in Koyeb dashboard
+        secret: DB_USERNAME  # Your database username (create secret in Koyeb)
       - name: DB_PASSWORD
-        secret: DB_PASSWORD  # Create secret in Koyeb dashboard
+        secret: DB_PASSWORD  # Your database password (create secret in Koyeb)
 
       # Session & Cache
       - name: SESSION_DRIVER
@@ -102,9 +107,13 @@ services:
       cpu: 0.5       # 0.5 vCPU
 
 # Notes for deployment:
-# 1. Set APP_KEY in Koyeb dashboard (run: php artisan key:generate --show)
-# 2. Configure database connection in Koyeb dashboard
-# 3. Set APP_URL to your Koyeb URL (e.g., https://your-app.koyeb.app)
-# 4. Add payment gateway credentials (Paystack, Hubtel)
-# 5. Configure Twilio for SMS (optional)
-# 6. Set ASSET_URL to your Koyeb URL for proper asset loading
+# 1. IMPORTANT: Create an external MySQL database first
+#    - Koyeb web service uses buildpack (NOT Docker)
+#    - Koyeb database service only supports PostgreSQL
+#    - Use PlanetScale, Railway, Aiven, or another MySQL provider
+# 2. Set APP_KEY in Koyeb dashboard (run: php artisan key:generate --show)
+# 3. Configure external MySQL database credentials as Koyeb secrets
+# 4. Set APP_URL and ASSET_URL to your Koyeb URL (e.g., https://your-app.koyeb.app)
+# 5. Add payment gateway credentials (Paystack, Hubtel) - optional
+# 6. Configure Twilio for SMS (optional)
+# 7. Deployment uses buildpack builder with automatic PHP/Laravel detection
