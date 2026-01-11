@@ -15,7 +15,13 @@ echo "========================================"
 # Create required directories (parallel)
 echo "Setting up directories..."
 mkdir -p storage/framework/{sessions,views,cache/data,testing} storage/logs bootstrap/cache
-chmod -R 775 storage bootstrap/cache 2>/dev/null || true
+
+# Set permissions with proper error handling
+echo "Setting permissions..."
+if ! chmod -R 775 storage bootstrap/cache 2>&1; then
+    echo "WARNING: Failed to set permissions on storage/bootstrap - this may cause issues"
+    echo "Attempting to continue anyway..."
+fi
 
 # Optional: Quick database setup (don't let it fail)
 echo "Quick setup..."
