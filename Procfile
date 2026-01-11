@@ -1,1 +1,1 @@
-web: php artisan serve --host=0.0.0.0 --port=${PORT:-8080}
+web: mkdir -p storage/framework/{sessions,views,cache,testing} storage/logs && chmod -R 775 storage bootstrap/cache && php artisan config:clear && php artisan migrate --force && php artisan storage:link --force && php artisan serve --host=0.0.0.0 --port=${PORT:-8080}

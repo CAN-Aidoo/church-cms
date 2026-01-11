@@ -34,6 +34,11 @@ use Illuminate\Support\Facades\Route;
 |--------------------------------------------------------------------------
 */
 
+// Health Check Route (Railway deployment - returns quickly without database)
+Route::get('/up', function () {
+    return response('OK', 200);
+});
+
 // Welcome Page
 Route::get('/', function () {
     return view('welcome');
