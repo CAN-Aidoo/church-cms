@@ -11,8 +11,10 @@ cmds = [
 cmds = [
   "npm run build",
   "composer dump-autoload",
-  "php artisan package:discover --ansi || true"
+  "php artisan package:discover --ansi || true",
+  "chmod +x start.sh"
 ]
 
 [start]
-cmd = "mkdir -p storage/framework/{sessions,views,cache,testing} storage/logs && chmod -R 775 storage bootstrap/cache && php artisan config:clear && php artisan migrate --force && php artisan storage:link --force && php artisan serve --host=0.0.0.0 --port=$PORT"
+cmd = "bash start.sh"
+
