@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Transform your church management with our comprehensive, modern Church Management System. Streamline operations, engage members, and grow your ministry.">
-    <title>{{ config('app.name') }} - Modern Church Management System</title>
+    <meta name="description" content="ChurchCMS - Empowering Ministry Through Technology. Comprehensive church management platform for member management, attendance tracking, financial management, and more. Built specifically for modern ministries.">
+    <title>ChurchCMS - Empowering Ministry Through Technology</title>
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -22,22 +22,23 @@
         }
 
         :root {
-            /* Brand Colors - Blue & Gold Theme */
-            --primary: #3b82f6;
-            --primary-dark: #2563eb;
-            --primary-light: #60a5fa;
-            --secondary: #f59e0b;
-            --secondary-dark: #d97706;
-            --secondary-light: #fbbf24;
-            --dark: #0f172a;
-            --dark-light: #1e293b;
-            --gray: #64748b;
-            --light: #f8fafc;
+            /* Church CMS Brand Colors - Royal Purple & Gold Theme */
+            --primary: #6B46C1;  /* Royal Purple - Representing divinity and royalty */
+            --primary-dark: #553C9A;
+            --primary-light: #9F7AEA;
+            --secondary: #F6AD55;  /* Warm Gold - Representing light and hope */
+            --secondary-dark: #ED8936;
+            --secondary-light: #FBD38D;
+            --accent: #38B2AC;  /* Teal accent for interactions */
+            --dark: #2D3748;
+            --dark-light: #4A5568;
+            --gray: #718096;
+            --light: #F7FAFC;
             --white: #ffffff;
-            /* Brand Gradients - Blue to Gold */
-            --gradient: linear-gradient(135deg, #3b82f6 0%, #f59e0b 100%);
-            --gradient-reverse: linear-gradient(135deg, #f59e0b 0%, #3b82f6 100%);
-            --gradient-soft: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(245, 158, 11, 0.1) 100%);
+            /* Church CMS Brand Gradients */
+            --gradient: linear-gradient(135deg, #6B46C1 0%, #F6AD55 100%);
+            --gradient-reverse: linear-gradient(135deg, #F6AD55 0%, #6B46C1 100%);
+            --gradient-soft: linear-gradient(135deg, rgba(107, 70, 193, 0.1) 0%, rgba(246, 173, 85, 0.1) 100%);
             --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
             --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
             --shadow-lg: 0 20px 25px -5px rgb(0 0 0 / 0.1);
@@ -533,7 +534,7 @@
     <nav id="navbar">
         <div class="nav-container">
             <div class="logo">
-                <i class="fas fa-church"></i> {{ config('app.name') }}
+                <i class="fas fa-church"></i> <span>ChurchCMS</span>
             </div>
             <div class="nav-links">
                 <a href="#features">Features</a>
@@ -560,11 +561,9 @@
 
         <div class="hero-container">
             <div class="hero-content">
-                <h1>Transform Your Church Management</h1>
+                <h1>Empowering Ministry Through Technology</h1>
                 <p>
-                    Empower your ministry with our comprehensive Church Management System.
-                    Streamline operations, engage members, track attendance, manage finances,
-                    and grow your church community with powerful, easy-to-use tools.
+                    ChurchCMS is your complete church management solution designed to help you focus on what matters most—building community and spreading faith. Streamline operations, engage members, track attendance, manage finances, and grow your church with powerful, intuitive tools built specifically for modern ministries.
                 </p>
                 <div class="hero-buttons">
                     <a href="{{ route('login') }}" class="btn btn-white btn-large">
@@ -716,7 +715,7 @@
         <div class="container">
             <div class="benefits-grid">
                 <div class="benefits-content">
-                    <h2>Why Choose Our Church Management System?</h2>
+                    <h2>Why Choose ChurchCMS?</h2>
 
                     <div class="benefit-item">
                         <div class="benefit-icon">
@@ -801,8 +800,8 @@
     <!-- CTA Section -->
     <section class="cta">
         <div class="container">
-            <h2>Ready to Transform Your Church?</h2>
-            <p>Join hundreds of churches already using our platform to grow and engage their communities</p>
+            <h2>Ready to Transform Your Ministry?</h2>
+            <p>Join hundreds of churches worldwide using ChurchCMS to streamline operations and engage their communities more effectively</p>
             <div class="cta-buttons">
                 <a href="{{ route('login') }}" class="btn btn-white btn-large">
                     <i class="fas fa-sign-in-alt"></i> Admin Login
@@ -818,10 +817,11 @@
     <footer id="about">
         <div class="footer-content container">
             <div class="footer-section">
-                <h3><i class="fas fa-church"></i> {{ config('app.name') }}</h3>
+                <h3><i class="fas fa-church"></i> ChurchCMS</h3>
                 <p>
-                    Empowering churches with modern management tools to focus on what matters most -
-                    building community and spreading faith.
+                    A comprehensive church management platform designed to empower ministries worldwide.
+                    From member management to financial tracking, we help churches focus on their mission
+                    by simplifying administration.
                 </p>
             </div>
 
@@ -857,7 +857,8 @@
         </div>
 
         <div class="footer-bottom container">
-            <p>&copy; {{ date('Y') }} {{ config('app.name') }}. All rights reserved. Built with ❤️ for churches worldwide.</p>
+            <p>&copy; {{ date('Y') }} ChurchCMS. All rights reserved. Built with ❤️ for churches worldwide.</p>
+            <p style="margin-top: 0.5rem; font-size: 0.875rem; opacity: 0.8;">Empowering Ministry Through Technology</p>
         </div>
     </footer>
 
