@@ -18,6 +18,12 @@
 /storage/logs/*
 !/storage/logs/.gitignore
 
+# Bootstrap cache (auto-generated, should not be committed)
+/bootstrap/cache/packages.php
+/bootstrap/cache/services.php
+/bootstrap/cache/config.php
+/bootstrap/cache/routes-v7.php
+
 # Environment files (SECURITY CRITICAL)
 .env
 .env.backup

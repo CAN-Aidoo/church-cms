@@ -23,11 +23,18 @@ if ! chmod -R 775 storage bootstrap/cache 2>&1; then
     echo "Attempting to continue anyway..."
 fi
 
+# CRITICAL: Clear all Laravel caches for fresh package discovery
+echo "Clearing Laravel caches..."
+set +e  # Don't exit on error for cache clearing
+rm -f bootstrap/cache/packages.php bootstrap/cache/services.php bootstrap/cache/config.php bootstrap/cache/routes*.php 2>/dev/null || true
+php artisan config:clear 2>/dev/null || true
+php artisan cache:clear 2>/dev/null || true
+php artisan route:clear 2>/dev/null || true
+php artisan view:clear 2>/dev/null || true
+echo "Caches cleared successfully!"
+
 # Optional: Quick database setup (don't let it fail)
 echo "Quick setup..."
-set +e  # Don't exit on error for optional steps
-
-php artisan config:clear 2>/dev/null || true
 php artisan storage:link --force 2>/dev/null || true
 
 # Quick migration attempt (5 second timeout)
