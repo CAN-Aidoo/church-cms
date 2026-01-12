@@ -1,17 +1,15 @@
-[phases.setup]
-nixPkgs = ["php82", "php82Packages.composer", "php82Extensions.mbstring", "php82Extensions.pdo", "php82Extensions.pdo_mysql", "php82Extensions.tokenizer", "php82Extensions.xml", "php82Extensions.ctype", "php82Extensions.bcmath", "php82Extensions.fileinfo", "nodejs_20", "npm"]
+# Nixpacks configuration for Laravel
+# Let NIXPACKS auto-detect PHP and Node versions
 
 [phases.install]
 cmds = [
-  "composer install --no-dev --optimize-autoloader --no-interaction --no-scripts",
+  "composer install --no-dev --optimize-autoloader --no-interaction",
   "npm ci"
 ]
 
 [phases.build]
 cmds = [
   "npm run build",
-  "composer dump-autoload",
-  "php artisan package:discover --ansi || true",
   "chmod +x start.sh"
 ]
 
