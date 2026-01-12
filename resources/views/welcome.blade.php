@@ -22,54 +22,50 @@
         }
 
         :root {
-            /* Church CMS Brand Colors - Royal Purple & Gold Theme */
-            --primary: #6B46C1;  /* Royal Purple - Representing divinity and royalty */
+            /* Church CMS Brand Colors */
+            --primary: #6B46C1;
             --primary-dark: #553C9A;
             --primary-light: #9F7AEA;
-            --secondary: #F6AD55;  /* Warm Gold - Representing light and hope */
+            --secondary: #F6AD55;
             --secondary-dark: #ED8936;
             --secondary-light: #FBD38D;
-            --accent: #38B2AC;  /* Teal accent for interactions */
+            --accent: #38B2AC;
             --dark: #2D3748;
             --dark-light: #4A5568;
             --gray: #718096;
             --light: #F7FAFC;
             --white: #ffffff;
-            /* Church CMS Brand Gradients */
             --gradient: linear-gradient(135deg, #6B46C1 0%, #F6AD55 100%);
             --gradient-reverse: linear-gradient(135deg, #F6AD55 0%, #6B46C1 100%);
-            --gradient-soft: linear-gradient(135deg, rgba(107, 70, 193, 0.1) 0%, rgba(246, 173, 85, 0.1) 100%);
-            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-            --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
-            --shadow-lg: 0 20px 25px -5px rgb(0 0 0 / 0.1);
-            --shadow-xl: 0 25px 50px -12px rgb(0 0 0 / 0.25);
+            --gradient-soft: linear-gradient(135deg, rgba(107, 70, 193, 0.05) 0%, rgba(246, 173, 85, 0.05) 100%);
         }
 
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
             line-height: 1.6;
             color: var(--dark);
             background: var(--white);
             overflow-x: hidden;
         }
 
-        /* Navigation */
+        /* Modern Navigation with Glassmorphism */
         nav {
             position: fixed;
             top: 0;
             left: 0;
             right: 0;
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            padding: 1rem 0;
-            box-shadow: var(--shadow-sm);
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            padding: 1.25rem 0;
             z-index: 1000;
-            transition: all 0.3s ease;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border-bottom: 1px solid rgba(107, 70, 193, 0.1);
         }
 
         nav.scrolled {
-            padding: 0.5rem 0;
-            box-shadow: var(--shadow);
+            padding: 0.875rem 0;
+            box-shadow: 0 10px 40px rgba(107, 70, 193, 0.1);
         }
 
         .nav-container {
@@ -82,38 +78,70 @@
         }
 
         .logo {
-            font-size: 1.5rem;
+            font-size: 1.75rem;
             font-weight: 800;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
             background: var(--gradient);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
+            letter-spacing: -0.02em;
+        }
+
+        .logo i {
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-size: 2rem;
         }
 
         .nav-links {
             display: flex;
-            gap: 2rem;
+            gap: 2.5rem;
             align-items: center;
         }
 
         .nav-links a {
             text-decoration: none;
-            color: var(--gray);
+            color: var(--dark);
             font-weight: 500;
-            transition: color 0.3s;
+            font-size: 0.938rem;
+            transition: all 0.3s ease;
+            position: relative;
         }
 
-        .nav-links a:hover {
+        .nav-links a:not(.btn)::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--gradient);
+            transition: width 0.3s ease;
+        }
+
+        .nav-links a:not(.btn):hover::after {
+            width: 100%;
+        }
+
+        .nav-links a:not(.btn):hover {
             color: var(--primary);
         }
 
+        /* Modern Buttons */
         .btn {
-            padding: 0.75rem 1.5rem;
-            border-radius: 0.5rem;
+            padding: 0.875rem 1.75rem;
+            border-radius: 0.75rem;
             text-decoration: none;
             font-weight: 600;
-            transition: all 0.3s ease;
-            display: inline-block;
+            font-size: 0.938rem;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
             border: none;
             cursor: pointer;
             text-align: center;
@@ -122,12 +150,12 @@
         .btn-primary {
             background: var(--gradient);
             color: var(--white);
-            box-shadow: var(--shadow);
+            box-shadow: 0 4px 20px rgba(107, 70, 193, 0.3);
         }
 
         .btn-primary:hover {
             transform: translateY(-2px);
-            box-shadow: var(--shadow-lg);
+            box-shadow: 0 8px 30px rgba(107, 70, 193, 0.4);
         }
 
         .btn-outline {
@@ -139,33 +167,49 @@
         .btn-outline:hover {
             background: var(--primary);
             color: var(--white);
+            transform: translateY(-2px);
         }
 
         .btn-large {
-            padding: 1rem 2rem;
-            font-size: 1.125rem;
+            padding: 1.125rem 2.25rem;
+            font-size: 1rem;
+            border-radius: 1rem;
         }
 
-        /* Hero Section */
+        .btn-white {
+            background: var(--white);
+            color: var(--primary);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .btn-white:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Modern Hero Section */
         .hero {
             min-height: 100vh;
             display: flex;
             align-items: center;
-            background: var(--gradient);
+            background: linear-gradient(135deg, #6B46C1 0%, #8B5CF6 50%, #F6AD55 100%);
             position: relative;
             overflow: hidden;
-            padding-top: 80px;
+            padding: 120px 0 80px;
         }
 
         .hero::before {
             content: '';
             position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: url('data:image/svg+xml,<svg width="100" height="100" xmlns="http://www.w3.org/2000/svg"><defs><pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M 40 0 L 0 0 0 40" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="1"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)" /></svg>');
-            opacity: 0.3;
+            width: 150%;
+            height: 150%;
+            background: radial-gradient(circle at 30% 50%, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
+            animation: rotate 20s linear infinite;
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
         }
 
         .hero-container {
@@ -174,26 +218,34 @@
             padding: 0 2rem;
             position: relative;
             z-index: 1;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            align-items: center;
         }
 
-        .hero-content {
-            max-width: 700px;
-            color: var(--white);
-        }
-
-        .hero h1 {
-            font-size: 3.5rem;
+        .hero-content h1 {
+            font-size: 4rem;
             font-weight: 900;
             line-height: 1.1;
             margin-bottom: 1.5rem;
+            color: var(--white);
+            letter-spacing: -0.03em;
             animation: fadeInUp 0.8s ease;
         }
 
-        .hero p {
+        .hero-content .highlight {
+            background: linear-gradient(135deg, #FBD38D 0%, #FFFFFF 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero-content p {
             font-size: 1.25rem;
             line-height: 1.8;
-            margin-bottom: 2rem;
-            opacity: 0.95;
+            margin-bottom: 2.5rem;
+            color: rgba(255, 255, 255, 0.95);
             animation: fadeInUp 0.8s ease 0.2s both;
         }
 
@@ -204,35 +256,55 @@
             animation: fadeInUp 0.8s ease 0.4s both;
         }
 
-        .hero-stats {
+        /* Hero Illustration */
+        .hero-visual {
+            position: relative;
+            animation: fadeInRight 0.8s ease 0.6s both;
+        }
+
+        .hero-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border-radius: 2rem;
+            padding: 2.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .hero-card-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 2rem;
-            margin-top: 4rem;
-            animation: fadeInUp 0.8s ease 0.6s both;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.5rem;
         }
 
-        .stat {
+        .hero-stat {
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 1rem;
+            padding: 1.5rem;
             text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.2);
         }
 
-        .stat-number {
+        .hero-stat-number {
             font-size: 2.5rem;
             font-weight: 800;
+            color: var(--white);
             margin-bottom: 0.5rem;
         }
 
-        .stat-label {
-            opacity: 0.9;
+        .hero-stat-label {
+            color: rgba(255, 255, 255, 0.9);
             font-size: 0.875rem;
+            font-weight: 500;
             text-transform: uppercase;
             letter-spacing: 0.05em;
         }
 
-        /* Features Section */
+        /* Features Section - Bento Box Layout */
         .features {
             padding: 8rem 2rem;
             background: var(--light);
+            position: relative;
         }
 
         .container {
@@ -242,57 +314,197 @@
 
         .section-header {
             text-align: center;
-            margin-bottom: 4rem;
+            margin-bottom: 5rem;
+            animation: fadeInUp 0.8s ease;
         }
 
         .section-badge {
-            display: inline-block;
-            padding: 0.5rem 1rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.625rem 1.25rem;
             background: var(--gradient-soft);
             color: var(--primary);
             border-radius: 2rem;
             font-weight: 600;
             font-size: 0.875rem;
-            margin-bottom: 1rem;
-            border: 1px solid rgba(59, 130, 246, 0.2);
+            margin-bottom: 1.5rem;
+            border: 1px solid rgba(107, 70, 193, 0.15);
         }
 
         .section-title {
-            font-size: 2.5rem;
+            font-size: 3rem;
             font-weight: 800;
-            margin-bottom: 1rem;
+            margin-bottom: 1.25rem;
             color: var(--dark);
+            letter-spacing: -0.02em;
+            line-height: 1.2;
         }
 
         .section-subtitle {
-            font-size: 1.125rem;
+            font-size: 1.25rem;
             color: var(--gray);
-            max-width: 600px;
+            max-width: 700px;
+            margin: 0 auto;
+            line-height: 1.7;
+        }
+
+        /* Bento Grid Layout */
+        .bento-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1.5rem;
+            margin-top: 3rem;
+        }
+
+        .bento-item {
+            background: var(--white);
+            border-radius: 1.5rem;
+            padding: 2rem;
+            border: 1px solid rgba(107, 70, 193, 0.1);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .bento-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--gradient);
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.4s ease;
+        }
+
+        .bento-item:hover::before {
+            transform: scaleX(1);
+        }
+
+        .bento-item:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(107, 70, 193, 0.15);
+            border-color: var(--primary-light);
+        }
+
+        .bento-item.large {
+            grid-column: span 2;
+        }
+
+        .bento-item.tall {
+            grid-row: span 2;
+        }
+
+        .bento-icon {
+            width: 70px;
+            height: 70px;
+            background: var(--gradient);
+            border-radius: 1.25rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1.5rem;
+            font-size: 2rem;
+            color: var(--white);
+            box-shadow: 0 8px 20px rgba(107, 70, 193, 0.3);
+        }
+
+        .bento-title {
+            font-size: 1.375rem;
+            font-weight: 700;
+            margin-bottom: 0.75rem;
+            color: var(--dark);
+        }
+
+        .bento-description {
+            color: var(--gray);
+            line-height: 1.7;
+            font-size: 0.938rem;
+        }
+
+        /* Stats Section */
+        .stats {
+            padding: 6rem 2rem;
+            background: var(--gradient);
+            color: var(--white);
+            position: relative;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 3rem;
+            max-width: 1280px;
             margin: 0 auto;
         }
 
-        .features-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 2rem;
+        .stat-card {
+            text-align: center;
+            animation: fadeInUp 0.8s ease;
         }
 
-        .feature-card {
+        .stat-number {
+            font-size: 4rem;
+            font-weight: 900;
+            margin-bottom: 0.5rem;
+            letter-spacing: -0.02em;
+        }
+
+        .stat-label {
+            font-size: 1.125rem;
+            opacity: 0.95;
+            font-weight: 500;
+        }
+
+        /* Benefits Section with Cards */
+        .benefits {
+            padding: 8rem 2rem;
             background: var(--white);
-            padding: 2rem;
-            border-radius: 1rem;
-            box-shadow: var(--shadow);
-            transition: all 0.3s ease;
-            border: 1px solid rgba(99, 102, 241, 0.1);
         }
 
-        .feature-card:hover {
+        .benefits-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+            margin-top: 4rem;
+        }
+
+        .benefit-card {
+            background: var(--gradient-soft);
+            border-radius: 1.5rem;
+            padding: 2.5rem;
+            border: 1px solid rgba(107, 70, 193, 0.15);
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .benefit-card::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(107, 70, 193, 0.1) 0%, transparent 70%);
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+
+        .benefit-card:hover::after {
+            opacity: 1;
+        }
+
+        .benefit-card:hover {
             transform: translateY(-8px);
-            box-shadow: var(--shadow-xl);
+            box-shadow: 0 20px 40px rgba(107, 70, 193, 0.15);
             border-color: var(--primary);
         }
 
-        .feature-icon {
+        .benefit-icon {
             width: 60px;
             height: 60px;
             background: var(--gradient);
@@ -301,139 +513,122 @@
             align-items: center;
             justify-content: center;
             margin-bottom: 1.5rem;
-            font-size: 1.5rem;
             color: var(--white);
-            box-shadow: var(--shadow);
+            font-size: 1.5rem;
+            box-shadow: 0 8px 20px rgba(107, 70, 193, 0.3);
         }
 
-        .feature-title {
+        .benefit-title {
             font-size: 1.25rem;
             font-weight: 700;
             margin-bottom: 0.75rem;
             color: var(--dark);
         }
 
-        .feature-description {
+        .benefit-text {
             color: var(--gray);
-            line-height: 1.6;
-        }
-
-        /* Benefits Section */
-        .benefits {
-            padding: 8rem 2rem;
-            background: var(--white);
-        }
-
-        .benefits-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 4rem;
-            align-items: center;
-        }
-
-        .benefits-image {
-            position: relative;
-        }
-
-        .benefits-image img {
-            width: 100%;
-            border-radius: 1rem;
-            box-shadow: var(--shadow-xl);
-        }
-
-        .benefits-content h2 {
-            font-size: 2.5rem;
-            font-weight: 800;
-            margin-bottom: 1.5rem;
-            color: var(--dark);
-        }
-
-        .benefit-item {
-            display: flex;
-            gap: 1rem;
-            margin-bottom: 1.5rem;
-        }
-
-        .benefit-icon {
-            width: 40px;
-            height: 40px;
-            background: var(--gradient-soft);
-            border-radius: 0.5rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-shrink: 0;
-            color: var(--primary);
-            border: 1px solid rgba(59, 130, 246, 0.2);
-        }
-
-        .benefit-text h3 {
-            font-weight: 600;
-            margin-bottom: 0.25rem;
-            color: var(--dark);
-        }
-
-        .benefit-text p {
-            color: var(--gray);
-            font-size: 0.938rem;
+            line-height: 1.7;
         }
 
         /* CTA Section */
         .cta {
-            padding: 6rem 2rem;
+            padding: 8rem 2rem;
             background: var(--gradient);
             color: var(--white);
             text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cta::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+        }
+
+        .cta-content {
+            position: relative;
+            z-index: 1;
+            max-width: 800px;
+            margin: 0 auto;
         }
 
         .cta h2 {
-            font-size: 2.5rem;
-            font-weight: 800;
-            margin-bottom: 1rem;
+            font-size: 3.5rem;
+            font-weight: 900;
+            margin-bottom: 1.5rem;
+            letter-spacing: -0.02em;
+            line-height: 1.2;
         }
 
         .cta p {
-            font-size: 1.125rem;
-            margin-bottom: 2rem;
+            font-size: 1.375rem;
+            margin-bottom: 3rem;
             opacity: 0.95;
+            line-height: 1.7;
         }
 
         .cta-buttons {
             display: flex;
-            gap: 1rem;
+            gap: 1.25rem;
             justify-content: center;
             flex-wrap: wrap;
-        }
-
-        .btn-white {
-            background: var(--white);
-            color: var(--primary);
-        }
-
-        .btn-white:hover {
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-xl);
         }
 
         /* Footer */
         footer {
             background: var(--dark);
             color: var(--white);
-            padding: 3rem 2rem 1.5rem;
+            padding: 5rem 2rem 2rem;
         }
 
         .footer-content {
             max-width: 1280px;
             margin: 0 auto;
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 3rem;
-            margin-bottom: 2rem;
+            grid-template-columns: 2fr repeat(3, 1fr);
+            gap: 4rem;
+            margin-bottom: 3rem;
+        }
+
+        .footer-brand {
+            max-width: 350px;
+        }
+
+        .footer-logo {
+            font-size: 1.75rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .footer-logo i {
+            color: var(--secondary);
+        }
+
+        .footer-tagline {
+            color: var(--secondary);
+            font-weight: 600;
+            margin-bottom: 1rem;
+            font-size: 0.938rem;
+        }
+
+        .footer-description {
+            color: rgba(255, 255, 255, 0.7);
+            line-height: 1.7;
+            margin-bottom: 1.5rem;
         }
 
         .footer-section h3 {
-            margin-bottom: 1rem;
+            margin-bottom: 1.25rem;
             font-weight: 700;
+            font-size: 1.125rem;
         }
 
         .footer-section ul {
@@ -441,17 +636,21 @@
         }
 
         .footer-section ul li {
-            margin-bottom: 0.5rem;
+            margin-bottom: 0.75rem;
         }
 
         .footer-section a {
             color: rgba(255, 255, 255, 0.7);
             text-decoration: none;
-            transition: color 0.3s;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
         }
 
         .footer-section a:hover {
-            color: var(--white);
+            color: var(--secondary);
+            transform: translateX(4px);
         }
 
         .footer-bottom {
@@ -461,15 +660,30 @@
             color: rgba(255, 255, 255, 0.6);
         }
 
+        .footer-bottom p {
+            margin-bottom: 0.5rem;
+        }
+
         /* Animations */
         @keyframes fadeInUp {
             from {
                 opacity: 0;
-                transform: translateY(30px);
+                transform: translateY(40px);
             }
             to {
                 opacity: 1;
                 transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInRight {
+            from {
+                opacity: 0;
+                transform: translateX(40px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
             }
         }
 
@@ -482,50 +696,70 @@
             }
         }
 
-        /* Responsive */
-        @media (max-width: 768px) {
-            .hero h1 {
-                font-size: 2.5rem;
+        /* Responsive Design */
+        @media (max-width: 1024px) {
+            .hero-container {
+                grid-template-columns: 1fr;
+                gap: 3rem;
             }
 
-            .hero p {
-                font-size: 1rem;
+            .bento-grid {
+                grid-template-columns: repeat(2, 1fr);
             }
 
-            .section-title {
-                font-size: 2rem;
+            .bento-item.large,
+            .bento-item.tall {
+                grid-column: span 1;
+                grid-row: span 1;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
             }
 
             .benefits-grid {
                 grid-template-columns: 1fr;
             }
 
+            .footer-content {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .hero-content h1 {
+                font-size: 2.5rem;
+            }
+
+            .hero-content p {
+                font-size: 1.125rem;
+            }
+
+            .section-title {
+                font-size: 2.25rem;
+            }
+
             .nav-links {
                 display: none;
             }
 
-            .features-grid {
+            .bento-grid {
                 grid-template-columns: 1fr;
             }
-        }
 
-        /* Floating shapes */
-        .floating-shape {
-            position: absolute;
-            opacity: 0.1;
-            animation: float 6s ease-in-out infinite;
-        }
+            .stats-grid {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+            }
 
-        .shape-1 {
-            top: 10%;
-            right: 10%;
-            animation-delay: 0s;
-        }
+            .cta h2 {
+                font-size: 2.5rem;
+            }
 
-        .shape-2 {
-            bottom: 20%;
-            left: 10%;
-            animation-delay: 2s;
+            .footer-content {
+                grid-template-columns: 1fr;
+                gap: 3rem;
+            }
         }
     </style>
 </head>
@@ -534,178 +768,191 @@
     <nav id="navbar">
         <div class="nav-container">
             <div class="logo">
-                <i class="fas fa-church"></i> <span>ChurchCMS</span>
+                <i class="fas fa-church"></i>
+                <span>ChurchCMS</span>
             </div>
             <div class="nav-links">
                 <a href="#features">Features</a>
                 <a href="#benefits">Benefits</a>
                 <a href="#about">About</a>
-                <a href="{{ route('login') }}" class="btn btn-outline">Sign In</a>
+                <a href="{{ route('login') }}" class="btn btn-primary">
+                    <i class="fas fa-sign-in-alt"></i> Sign In
+                </a>
             </div>
         </div>
     </nav>
 
     <!-- Hero Section -->
     <section class="hero">
-        <!-- Floating shapes -->
-        <div class="floating-shape shape-1">
-            <svg width="100" height="100" viewBox="0 0 100 100" fill="currentColor">
-                <circle cx="50" cy="50" r="40"/>
-            </svg>
-        </div>
-        <div class="floating-shape shape-2">
-            <svg width="120" height="120" viewBox="0 0 100 100" fill="currentColor">
-                <rect x="10" y="10" width="80" height="80" rx="20"/>
-            </svg>
-        </div>
-
         <div class="hero-container">
             <div class="hero-content">
-                <h1>Empowering Ministry Through Technology</h1>
+                <h1>
+                    Empowering Ministry<br>
+                    Through <span class="highlight">Technology</span>
+                </h1>
                 <p>
-                    ChurchCMS is your complete church management solution designed to help you focus on what matters most—building community and spreading faith. Streamline operations, engage members, track attendance, manage finances, and grow your church with powerful, intuitive tools built specifically for modern ministries.
+                    ChurchCMS is your complete church management solution designed to help you focus on what matters most—building community and spreading faith. Streamline operations with powerful, intuitive tools built for modern ministries.
                 </p>
                 <div class="hero-buttons">
                     <a href="{{ route('login') }}" class="btn btn-white btn-large">
                         <i class="fas fa-sign-in-alt"></i> Admin Login
                     </a>
                     <a href="{{ route('register') }}" class="btn btn-outline btn-large" style="border-color: white; color: white;">
-                        <i class="fas fa-user-plus"></i> Get Started
+                        <i class="fas fa-rocket"></i> Get Started Free
                     </a>
                 </div>
+            </div>
 
-                <div class="hero-stats">
-                    <div class="stat">
-                        <div class="stat-number">20+</div>
-                        <div class="stat-label">Modules</div>
-                    </div>
-                    <div class="stat">
-                        <div class="stat-number">250+</div>
-                        <div class="stat-label">Features</div>
-                    </div>
-                    <div class="stat">
-                        <div class="stat-number">100%</div>
-                        <div class="stat-label">Secure</div>
-                    </div>
-                    <div class="stat">
-                        <div class="stat-number">24/7</div>
-                        <div class="stat-label">Access</div>
+            <div class="hero-visual">
+                <div class="hero-card">
+                    <div class="hero-card-grid">
+                        <div class="hero-stat">
+                            <div class="hero-stat-number">20+</div>
+                            <div class="hero-stat-label">Modules</div>
+                        </div>
+                        <div class="hero-stat">
+                            <div class="hero-stat-number">250+</div>
+                            <div class="hero-stat-label">Features</div>
+                        </div>
+                        <div class="hero-stat">
+                            <div class="hero-stat-number">100%</div>
+                            <div class="hero-stat-label">Secure</div>
+                        </div>
+                        <div class="hero-stat">
+                            <div class="hero-stat-number">24/7</div>
+                            <div class="hero-stat-label">Support</div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- Features Section -->
+    <!-- Features Section - Bento Grid -->
     <section id="features" class="features">
         <div class="container">
             <div class="section-header">
-                <span class="section-badge">POWERFUL FEATURES</span>
-                <h2 class="section-title">Everything You Need to Manage Your Church</h2>
+                <span class="section-badge">
+                    <i class="fas fa-stars"></i> POWERFUL FEATURES
+                </span>
+                <h2 class="section-title">Everything Your Ministry Needs</h2>
                 <p class="section-subtitle">
                     Comprehensive tools designed specifically for modern church administration and member engagement
                 </p>
             </div>
 
-            <div class="features-grid">
-                <div class="feature-card">
-                    <div class="feature-icon">
+            <div class="bento-grid">
+                <div class="bento-item large">
+                    <div class="bento-icon">
                         <i class="fas fa-users"></i>
                     </div>
-                    <h3 class="feature-title">Member Management</h3>
-                    <p class="feature-description">
-                        Comprehensive member profiles, family tracking, lifecycle management,
-                        and document storage. Keep all member information organized and accessible.
+                    <h3 class="bento-title">Member Management</h3>
+                    <p class="bento-description">
+                        Comprehensive member profiles, family tracking, lifecycle management, and document storage. Keep all member information organized and accessible in one secure platform.
                     </p>
                 </div>
 
-                <div class="feature-card">
-                    <div class="feature-icon">
+                <div class="bento-item">
+                    <div class="bento-icon">
                         <i class="fas fa-chart-line"></i>
                     </div>
-                    <h3 class="feature-title">Attendance Tracking</h3>
-                    <p class="feature-description">
-                        Track service attendance, generate reports, identify trends, and engage
-                        with absentees. Real-time analytics and insights at your fingertips.
+                    <h3 class="bento-title">Attendance Tracking</h3>
+                    <p class="bento-description">
+                        Real-time attendance tracking with analytics and insights.
                     </p>
                 </div>
 
-                <div class="feature-card">
-                    <div class="feature-icon">
+                <div class="bento-item">
+                    <div class="bento-icon">
                         <i class="fas fa-hand-holding-usd"></i>
                     </div>
-                    <h3 class="feature-title">Financial Management</h3>
-                    <p class="feature-description">
-                        Complete financial tracking with income/expense management, dual approval
-                        workflow, budget tracking, and comprehensive financial reports.
+                    <h3 class="bento-title">Financial Management</h3>
+                    <p class="bento-description">
+                        Complete financial tracking with dual approval workflow.
                     </p>
                 </div>
 
-                <div class="feature-card">
-                    <div class="feature-icon">
+                <div class="bento-item">
+                    <div class="bento-icon">
                         <i class="fas fa-calendar-alt"></i>
                     </div>
-                    <h3 class="feature-title">Event & Program Management</h3>
-                    <p class="feature-description">
-                        Plan and manage church programs, handle registrations, track attendance,
-                        and measure program effectiveness with detailed analytics.
+                    <h3 class="bento-title">Event Management</h3>
+                    <p class="bento-description">
+                        Plan programs and track registrations effortlessly.
                     </p>
                 </div>
 
-                <div class="feature-card">
-                    <div class="feature-icon">
+                <div class="bento-item large">
+                    <div class="bento-icon">
                         <i class="fas fa-sms"></i>
                     </div>
-                    <h3 class="feature-title">SMS Broadcasting</h3>
-                    <p class="feature-description">
-                        Send targeted SMS broadcasts to members, use custom templates, track
-                        delivery status, and schedule messages for optimal engagement.
+                    <h3 class="bento-title">SMS Broadcasting</h3>
+                    <p class="bento-description">
+                        Send targeted SMS broadcasts to members with custom templates, track delivery status, and schedule messages for maximum engagement.
                     </p>
                 </div>
 
-                <div class="feature-card">
-                    <div class="feature-icon">
+                <div class="bento-item">
+                    <div class="bento-icon">
                         <i class="fas fa-pray"></i>
                     </div>
-                    <h3 class="feature-title">Prayer Management</h3>
-                    <p class="feature-description">
-                        Receive and track prayer requests, assign to prayer teams, monitor
-                        progress, and celebrate answered prayers with testimonies.
+                    <h3 class="bento-title">Prayer Management</h3>
+                    <p class="bento-description">
+                        Track prayer requests and celebrate answered prayers.
                     </p>
                 </div>
 
-                <div class="feature-card">
-                    <div class="feature-icon">
+                <div class="bento-item">
+                    <div class="bento-icon">
                         <i class="fas fa-child"></i>
                     </div>
-                    <h3 class="feature-title">Children's Ministry</h3>
-                    <p class="feature-description">
-                        Secure check-in/check-out system, curriculum management, event planning,
-                        and comprehensive reporting for your children's programs.
+                    <h3 class="bento-title">Children's Ministry</h3>
+                    <p class="bento-description">
+                        Secure check-in/out system with curriculum management.
                     </p>
                 </div>
 
-                <div class="feature-card">
-                    <div class="feature-icon">
-                        <i class="fas fa-file-alt"></i>
-                    </div>
-                    <h3 class="feature-title">Advanced Reporting</h3>
-                    <p class="feature-description">
-                        Custom report builder, scheduled reports, analytics dashboard, and
-                        export capabilities for data-driven decision making.
-                    </p>
-                </div>
-
-                <div class="feature-card">
-                    <div class="feature-icon">
+                <div class="bento-item">
+                    <div class="bento-icon">
                         <i class="fas fa-qrcode"></i>
                     </div>
-                    <h3 class="feature-title">QR Code System</h3>
-                    <p class="feature-description">
-                        Generate QR codes for services, events, payments, and member registration.
-                        Streamline check-ins and enhance member experience.
+                    <h3 class="bento-title">QR Code System</h3>
+                    <p class="bento-description">
+                        Streamline check-ins with QR codes for everything.
                     </p>
                 </div>
+
+                <div class="bento-item">
+                    <div class="bento-icon">
+                        <i class="fas fa-file-alt"></i>
+                    </div>
+                    <h3 class="bento-title">Advanced Reporting</h3>
+                    <p class="bento-description">
+                        Custom reports and analytics for data-driven decisions.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Stats Section -->
+    <section class="stats">
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-number">500+</div>
+                <div class="stat-label">Churches Served</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">50K+</div>
+                <div class="stat-label">Active Members</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">99.9%</div>
+                <div class="stat-label">Uptime</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">24/7</div>
+                <div class="stat-label">Support Available</div>
             </div>
         </div>
     </section>
@@ -713,85 +960,75 @@
     <!-- Benefits Section -->
     <section id="benefits" class="benefits">
         <div class="container">
+            <div class="section-header">
+                <span class="section-badge">
+                    <i class="fas fa-star"></i> WHY CHOOSE US
+                </span>
+                <h2 class="section-title">Built for Modern Ministries</h2>
+                <p class="section-subtitle">
+                    Experience the difference with our comprehensive, secure, and easy-to-use platform
+                </p>
+            </div>
+
             <div class="benefits-grid">
-                <div class="benefits-content">
-                    <h2>Why Choose ChurchCMS?</h2>
-
-                    <div class="benefit-item">
-                        <div class="benefit-icon">
-                            <i class="fas fa-bolt"></i>
-                        </div>
-                        <div class="benefit-text">
-                            <h3>Lightning Fast & Reliable</h3>
-                            <p>Built with modern technology for optimal performance and 99.9% uptime guarantee</p>
-                        </div>
+                <div class="benefit-card">
+                    <div class="benefit-icon">
+                        <i class="fas fa-bolt"></i>
                     </div>
-
-                    <div class="benefit-item">
-                        <div class="benefit-icon">
-                            <i class="fas fa-shield-alt"></i>
-                        </div>
-                        <div class="benefit-text">
-                            <h3>Bank-Level Security</h3>
-                            <p>Enterprise-grade encryption, role-based access control, and audit logging</p>
-                        </div>
-                    </div>
-
-                    <div class="benefit-item">
-                        <div class="benefit-icon">
-                            <i class="fas fa-mobile-alt"></i>
-                        </div>
-                        <div class="benefit-text">
-                            <h3>Mobile-First Design</h3>
-                            <p>Access from anywhere on any device with our responsive, mobile-optimized interface</p>
-                        </div>
-                    </div>
-
-                    <div class="benefit-item">
-                        <div class="benefit-icon">
-                            <i class="fas fa-users-cog"></i>
-                        </div>
-                        <div class="benefit-text">
-                            <h3>Easy to Use</h3>
-                            <p>Intuitive interface designed for all skill levels with comprehensive training resources</p>
-                        </div>
-                    </div>
-
-                    <div class="benefit-item">
-                        <div class="benefit-icon">
-                            <i class="fas fa-chart-bar"></i>
-                        </div>
-                        <div class="benefit-text">
-                            <h3>Powerful Analytics</h3>
-                            <p>Real-time insights and data visualization to help you make informed decisions</p>
-                        </div>
-                    </div>
-
-                    <div class="benefit-item">
-                        <div class="benefit-icon">
-                            <i class="fas fa-headset"></i>
-                        </div>
-                        <div class="benefit-text">
-                            <h3>Dedicated Support</h3>
-                            <p>Expert support team ready to help you succeed with setup, training, and ongoing assistance</p>
-                        </div>
-                    </div>
+                    <h3 class="benefit-title">Lightning Fast</h3>
+                    <p class="benefit-text">
+                        Built with modern technology for optimal performance and 99.9% uptime guarantee.
+                    </p>
                 </div>
 
-                <div class="benefits-image">
-                    <svg viewBox="0 0 500 500" xmlns="http://www.w3.org/2000/svg">
-                        <defs>
-                            <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
-                                <stop offset="0%" style="stop-color:#667eea;stop-opacity:1" />
-                                <stop offset="100%" style="stop-color:#764ba2;stop-opacity:1" />
-                            </linearGradient>
-                        </defs>
-                        <rect width="500" height="500" fill="url(#grad1)" rx="20"/>
-                        <circle cx="250" cy="250" r="80" fill="white" opacity="0.3"/>
-                        <circle cx="250" cy="250" r="60" fill="white" opacity="0.5"/>
-                        <circle cx="250" cy="250" r="40" fill="white" opacity="0.7"/>
-                        <path d="M 250 200 L 280 240 L 250 280 L 220 240 Z" fill="white"/>
-                    </svg>
+                <div class="benefit-card">
+                    <div class="benefit-icon">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <h3 class="benefit-title">Bank-Level Security</h3>
+                    <p class="benefit-text">
+                        Enterprise-grade encryption with role-based access control and complete audit logging.
+                    </p>
+                </div>
+
+                <div class="benefit-card">
+                    <div class="benefit-icon">
+                        <i class="fas fa-mobile-alt"></i>
+                    </div>
+                    <h3 class="benefit-title">Mobile-First Design</h3>
+                    <p class="benefit-text">
+                        Access from anywhere on any device with our responsive interface.
+                    </p>
+                </div>
+
+                <div class="benefit-card">
+                    <div class="benefit-icon">
+                        <i class="fas fa-users-cog"></i>
+                    </div>
+                    <h3 class="benefit-title">Easy to Use</h3>
+                    <p class="benefit-text">
+                        Intuitive interface designed for all skill levels with comprehensive training.
+                    </p>
+                </div>
+
+                <div class="benefit-card">
+                    <div class="benefit-icon">
+                        <i class="fas fa-chart-bar"></i>
+                    </div>
+                    <h3 class="benefit-title">Powerful Analytics</h3>
+                    <p class="benefit-text">
+                        Real-time insights and data visualization for informed decision making.
+                    </p>
+                </div>
+
+                <div class="benefit-card">
+                    <div class="benefit-icon">
+                        <i class="fas fa-headset"></i>
+                    </div>
+                    <h3 class="benefit-title">Dedicated Support</h3>
+                    <p class="benefit-text">
+                        Expert support team ready to help with setup, training, and assistance.
+                    </p>
                 </div>
             </div>
         </div>
@@ -799,9 +1036,11 @@
 
     <!-- CTA Section -->
     <section class="cta">
-        <div class="container">
+        <div class="cta-content">
             <h2>Ready to Transform Your Ministry?</h2>
-            <p>Join hundreds of churches worldwide using ChurchCMS to streamline operations and engage their communities more effectively</p>
+            <p>
+                Join hundreds of churches worldwide using ChurchCMS to streamline operations and engage their communities more effectively
+            </p>
             <div class="cta-buttons">
                 <a href="{{ route('login') }}" class="btn btn-white btn-large">
                     <i class="fas fa-sign-in-alt"></i> Admin Login
@@ -816,32 +1055,34 @@
     <!-- Footer -->
     <footer id="about">
         <div class="footer-content container">
-            <div class="footer-section">
-                <h3><i class="fas fa-church"></i> ChurchCMS</h3>
-                <p>
-                    A comprehensive church management platform designed to empower ministries worldwide.
-                    From member management to financial tracking, we help churches focus on their mission
-                    by simplifying administration.
+            <div class="footer-brand">
+                <div class="footer-logo">
+                    <i class="fas fa-church"></i>
+                    <span>ChurchCMS</span>
+                </div>
+                <div class="footer-tagline">Empowering Ministry Through Technology</div>
+                <p class="footer-description">
+                    A comprehensive church management platform designed to empower ministries worldwide. From member management to financial tracking, we help churches focus on their mission by simplifying administration.
                 </p>
             </div>
 
             <div class="footer-section">
-                <h3>Quick Links</h3>
+                <h3>Platform</h3>
                 <ul>
-                    <li><a href="#features">Features</a></li>
-                    <li><a href="#benefits">Benefits</a></li>
-                    <li><a href="{{ route('login') }}">Login</a></li>
-                    <li><a href="{{ route('register') }}">Register</a></li>
+                    <li><a href="#features"><i class="fas fa-arrow-right"></i> Features</a></li>
+                    <li><a href="#benefits"><i class="fas fa-arrow-right"></i> Benefits</a></li>
+                    <li><a href="{{ route('login') }}"><i class="fas fa-arrow-right"></i> Login</a></li>
+                    <li><a href="{{ route('register') }}"><i class="fas fa-arrow-right"></i> Register</a></li>
                 </ul>
             </div>
 
             <div class="footer-section">
-                <h3>Support</h3>
+                <h3>Resources</h3>
                 <ul>
-                    <li><a href="#">Documentation</a></li>
-                    <li><a href="#">Help Center</a></li>
-                    <li><a href="#">Contact Us</a></li>
-                    <li><a href="#">Privacy Policy</a></li>
+                    <li><a href="#"><i class="fas fa-arrow-right"></i> Documentation</a></li>
+                    <li><a href="#"><i class="fas fa-arrow-right"></i> Help Center</a></li>
+                    <li><a href="#"><i class="fas fa-arrow-right"></i> Contact Us</a></li>
+                    <li><a href="#"><i class="fas fa-arrow-right"></i> Privacy Policy</a></li>
                 </ul>
             </div>
 
@@ -873,7 +1114,7 @@
             }
         });
 
-        // Smooth scrolling for anchor links
+        // Smooth scrolling
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
             anchor.addEventListener('click', function (e) {
                 e.preventDefault();
@@ -885,6 +1126,24 @@
                     });
                 }
             });
+        });
+
+        // Intersection Observer for animations
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -100px 0px'
+        };
+
+        const observer = new IntersectionObserver(function(entries) {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.animation = 'fadeInUp 0.8s ease forwards';
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.bento-item, .benefit-card, .stat-card').forEach(el => {
+            observer.observe(el);
         });
     </script>
 </body>
