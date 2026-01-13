@@ -59,20 +59,25 @@ Route::middleware(['guest', 'throttle:5,1'])->group(function () {
     Route::post('/reset-password', [AuthController::class, 'resetPassword'])->name('password.update')->middleware('throttle:3,1');
 });
 
-// Authenticated Routes
-Route::middleware('auth')->group(function () {
+// ============================================================================
+// WEB APP AUTHENTICATED ROUTES (ADMIN & PASTOR ONLY)
+// ============================================================================
+// All routes below are restricted to admin and pastor roles only.
+// Members, workers, and leaders should use the mobile app.
+
+Route::middleware(['auth', 'web.admin'])->group(function () {
     // Logout
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-    // Dashboard - All authenticated users
+    // Dashboard - Admin & Pastor Only
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/dashboard/quick-action-data', [DashboardController::class, 'getQuickActionData'])->name('dashboard.quick-action-data');
 
-    // Profile Routes
+    // Profile Routes - Admin & Pastor Only
     Route::get('/profile', [DashboardController::class, 'profile'])->name('profile');
     Route::put('/profile', [DashboardController::class, 'updateProfile'])->name('profile.update');
 
-    // Notification Routes - All authenticated users
+    // Notification Routes - Admin & Pastor Only
     Route::get('notifications', [NotificationController::class, 'index'])->name('notifications.index');
     Route::get('notifications/unread', [NotificationController::class, 'unread'])->name('notifications.unread');
     Route::post('notifications/{notification}/mark-as-read', [NotificationController::class, 'markAsRead'])->name('notifications.mark-as-read');
@@ -82,8 +87,8 @@ Route::middleware('auth')->group(function () {
     Route::get('notifications/preferences', [NotificationController::class, 'preferences'])->name('notifications.preferences');
     Route::put('notifications/preferences', [NotificationController::class, 'updatePreferences'])->name('notifications.update-preferences');
 
-    // Member Routes - Staff and above
-    Route::middleware(['role:admin,pastor,staff'])->group(function () {
+    // Member Routes - Admin and Pastor only
+    Route::middleware(['role:admin,pastor'])->group(function () {
         // Member statistics and export
         Route::get('members/statistics', [MemberController::class, 'statistics'])->name('members.statistics');
         Route::get('members/export', [MemberController::class, 'export'])->name('members.export');
@@ -107,8 +112,8 @@ Route::middleware('auth')->group(function () {
         Route::post('members/export-qr-cards-pdf', [MemberController::class, 'exportQRCardsPdf'])->name('members.export-qr-cards-pdf');
     });
 
-    // Attendance Routes - Staff and above
-    Route::middleware(['role:admin,pastor,staff'])->group(function () {
+    // Attendance Routes - Admin and Pastor only
+    Route::middleware(['role:admin,pastor'])->group(function () {
         // Attendance list and reports
         Route::get('attendance', [AttendanceController::class, 'index'])->name('attendance.index');
         Route::get('attendance/mark', [AttendanceController::class, 'mark'])->name('attendance.mark');
@@ -127,8 +132,8 @@ Route::middleware('auth')->group(function () {
         Route::delete('attendance/{attendance}', [AttendanceController::class, 'destroy'])->name('attendance.destroy');
     });
 
-    // Finance/Transaction Routes - Staff and above
-    Route::middleware(['role:admin,pastor,staff'])->group(function () {
+    // Finance/Transaction Routes - Admin and Pastor only
+    Route::middleware(['role:admin,pastor'])->group(function () {
         // Transaction list and reports
         Route::get('transactions', [TransactionController::class, 'index'])->name('transactions.index');
         Route::get('transactions/reports', [TransactionController::class, 'reports'])->name('transactions.reports');
@@ -155,8 +160,8 @@ Route::middleware('auth')->group(function () {
         Route::delete('transactions/{transaction}', [TransactionController::class, 'destroy'])->name('transactions.destroy');
     });
 
-    // Visitor Routes - Staff and above
-    Route::middleware(['role:admin,pastor,staff'])->group(function () {
+    // Visitor Routes - Admin and Pastor only
+    Route::middleware(['role:admin,pastor'])->group(function () {
         // Visitor list and special views
         Route::get('visitors', [VisitorController::class, 'index'])->name('visitors.index');
         Route::get('visitors/eligible', [VisitorController::class, 'eligible'])->name('visitors.eligible');
@@ -180,8 +185,8 @@ Route::middleware('auth')->group(function () {
         Route::post('visitors/{visitor}/mark-inactive', [VisitorController::class, 'markInactive'])->name('visitors.markInactive');
     });
 
-    // SMS Broadcast Routes - Staff and above
-    Route::middleware(['role:admin,pastor,staff'])->group(function () {
+    // SMS Broadcast Routes - Admin and Pastor only
+    Route::middleware(['role:admin,pastor'])->group(function () {
         Route::get('sms', [SmsBroadcastController::class, 'index'])->name('sms.index');
         Route::get('sms/create', [SmsBroadcastController::class, 'create'])->name('sms.create');
         Route::post('sms', [SmsBroadcastController::class, 'store'])->name('sms.store');
@@ -190,8 +195,8 @@ Route::middleware('auth')->group(function () {
         Route::get('sms/{broadcast}/status', [SmsBroadcastController::class, 'status'])->name('sms.status');
     });
 
-    // Equipment Routes - Staff and above
-    Route::middleware(['role:admin,pastor,staff'])->group(function () {
+    // Equipment Routes - Admin and Pastor only
+    Route::middleware(['role:admin,pastor'])->group(function () {
         // Equipment list and reports
         Route::get('equipment', [EquipmentController::class, 'index'])->name('equipment.index');
         Route::get('equipment/maintenance', [EquipmentController::class, 'maintenance'])->name('equipment.maintenance');
@@ -247,8 +252,8 @@ Route::middleware('auth')->group(function () {
         Route::get('shepherds/{shepherd}/reports', [ShepherdController::class, 'reports'])->name('shepherds.reports');
     });
 
-    // Service Units Routes - Staff and above
-    Route::middleware(['role:admin,pastor,staff'])->group(function () {
+    // Service Units Routes - Admin and Pastor only
+    Route::middleware(['role:admin,pastor'])->group(function () {
         // Service unit list and analytics
         Route::get('service-units', [ServiceUnitController::class, 'index'])->name('service-units.index');
         Route::get('service-units/analytics', [ServiceUnitController::class, 'analytics'])->name('service-units.analytics');
@@ -274,8 +279,8 @@ Route::middleware('auth')->group(function () {
         Route::put('duty-rosters/{dutyRoster}/publish', [ServiceUnitController::class, 'publishDutyRoster'])->name('service-units.publish-duty-roster');
     });
 
-    // Programs Module - Staff and above
-    Route::middleware(['role:admin,pastor,staff'])->group(function () {
+    // Programs Module - Admin and Pastor only
+    Route::middleware(['role:admin,pastor'])->group(function () {
         // Program listing and viewing
         Route::get('programs', [ProgramController::class, 'index'])->name('programs.index');
         Route::get('programs/create', [ProgramController::class, 'create'])->name('programs.create');
@@ -320,13 +325,11 @@ Route::middleware('auth')->group(function () {
         Route::post('programs/{program}/export-qr-poster-pdf', [ProgramController::class, 'exportQRPosterPdf'])->name('programs.export-qr-poster-pdf');
     });
 
-    // Public program registration (all authenticated users)
-    Route::get('programs/{program}/register', [ProgramController::class, 'showRegistrationForm'])->name('programs.registration-form');
-    Route::post('programs/{program}/register', [ProgramController::class, 'register'])->name('programs.register');
-    Route::get('programs/registrations/{registration}/success', [ProgramController::class, 'registrationSuccess'])->name('programs.registration-success');
+    // Note: Program registration for members is available via Mobile API only
+    // See routes/api.php line 186: Route::post('/programs/{program}/register')
 
-    // Service Planning Module - Staff and above
-    Route::middleware(['role:admin,pastor,staff'])->group(function () {
+    // Service Planning Module - Admin and Pastor only
+    Route::middleware(['role:admin,pastor'])->group(function () {
         // Service schedule listing and calendar
         Route::get('services', [ServicePlanningController::class, 'index'])->name('services.index');
         Route::get('services/calendar', [ServicePlanningController::class, 'calendar'])->name('services.calendar');
@@ -364,8 +367,8 @@ Route::middleware('auth')->group(function () {
         Route::post('services/volunteers/{volunteer}/confirm', [ServicePlanningController::class, 'confirmVolunteer'])->name('services.confirm-volunteer');
     });
 
-    // Prayer Request System - Staff and above
-    Route::middleware(['role:admin,pastor,staff'])->group(function () {
+    // Prayer Request System - Admin and Pastor only
+    Route::middleware(['role:admin,pastor'])->group(function () {
         // Prayer dashboard and management
         Route::get('prayer', [PrayerController::class, 'index'])->name('prayer.index');
         Route::get('prayer/analytics', [PrayerController::class, 'analytics'])->name('prayer.analytics');
@@ -380,22 +383,11 @@ Route::middleware('auth')->group(function () {
         Route::post('prayer/testimonies/{testimony}/approve', [PrayerController::class, 'approveTestimony'])->name('prayer.approve-testimony');
     });
 
-    // Prayer Request CRUD (All authenticated users - Authorization handled in controller)
-    Route::get('prayer/create', [PrayerController::class, 'create'])->name('prayer.create');
-    Route::post('prayer', [PrayerController::class, 'store'])->name('prayer.store');
-    Route::get('prayer/{prayerRequest}', [PrayerController::class, 'show'])->name('prayer.show');
-    Route::get('prayer/{prayerRequest}/edit', [PrayerController::class, 'edit'])->name('prayer.edit');
-    Route::put('prayer/{prayerRequest}', [PrayerController::class, 'update'])->name('prayer.update');
-    Route::delete('prayer/{prayerRequest}', [PrayerController::class, 'destroy'])->name('prayer.destroy');
+    // Note: Prayer requests for members are available via Mobile API only
+    // See routes/api.php lines 189-207 for prayer request endpoints
 
-    // Public prayer routes (all authenticated users)
-    Route::get('prayer/wall', [PrayerController::class, 'prayerWall'])->name('prayer.wall');
-    Route::get('prayer/my-requests', [PrayerController::class, 'myRequests'])->name('prayer.my-requests');
-    Route::get('prayer/my-assignments', [PrayerController::class, 'myAssignments'])->name('prayer.my-assignments');
-    Route::get('prayer/testimonies/wall', [PrayerController::class, 'testimoniesWall'])->name('prayer.testimonies-wall');
-
-    // Birthday & Anniversary Automation - Staff and above
-    Route::middleware(['role:admin,pastor,staff'])->group(function () {
+    // Birthday & Anniversary Automation - Admin and Pastor only
+    Route::middleware(['role:admin,pastor'])->group(function () {
         // Dashboard and main views
         Route::get('birthdays', [BirthdayController::class, 'index'])->name('birthdays.index');
         Route::get('birthdays/calendar', [BirthdayController::class, 'calendar'])->name('birthdays.calendar');
@@ -416,8 +408,8 @@ Route::middleware('auth')->group(function () {
         });
     });
 
-    // Reports Routes - Staff and above
-    Route::middleware(['role:admin,pastor,staff'])->group(function () {
+    // Reports Routes - Admin and Pastor only
+    Route::middleware(['role:admin,pastor'])->group(function () {
         // Main dashboard
         Route::get('reports', [ReportController::class, 'index'])->name('reports.index');
 
@@ -477,8 +469,8 @@ Route::middleware('auth')->group(function () {
         Route::post('reports/export/csv', [ReportController::class, 'exportCsv'])->name('reports.export.csv');
     });
 
-    // Children's Ministry Routes - Staff and above
-    Route::middleware(['role:admin,pastor,staff'])->group(function () {
+    // Children's Ministry Routes - Admin and Pastor only
+    Route::middleware(['role:admin,pastor'])->group(function () {
         // Dashboard
         Route::get('childrens-ministry', [ChildrensMinistryController::class, 'index'])->name('childrens-ministry.index');
 
@@ -630,58 +622,11 @@ Route::middleware('auth')->group(function () {
         Route::get('welfare/reports', [WelfareController::class, 'reports'])->name('welfare.reports');
     });
 
-    // Messaging Routes - All authenticated users
-    Route::prefix('messaging')->name('messaging.')->group(function () {
-        // Dashboard
-        Route::get('/', [MessagingController::class, 'index'])->name('index');
+    // Note: Messaging for members is available via Mobile API only
+    // See routes/api.php lines 254-267 for messaging endpoints
 
-        // Conversations
-        Route::get('conversations/{conversation}', [MessagingController::class, 'showConversation'])->name('conversation');
-        Route::get('conversations/{conversation}/messages', [MessagingController::class, 'getMessages'])->name('conversation.messages');
-        Route::post('conversations/{conversation}/mark-read', [MessagingController::class, 'markAsRead'])->name('conversation.mark-read');
-        Route::post('conversations/{conversation}/archive', [MessagingController::class, 'archiveConversation'])->name('conversation.archive');
-        Route::post('conversations/{conversation}/unarchive', [MessagingController::class, 'unarchiveConversation'])->name('conversation.unarchive');
-
-        // Start conversations
-        Route::post('direct', [MessagingController::class, 'startDirectConversation'])->name('direct');
-        Route::post('groups', [MessagingController::class, 'createGroup'])->name('groups.create');
-
-        // Group management
-        Route::put('groups/{conversation}', [MessagingController::class, 'updateGroup'])->name('groups.update');
-        Route::post('groups/{conversation}/participants', [MessagingController::class, 'addParticipants'])->name('groups.add-participants');
-        Route::delete('groups/{conversation}/participants', [MessagingController::class, 'removeParticipant'])->name('groups.remove-participant');
-        Route::post('groups/{conversation}/leave', [MessagingController::class, 'leaveGroup'])->name('groups.leave');
-
-        // Messages
-        Route::post('conversations/{conversation}/messages', [MessagingController::class, 'sendMessage'])->name('messages.send');
-        Route::put('messages/{message}', [MessagingController::class, 'editMessage'])->name('messages.edit');
-        Route::delete('messages/{message}', [MessagingController::class, 'deleteMessage'])->name('messages.delete');
-        Route::post('messages/{message}/pin', [MessagingController::class, 'pinMessage'])->name('messages.pin');
-        Route::delete('messages/{message}/pin', [MessagingController::class, 'unpinMessage'])->name('messages.unpin');
-
-        // Reactions
-        Route::post('messages/{message}/reactions', [MessagingController::class, 'reactToMessage'])->name('messages.react');
-        Route::delete('messages/{message}/reactions', [MessagingController::class, 'removeReaction'])->name('messages.unreact');
-
-        // Stars
-        Route::post('messages/{message}/star', [MessagingController::class, 'starMessage'])->name('messages.star');
-        Route::delete('messages/{message}/star', [MessagingController::class, 'unstarMessage'])->name('messages.unstar');
-        Route::get('starred', [MessagingController::class, 'starredMessages'])->name('starred');
-
-        // Search
-        Route::get('search', [MessagingController::class, 'search'])->name('search');
-
-        // Blocking
-        Route::post('block', [MessagingController::class, 'blockUser'])->name('block');
-        Route::post('unblock', [MessagingController::class, 'unblockUser'])->name('unblock');
-        Route::get('blocked', [MessagingController::class, 'blockedUsers'])->name('blocked');
-
-        // Reporting
-        Route::post('messages/{message}/report', [MessagingController::class, 'reportMessage'])->name('messages.report');
-    });
-
-    // Media Team Routes - Staff and above
-    Route::middleware(['role:admin,pastor,staff'])->prefix('media')->name('media.')->group(function () {
+    // Media Team Routes - Admin and Pastor only
+    Route::middleware(['role:admin,pastor'])->prefix('media')->name('media.')->group(function () {
         Route::get('/', [MediaController::class, 'index'])->name('index');
         Route::get('content', [MediaController::class, 'content'])->name('content');
         Route::post('content', [MediaController::class, 'storeContent'])->name('content.store');
@@ -701,18 +646,9 @@ Route::middleware('auth')->group(function () {
         Route::post('agreements/{agreement}/activate', [PartnershipController::class, 'activateAgreement'])->name('agreements.activate');
     });
 
-    // QR Code Management Routes (Basic)
-    Route::prefix('qr-codes')->name('qr-codes.')->group(function () {
-        Route::get('/', [QrCodeController::class, 'index'])->name('index');
-        Route::get('/service', [QrCodeController::class, 'serviceQrCode'])->name('service');
-        Route::get('/member-registration', [QrCodeController::class, 'memberRegistration'])->name('member-registration');
-        Route::get('/visitor-registration', [QrCodeController::class, 'visitorRegistration'])->name('visitor-registration');
-        Route::get('/payment', [QrCodeController::class, 'payment'])->name('payment');
-        Route::get('/personal', [QrCodeController::class, 'personal'])->name('personal');
-        Route::get('/equipment/{equipment}', [QrCodeController::class, 'equipment'])->name('equipment');
-        Route::get('/program/{program}', [QrCodeController::class, 'programRegistration'])->name('program');
-        Route::post('/bulk-download', [QrCodeController::class, 'bulkDownload'])->name('bulk-download');
-    });
+    // Note: Basic QR code generation for members is available via Mobile API
+    // See routes/api.php lines 324-341 for QR scan endpoints
+    // See routes/api.php line 376 for personal QR generation
 
     // QR Code Management System (Comprehensive) - Admin and Pastor only
     Route::middleware(['role:admin,pastor'])->prefix('qr-management')->name('qr-management.')->group(function () {
@@ -741,13 +677,13 @@ Route::middleware('auth')->group(function () {
         Route::get('/{id}/download', [App\Http\Controllers\QRManagementController::class, 'downloadImage'])->name('download');
     });
 
-    // PWA Scanner Routes - Authenticated users only
-    Route::prefix('pwa')->name('pwa.')->group(function () {
-        Route::get('/scanner', [App\Http\Controllers\PWAController::class, 'scanner'])->name('scanner');
-        Route::get('/scanner/config', [App\Http\Controllers\PWAController::class, 'getScannerConfig'])->name('scanner.config');
-        Route::post('/install', [App\Http\Controllers\PWAController::class, 'install'])->name('install');
-    });
+    // Note: PWA Scanner for members is available via Mobile routes
+    // See lines 745-749 for mobile PWA scanner routes
 });
+
+// ============================================================================
+// END OF WEB APP ROUTES (ADMIN & PASTOR ONLY)
+// ============================================================================
 
 // ============================================================================
 // PWA PUBLIC ROUTES (NO AUTH REQUIRED)

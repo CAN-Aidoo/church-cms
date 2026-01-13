@@ -86,8 +86,8 @@ Route::prefix('v1')->middleware('auth:sanctum')->group(function () {
         Route::get('/upcoming-events', [MemberController::class, 'getMyUpcomingEvents']);
     });
 
-    // Members API - Staff and above
-    Route::middleware(['role:admin,pastor,staff'])->prefix('members')->group(function () {
+    // Members API - Admin and Pastor only
+    Route::middleware(['role:admin,pastor'])->prefix('members')->group(function () {
         Route::get('/', [MemberController::class, 'index']);
         Route::post('/', [MemberController::class, 'store']);
         Route::get('/search', [MemberController::class, 'search']);
@@ -101,8 +101,8 @@ Route::prefix('v1')->middleware('auth:sanctum')->group(function () {
         Route::post('/bulk-action', [MemberController::class, 'bulkAction']);
     });
 
-    // Attendance API - Staff and above
-    Route::middleware(['role:admin,pastor,staff'])->prefix('attendance')->group(function () {
+    // Attendance API - Admin and Pastor only
+    Route::middleware(['role:admin,pastor'])->prefix('attendance')->group(function () {
         Route::get('/', [AttendanceController::class, 'index']);
         Route::post('/', [AttendanceController::class, 'store']);
         Route::post('/bulk', [AttendanceController::class, 'bulkStore']);
@@ -114,8 +114,8 @@ Route::prefix('v1')->middleware('auth:sanctum')->group(function () {
         Route::delete('/{attendance}', [AttendanceController::class, 'destroy']);
     });
 
-    // Transactions API - Staff and above
-    Route::middleware(['role:admin,pastor,staff'])->prefix('transactions')->group(function () {
+    // Transactions API - Admin and Pastor only
+    Route::middleware(['role:admin,pastor'])->prefix('transactions')->group(function () {
         Route::get('/', [TransactionController::class, 'index']);
         Route::post('/', [TransactionController::class, 'store']);
         Route::get('/reports', [TransactionController::class, 'reports']);
@@ -136,8 +136,8 @@ Route::prefix('v1')->middleware('auth:sanctum')->group(function () {
         Route::get('/analytics/forecasting', [TransactionController::class, 'getForecasting']);
     });
 
-    // Visitors API - Staff and above
-    Route::middleware(['role:admin,pastor,staff'])->prefix('visitors')->group(function () {
+    // Visitors API - Admin and Pastor only
+    Route::middleware(['role:admin,pastor'])->prefix('visitors')->group(function () {
         Route::get('/', [VisitorController::class, 'index']);
         Route::post('/', [VisitorController::class, 'store']);
         Route::get('/eligible', [VisitorController::class, 'eligible']);
@@ -150,8 +150,8 @@ Route::prefix('v1')->middleware('auth:sanctum')->group(function () {
         Route::post('/{visitor}/convert', [VisitorController::class, 'convert']);
     });
 
-    // SMS Broadcast API - Staff and above
-    Route::middleware(['role:admin,pastor,staff'])->prefix('sms')->group(function () {
+    // SMS Broadcast API - Admin and Pastor only
+    Route::middleware(['role:admin,pastor'])->prefix('sms')->group(function () {
         Route::get('/', [SmsBroadcastController::class, 'index']);
         Route::post('/', [SmsBroadcastController::class, 'store']);
         Route::get('/{broadcast}', [SmsBroadcastController::class, 'show']);
@@ -166,8 +166,8 @@ Route::prefix('v1')->middleware('auth:sanctum')->group(function () {
         Route::post('/message/info', [SmsBroadcastController::class, 'getMessageInfo']);
     });
 
-    // Programs API - Staff and above
-    Route::middleware(['role:admin,pastor,staff'])->prefix('programs')->group(function () {
+    // Programs API - Admin and Pastor only
+    Route::middleware(['role:admin,pastor'])->prefix('programs')->group(function () {
         Route::get('/', [ProgramController::class, 'index']);
         Route::post('/', [ProgramController::class, 'store']);
         Route::get('/{program}', [ProgramController::class, 'show']);
@@ -195,8 +195,8 @@ Route::prefix('v1')->middleware('auth:sanctum')->group(function () {
         Route::put('/{prayerRequest}', [PrayerController::class, 'update']);
         Route::delete('/{prayerRequest}', [PrayerController::class, 'destroy']);
 
-        // Staff and above
-        Route::middleware(['role:admin,pastor,staff'])->group(function () {
+        // Admin and Pastor only
+        Route::middleware(['role:admin,pastor'])->group(function () {
             Route::get('/', [PrayerController::class, 'index']);
             Route::get('/analytics', [PrayerController::class, 'analytics']);
             Route::post('/{prayerRequest}/assign', [PrayerController::class, 'assign']);
@@ -206,8 +206,8 @@ Route::prefix('v1')->middleware('auth:sanctum')->group(function () {
         });
     });
 
-    // Birthdays API - Staff and above
-    Route::middleware(['role:admin,pastor,staff'])->prefix('birthdays')->group(function () {
+    // Birthdays API - Admin and Pastor only
+    Route::middleware(['role:admin,pastor'])->prefix('birthdays')->group(function () {
         Route::get('/', [BirthdayController::class, 'index']);
         Route::get('/calendar', [BirthdayController::class, 'calendar']);
         Route::get('/history', [BirthdayController::class, 'history']);
@@ -230,8 +230,8 @@ Route::prefix('v1')->middleware('auth:sanctum')->group(function () {
         });
     });
 
-    // Reports API - Staff and above
-    Route::middleware(['role:admin,pastor,staff'])->prefix('reports')->group(function () {
+    // Reports API - Admin and Pastor only
+    Route::middleware(['role:admin,pastor'])->prefix('reports')->group(function () {
         Route::get('/', [ReportController::class, 'index']);
         Route::get('/analytics', [ReportController::class, 'analytics']);
         Route::post('/custom', [ReportController::class, 'storeCustomReport']);
@@ -279,8 +279,8 @@ Route::prefix('v1')->middleware('auth:sanctum')->group(function () {
         Route::post('/{shepherd}/unassign-member', [ShepherdController::class, 'unassignMember']);
     });
 
-    // Service Units API - Staff and above
-    Route::middleware(['role:admin,pastor,staff'])->prefix('service-units')->group(function () {
+    // Service Units API - Admin and Pastor only
+    Route::middleware(['role:admin,pastor'])->prefix('service-units')->group(function () {
         Route::get('/', [ServiceUnitController::class, 'index']);
         Route::post('/', [ServiceUnitController::class, 'store']);
         Route::get('/analytics', [ServiceUnitController::class, 'analytics']);

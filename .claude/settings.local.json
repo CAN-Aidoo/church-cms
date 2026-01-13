@@ -68,7 +68,10 @@
       "Bash(timeout 3 tail:*)",
       "Bash(del \"C:\\\\xampp\\\\htdocs\\\\church-cms-docs\\\\database\\\\migrations\\\\2026_01_09_075442_create_service_unit_meetings_table.php\")",
       "Bash(del \"C:\\\\xampp\\\\htdocs\\\\church-cms-docs\\\\database\\\\migrations\\\\2026_01_09_075446_create_service_unit_trainings_table.php\")",
-      "Bash(git checkout:*)"
+      "Bash(git checkout:*)",
+      "Bash(git mv:*)",
+      "Bash(git restore:*)",
+      "Bash(Class 'NunoMaduro\\\\Collision\\\\Adapters\\\\Laravel\\\\CollisionServiceProvider' not found\"\n\nChanges:\n\n1. Deleted Cached Files \\(CRITICAL\\):\n   - Removed bootstrap/cache/packages.php \\(had collision registered\\)\n   - Removed bootstrap/cache/services.php \\(stale cache\\)\n   - These files should NEVER be committed to repository\n\n2. Updated .gitignore:\n   - Added /bootstrap/cache/packages.php\n   - Added /bootstrap/cache/services.php\n   - Added /bootstrap/cache/config.php\n   - Added /bootstrap/cache/routes-v7.php\n   - Prevents future cache commits\n\n3. Enhanced start.sh Cache Clearing:\n   - Added comprehensive cache clearing at startup\n   - Removes all bootstrap/cache/*.php files\n   - Runs artisan config:clear, cache:clear, route:clear, view:clear\n   - Ensures fresh package discovery on every deployment\n   - Prevents cached provider issues\n\nWhy This Fixes The Crash:\n- No more cached collision provider in deployed code\n- Laravel will regenerate packages.php without collision \\(dont-discover\\)\n- Only production dependencies will be discovered\n- Fresh cache on every deployment prevents stale provider issues\n\nTechnical Details:\n- composer.json has \"dont-discover\": [\"nunomaduro/collision\"]\n- But cached packages.php had it anyway \\(from local dev\\)\n- Cache was committed and deployed to Railway\n- Railway doesn''t install collision \\(--no-dev\\)\n- Fresh discovery will respect dont-discover setting\n\nExpected Result:\n✅ No more \"CollisionServiceProvider not found\" errors\n✅ App boots successfully on Railway\n✅ Fresh package discovery on every deployment\n✅ No dev packages loaded in production\n\nCo-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>\nEOF\n\\)\")"
     ],
     "deny": [],
     "ask": []
