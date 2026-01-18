@@ -191,6 +191,9 @@ Route::middleware(['auth', 'web.admin'])->group(function () {
         Route::get('sms/create', [SmsBroadcastController::class, 'create'])->name('sms.create');
         Route::post('sms', [SmsBroadcastController::class, 'store'])->name('sms.store');
         Route::get('sms/{broadcast}', [SmsBroadcastController::class, 'show'])->name('sms.show');
+        Route::get('sms/{broadcast}/edit', [SmsBroadcastController::class, 'edit'])->name('sms.edit');
+        Route::put('sms/{broadcast}', [SmsBroadcastController::class, 'update'])->name('sms.update');
+        Route::delete('sms/{broadcast}', [SmsBroadcastController::class, 'destroy'])->name('sms.destroy');
         Route::post('sms/{broadcast}/send', [SmsBroadcastController::class, 'send'])->name('sms.send');
         Route::get('sms/{broadcast}/status', [SmsBroadcastController::class, 'status'])->name('sms.status');
     });
@@ -503,6 +506,7 @@ Route::middleware(['auth', 'web.admin'])->group(function () {
         Route::post('childrens-ministry/events/{event}/publish', [ChildrensMinistryController::class, 'publishEvent'])->name('childrens-ministry.events.publish');
         Route::post('childrens-ministry/events/{event}/start', [ChildrensMinistryController::class, 'startEvent'])->name('childrens-ministry.events.start');
         Route::post('childrens-ministry/events/{event}/complete', [ChildrensMinistryController::class, 'completeEvent'])->name('childrens-ministry.events.complete');
+        Route::delete('childrens-ministry/events/{event}', [ChildrensMinistryController::class, 'destroyEvent'])->name('childrens-ministry.events.destroy');
 
         // Reports
         Route::get('childrens-ministry/reports', [ChildrensMinistryController::class, 'reports'])->name('childrens-ministry.reports');
@@ -550,6 +554,7 @@ Route::middleware(['auth', 'web.admin'])->group(function () {
         Route::put('counselling/counsellors/{counsellor}', [CounsellingController::class, 'updateCounsellor'])->name('counselling.counsellors.update');
         Route::post('counselling/counsellors/{counsellor}/activate', [CounsellingController::class, 'activateCounsellor'])->name('counselling.counsellors.activate');
         Route::post('counselling/counsellors/{counsellor}/deactivate', [CounsellingController::class, 'deactivateCounsellor'])->name('counselling.counsellors.deactivate');
+        Route::delete('counselling/counsellors/{counsellor}', [CounsellingController::class, 'destroyCounsellor'])->name('counselling.counsellors.destroy');
 
         // Sessions
         Route::get('counselling/sessions', [CounsellingController::class, 'sessions'])->name('counselling.sessions');
@@ -562,6 +567,7 @@ Route::middleware(['auth', 'web.admin'])->group(function () {
         Route::post('counselling/sessions/{session}/complete', [CounsellingController::class, 'completeSession'])->name('counselling.sessions.complete');
         Route::post('counselling/sessions/{session}/cancel', [CounsellingController::class, 'cancelSession'])->name('counselling.sessions.cancel');
         Route::post('counselling/sessions/{session}/reschedule', [CounsellingController::class, 'rescheduleSession'])->name('counselling.sessions.reschedule');
+        Route::delete('counselling/sessions/{session}', [CounsellingController::class, 'destroySession'])->name('counselling.sessions.destroy');
         Route::get('counselling/available-counsellors', [CounsellingController::class, 'getAvailableCounsellors'])->name('counselling.available-counsellors');
 
         // Cases
@@ -573,6 +579,7 @@ Route::middleware(['auth', 'web.admin'])->group(function () {
         Route::post('counselling/cases/{case}/activate', [CounsellingController::class, 'activateCase'])->name('counselling.cases.activate');
         Route::post('counselling/cases/{case}/hold', [CounsellingController::class, 'holdCase'])->name('counselling.cases.hold');
         Route::post('counselling/cases/{case}/close', [CounsellingController::class, 'closeCase'])->name('counselling.cases.close');
+        Route::delete('counselling/cases/{case}', [CounsellingController::class, 'destroyCase'])->name('counselling.cases.destroy');
 
         // Resources
         Route::get('counselling/resources', [CounsellingController::class, 'resources'])->name('counselling.resources');
@@ -580,6 +587,7 @@ Route::middleware(['auth', 'web.admin'])->group(function () {
         Route::post('counselling/resources', [CounsellingController::class, 'storeResource'])->name('counselling.resources.store');
         Route::get('counselling/resources/{resource}', [CounsellingController::class, 'showResource'])->name('counselling.resources.show');
         Route::put('counselling/resources/{resource}', [CounsellingController::class, 'updateResource'])->name('counselling.resources.update');
+        Route::delete('counselling/resources/{resource}', [CounsellingController::class, 'destroyResource'])->name('counselling.resources.destroy');
         Route::get('counselling/resources/{resource}/download', [CounsellingController::class, 'downloadResource'])->name('counselling.resources.download');
 
         // Reports
@@ -603,6 +611,7 @@ Route::middleware(['auth', 'web.admin'])->group(function () {
         Route::post('welfare/cases/{case}/approve', [WelfareController::class, 'approveCase'])->name('welfare.cases.approve');
         Route::post('welfare/cases/{case}/reject', [WelfareController::class, 'rejectCase'])->name('welfare.cases.reject');
         Route::post('welfare/cases/{case}/close', [WelfareController::class, 'closeCase'])->name('welfare.cases.close');
+        Route::delete('welfare/cases/{case}', [WelfareController::class, 'destroyCase'])->name('welfare.cases.destroy');
 
         // Programs
         Route::get('welfare/programs', [WelfareController::class, 'programs'])->name('welfare.programs');
@@ -613,6 +622,7 @@ Route::middleware(['auth', 'web.admin'])->group(function () {
         Route::post('welfare/programs/{program}/activate', [WelfareController::class, 'activateProgram'])->name('welfare.programs.activate');
         Route::post('welfare/programs/{program}/pause', [WelfareController::class, 'pauseProgram'])->name('welfare.programs.pause');
         Route::post('welfare/programs/{program}/complete', [WelfareController::class, 'completeProgram'])->name('welfare.programs.complete');
+        Route::delete('welfare/programs/{program}', [WelfareController::class, 'destroyProgram'])->name('welfare.programs.destroy');
 
         // Fund Transactions
         Route::get('welfare/fund-transactions', [WelfareController::class, 'fundTransactions'])->name('welfare.fund-transactions');
@@ -634,6 +644,18 @@ Route::middleware(['auth', 'web.admin'])->group(function () {
         Route::get('streams', [MediaController::class, 'streams'])->name('streams');
         Route::post('streams', [MediaController::class, 'storeStream'])->name('streams.store');
         Route::get('team', [MediaController::class, 'teamMembers'])->name('team');
+
+        // Content CRUD routes
+        Route::get('content/{content}', [MediaController::class, 'showContent'])->name('content.show');
+        Route::get('content/{content}/edit', [MediaController::class, 'editContent'])->name('content.edit');
+        Route::put('content/{content}', [MediaController::class, 'updateContent'])->name('content.update');
+        Route::delete('content/{content}', [MediaController::class, 'destroyContent'])->name('content.destroy');
+
+        // Stream CRUD routes
+        Route::get('streams/{stream}', [MediaController::class, 'showStream'])->name('streams.show');
+        Route::get('streams/{stream}/edit', [MediaController::class, 'editStream'])->name('streams.edit');
+        Route::put('streams/{stream}', [MediaController::class, 'updateStream'])->name('streams.update');
+        Route::delete('streams/{stream}', [MediaController::class, 'destroyStream'])->name('streams.destroy');
     });
 
     // Partnerships Routes - Pastor and above
@@ -644,6 +666,18 @@ Route::middleware(['auth', 'web.admin'])->group(function () {
         Route::get('agreements', [PartnershipController::class, 'agreements'])->name('agreements');
         Route::post('agreements', [PartnershipController::class, 'storeAgreement'])->name('agreements.store');
         Route::post('agreements/{agreement}/activate', [PartnershipController::class, 'activateAgreement'])->name('agreements.activate');
+
+        // Partner CRUD routes
+        Route::get('partners/{partner}', [PartnershipController::class, 'showPartner'])->name('partners.show');
+        Route::get('partners/{partner}/edit', [PartnershipController::class, 'editPartner'])->name('partners.edit');
+        Route::put('partners/{partner}', [PartnershipController::class, 'updatePartner'])->name('partners.update');
+        Route::delete('partners/{partner}', [PartnershipController::class, 'destroyPartner'])->name('partners.destroy');
+
+        // Agreement CRUD routes
+        Route::get('agreements/{agreement}', [PartnershipController::class, 'showAgreement'])->name('agreements.show');
+        Route::get('agreements/{agreement}/edit', [PartnershipController::class, 'editAgreement'])->name('agreements.edit');
+        Route::put('agreements/{agreement}', [PartnershipController::class, 'updateAgreement'])->name('agreements.update');
+        Route::delete('agreements/{agreement}', [PartnershipController::class, 'destroyAgreement'])->name('agreements.destroy');
     });
 
     // Note: Basic QR code generation for members is available via Mobile API
@@ -660,6 +694,9 @@ Route::middleware(['auth', 'web.admin'])->group(function () {
         Route::get('/create', [App\Http\Controllers\QRManagementController::class, 'create'])->name('create');
         Route::post('/', [App\Http\Controllers\QRManagementController::class, 'store'])->name('store');
         Route::get('/{id}', [App\Http\Controllers\QRManagementController::class, 'show'])->name('show');
+        Route::get('/{id}/edit', [App\Http\Controllers\QRManagementController::class, 'edit'])->name('edit');
+        Route::put('/{id}', [App\Http\Controllers\QRManagementController::class, 'update'])->name('update');
+        Route::delete('/{id}', [App\Http\Controllers\QRManagementController::class, 'destroy'])->name('destroy');
         Route::post('/{id}/revoke', [App\Http\Controllers\QRManagementController::class, 'revoke'])->name('revoke');
         Route::post('/{id}/extend', [App\Http\Controllers\QRManagementController::class, 'extend'])->name('extend');
 

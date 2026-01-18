@@ -31,11 +31,21 @@
 
 @push('scripts')
 <script>
+    // HTML escape helper to prevent XSS
+    function escapeHtml(text) {
+        if (text === null || text === undefined) return '';
+        const div = document.createElement('div');
+        div.textContent = String(text);
+        return div.innerHTML;
+    }
+
     const conversationId = {{ $conversationId }};
     let messages = [];
+    let loadError = false;
 
     async function loadMessages() {
         try {
+            loadError = false;
             const response = await fetch(`${window.API_BASE_URL}/messaging/conversations/${conversationId}/messages`, {
                 headers: {
                     'Accept': 'application/json',
@@ -53,7 +63,24 @@
 
         } catch (error) {
             console.error('Error loading messages:', error);
+            loadError = true;
+            showLoadError();
         }
+    }
+
+    function showLoadError() {
+        const container = document.getElementById('messagesContainer');
+        container.innerHTML = `
+            <div class="text-center py-12">
+                <svg class="w-16 h-16 mx-auto mb-4 text-red-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                <p class="text-gray-700 font-medium">Failed to load messages</p>
+                <button onclick="loadMessages()" class="mt-4 text-blue-600 font-medium text-sm hover:underline">
+                    Try Again
+                </button>
+            </div>
+        `;
     }
 
     function renderMessages() {
@@ -76,9 +103,9 @@
             return `
                 <div class="flex ${isOwn ? 'justify-end' : 'justify-start'}">
                     <div class="max-w-[75%]">
-                        ${!isOwn ? `<p class="text-xs text-gray-500 mb-1 px-2">${msg.sender_name}</p>` : ''}
+                        ${!isOwn ? `<p class="text-xs text-gray-500 mb-1 px-2">${escapeHtml(msg.sender_name)}</p>` : ''}
                         <div class="${isOwn ? 'bg-blue-600 text-white' : 'bg-white border border-gray-200 text-gray-900'} rounded-2xl px-4 py-3 shadow-sm">
-                            <p class="text-sm">${msg.message}</p>
+                            <p class="text-sm">${escapeHtml(msg.message)}</p>
                         </div>
                         <p class="text-xs text-gray-400 mt-1 px-2">${time}</p>
                     </div>
@@ -91,27 +118,24 @@
     }
 
     async function sendMessage(message) {
-        try {
-            const response = await fetch(`${window.API_BASE_URL}/messaging/conversations/${conversationId}/messages`, {
-                method: 'POST',
-                headers: {
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json',
-                    'X-Requested-With': 'XMLHttpRequest',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-                },
-                credentials: 'same-origin',
-                body: JSON.stringify({ message })
-            });
+        const response = await fetch(`${window.API_BASE_URL}/messaging/conversations/${conversationId}/messages`, {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+            },
+            credentials: 'same-origin',
+            body: JSON.stringify({ message })
+        });
 
-            if (!response.ok) throw new Error('Failed to send message');
-
-            await loadMessages();
-
-        } catch (error) {
-            console.error('Error sending message:', error);
-            alert('Failed to send message');
+        if (!response.ok) {
+            alert('Failed to send message. Please try again.');
+            throw new Error('Failed to send message');
         }
+
+        await loadMessages();
     }
 
     async function markAsRead() {
@@ -137,8 +161,13 @@
 
         if (!message) return;
 
-        input.value = '';
-        await sendMessage(message);
+        try {
+            await sendMessage(message);
+            input.value = ''; // Clear only on success
+        } catch (error) {
+            // Input retains value on failure so user can retry
+            console.error('Send failed, input preserved');
+        }
     });
 
     document.addEventListener('DOMContentLoaded', () => {

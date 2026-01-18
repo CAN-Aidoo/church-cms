@@ -37,11 +37,6 @@ class RestrictWebToAdminPastor
             return $next($request);
         }
 
-        // Redirect members, staff, workers, and leaders to mobile app
-        if ($request->is('mobile/*')) {
-            return $next($request);
-        }
-
         // Redirect to mobile app with message
         return redirect('/mobile/dashboard')
             ->with('info', 'Please use the mobile app to access member features. The web portal is for administrators only.');

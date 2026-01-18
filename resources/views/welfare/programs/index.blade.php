@@ -63,15 +63,34 @@
                 </div>
             </div>
             
-            <div class="px-6 py-4 border-t border-slate-100 bg-slate-50/50 flex justify-between items-center">
-                <span class="text-xs text-slate-500 flex items-center gap-1">
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
-                    {{ $program->start_date ? $program->start_date->format('M d, Y') : 'N/A' }}
-                </span>
-                <a href="{{ route('welfare.programs.show', $program) }}" class="text-xs font-bold text-primary-600 hover:text-primary-700 flex items-center gap-1 group/link">
-                    View Dashboard
-                    <svg class="w-3.5 h-3.5 group-hover/link:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
-                </a>
+            <div class="px-6 py-4 border-t border-slate-100 bg-slate-50/50">
+                <div class="flex justify-between items-center mb-3">
+                    <span class="text-xs text-slate-500 flex items-center gap-1">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                        {{ $program->start_date ? $program->start_date->format('M d, Y') : 'N/A' }}
+                    </span>
+                    <a href="{{ route('welfare.programs.show', $program) }}" class="text-xs font-bold text-primary-600 hover:text-primary-700 flex items-center gap-1 group/link">
+                        View Dashboard
+                        <svg class="w-3.5 h-3.5 group-hover/link:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+                    </a>
+                </div>
+                <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
+                    <!-- Edit -->
+                    <a href="{{ route('welfare.programs.edit', $program) }}" class="text-slate-400 hover:text-primary-600 transition-colors" title="Edit Program">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                        </svg>
+                    </a>
+                    <!-- Delete -->
+                    <form action="{{ route('welfare.programs.destroy', $program) }}" method="POST" class="inline" onsubmit="return confirm('Delete this program? This will only work if there are no active beneficiaries.')">
+                        @csrf @method('DELETE')
+                        <button type="submit" class="text-slate-400 hover:text-red-600 transition-colors" title="Delete Program">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                            </svg>
+                        </button>
+                    </form>
+                </div>
             </div>
         </div>
         @empty

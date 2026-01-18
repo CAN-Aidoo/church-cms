@@ -154,6 +154,27 @@
 
 @push('scripts')
 <script>
+    // HTML escape helper to prevent XSS
+    function escapeHtml(text) {
+        if (text === null || text === undefined) return '';
+        const div = document.createElement('div');
+        div.textContent = String(text);
+        return div.innerHTML;
+    }
+
+    // CSV field escape helper to prevent CSV injection
+    function escapeCsvField(field) {
+        if (field === null || field === undefined) return '';
+        let str = String(field);
+        // Neutralize formula injection
+        if (/^[=+\-@]/.test(str)) {
+            str = "'" + str;
+        }
+        // Escape quotes and wrap in quotes
+        str = str.replace(/"/g, '""');
+        return '"' + str + '"';
+    }
+
     let attendanceData = [];
     let filteredData = [];
     let currentPage = 1;
@@ -252,7 +273,7 @@
                 <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100 hover:shadow-md transition">
                     <div class="flex items-center justify-between">
                         <div class="flex-1">
-                            <p class="font-semibold text-gray-900">${record.service_type || 'Service'}</p>
+                            <p class="font-semibold text-gray-900">${escapeHtml(record.service_type) || 'Service'}</p>
                             <p class="text-sm text-gray-500 mt-1">${formattedDate}</p>
                             ${record.checked_in_at ? `
                                 <p class="text-xs text-gray-400 mt-1">
@@ -326,7 +347,7 @@
             filters.serviceTypes.forEach(type => {
                 chips.push(`
                     <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-purple-100 text-purple-800">
-                        ${type}
+                        ${escapeHtml(type)}
                     </span>
                 `);
             });
@@ -359,18 +380,20 @@
     }
 
     function exportHistory() {
-        // Create CSV content
-        const csvContent = [
-            ['Date', 'Service Type', 'Check-In Time'],
-            ...filteredData.map(record => [
-                record.date,
-                record.service_type || 'Service',
-                record.checked_in_at || 'N/A'
-            ])
-        ].map(row => row.join(',')).join('\n');
+        // Create CSV content with proper escaping to prevent CSV injection
+        const headers = [escapeCsvField('Date'), escapeCsvField('Service Type'), escapeCsvField('Check-In Time')].join(',');
+        const rows = filteredData.map(record => [
+            escapeCsvField(record.date || ''),
+            escapeCsvField(record.service_type || 'Service'),
+            escapeCsvField(record.checked_in_at || 'N/A')
+        ].join(','));
+
+        // Add UTF-8 BOM for Excel compatibility
+        const BOM = '\uFEFF';
+        const csvContent = BOM + headers + '\n' + rows.join('\n');
 
         // Download
-        const blob = new Blob([csvContent], { type: 'text/csv' });
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8' });
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
@@ -403,8 +426,32 @@
         filters.dateRange = document.querySelector('input[name="date_range"]:checked').value;
 
         if (filters.dateRange === 'custom') {
-            filters.startDate = document.querySelector('input[name="start_date"]').value;
-            filters.endDate = document.querySelector('input[name="end_date"]').value;
+            const startDateInput = document.querySelector('input[name="start_date"]');
+            const endDateInput = document.querySelector('input[name="end_date"]');
+            const startDateVal = startDateInput.value;
+            const endDateVal = endDateInput.value;
+
+            // Validate custom date range
+            if (!startDateVal || !endDateVal) {
+                alert('Please select both start and end dates for custom range.');
+                return;
+            }
+
+            const startDate = new Date(startDateVal);
+            const endDate = new Date(endDateVal);
+
+            if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
+                alert('Invalid date format. Please select valid dates.');
+                return;
+            }
+
+            if (startDate > endDate) {
+                alert('Start date must be before or equal to end date.');
+                return;
+            }
+
+            filters.startDate = startDateVal;
+            filters.endDate = endDateVal;
         }
 
         const serviceTypeInputs = document.querySelectorAll('input[name="service_type[]"]:checked');

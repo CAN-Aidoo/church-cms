@@ -577,4 +577,85 @@ class CounsellingController extends Controller
 
         return view('counselling.reports', compact('report', 'startDate', 'endDate'));
     }
+
+    /**
+     * Delete counsellor.
+     */
+    public function destroyCounsellor($counsellor)
+    {
+        $counsellor = \App\Models\Counsellor::findOrFail($counsellor);
+
+        // Check if counsellor has active cases or sessions
+        $activeCases = $counsellor->cases()->whereIn('status', ['new', 'active'])->count();
+        $upcomingSessions = $counsellor->sessions()
+            ->whereIn('status', ['scheduled', 'confirmed'])
+            ->where('session_date', '>=', now())
+            ->count();
+
+        if ($activeCases > 0 || $upcomingSessions > 0) {
+            return redirect()->back()
+                ->with('error', 'Cannot delete counsellor with active cases or upcoming sessions. Please reassign or close them first.');
+        }
+
+        $counsellor->delete();
+
+        return redirect()->route('counselling.counsellors')
+            ->with('success', 'Counsellor deleted successfully.');
+    }
+
+    /**
+     * Delete session.
+     */
+    public function destroySession($session)
+    {
+        $session = \App\Models\CounsellingSession::findOrFail($session);
+
+        // Only allow deletion of cancelled or completed sessions
+        if (!in_array($session->status, ['cancelled', 'completed', 'no_show'])) {
+            return redirect()->back()
+                ->with('error', 'Only cancelled or completed sessions can be deleted. Please cancel the session first.');
+        }
+
+        $session->delete();
+
+        return redirect()->route('counselling.sessions')
+            ->with('success', 'Session deleted successfully.');
+    }
+
+    /**
+     * Delete case.
+     */
+    public function destroyCase($case)
+    {
+        $case = \App\Models\CounsellingCase::findOrFail($case);
+
+        // Only allow deletion of closed cases
+        if ($case->status !== 'closed') {
+            return redirect()->back()
+                ->with('error', 'Only closed cases can be deleted. Please close the case first.');
+        }
+
+        $case->delete();
+
+        return redirect()->route('counselling.cases')
+            ->with('success', 'Case deleted successfully.');
+    }
+
+    /**
+     * Delete resource.
+     */
+    public function destroyResource($resource)
+    {
+        $resource = \App\Models\CounsellingResource::findOrFail($resource);
+
+        // Delete file if exists
+        if ($resource->file_path && \Storage::disk('public')->exists($resource->file_path)) {
+            \Storage::disk('public')->delete($resource->file_path);
+        }
+
+        $resource->delete();
+
+        return redirect()->route('counselling.resources')
+            ->with('success', 'Resource deleted successfully.');
+    }
 }

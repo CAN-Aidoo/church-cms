@@ -4,7 +4,7 @@
 @section('header', 'Prayer Wall')
 
 @section('header-actions')
-<a href="{{ route('mobile.prayer.my-requests') }}" class="p-2 rounded-full hover:bg/10" title="My Requests">
+<a href="{{ route('mobile.prayer.my-requests') }}" class="p-2 rounded-full hover:bg-white/10" title="My Requests">
     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
     </svg>
@@ -45,12 +45,21 @@
 
 @push('scripts')
 <script>
+    // HTML escape helper to prevent XSS
+    function escapeHtml(text) {
+        if (text === null || text === undefined) return '';
+        const div = document.createElement('div');
+        div.textContent = String(text);
+        return div.innerHTML;
+    }
+
     let prayerWall = [];
+    let originalPrayerWall = []; // Keep original data for search filtering
 
     async function loadPrayerWall() {
         try {
             const category = document.getElementById('categoryFilter').value;
-            const url = `${window.API_BASE_URL}/prayer/wall${category ? '?category=' + category : ''}`;
+            const url = `${window.API_BASE_URL}/prayer/wall${category ? '?category=' + encodeURIComponent(category) : ''}`;
 
             const response = await fetch(url, {
                 headers: {
@@ -63,7 +72,8 @@
             if (!response.ok) throw new Error('Failed to fetch prayer wall');
 
             const data = await response.json();
-            prayerWall = data.requests || [];
+            originalPrayerWall = data.requests || [];
+            prayerWall = [...originalPrayerWall];
             renderPrayerWall();
 
         } catch (error) {
@@ -98,15 +108,15 @@
                 <div class="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
                     <div class="flex items-start gap-3 mb-3">
                         <div class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold text-sm">
-                            ${request.member_name ? request.member_name.charAt(0).toUpperCase() : 'A'}
+                            ${request.member_name ? escapeHtml(request.member_name.charAt(0).toUpperCase()) : 'A'}
                         </div>
                         <div class="flex-1">
-                            <h4 class="font-semibold text-gray-900">${request.title}</h4>
-                            <p class="text-xs text-gray-500">${request.member_name || 'Anonymous'} • ${formattedDate}</p>
+                            <h4 class="font-semibold text-gray-900">${escapeHtml(request.title)}</h4>
+                            <p class="text-xs text-gray-500">${escapeHtml(request.member_name) || 'Anonymous'} • ${formattedDate}</p>
                         </div>
                     </div>
-                    <p class="text-sm text-gray-700 mb-3">${request.request}</p>
-                    ${request.category ? `<span class="inline-block px-2 py-1 bg-blue-50 text-blue-700 text-xs rounded-full">${request.category}</span>` : ''}
+                    <p class="text-sm text-gray-700 mb-3">${escapeHtml(request.request)}</p>
+                    ${request.category ? `<span class="inline-block px-2 py-1 bg-blue-50 text-blue-700 text-xs rounded-full">${escapeHtml(request.category)}</span>` : ''}
                     <div class="flex items-center gap-4 mt-4 pt-4 border-t border-gray-100">
                         <button onclick="prayForThis(${request.id})" class="flex items-center gap-1 text-blue-600 text-sm font-medium">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -165,12 +175,15 @@
     document.getElementById('searchInput').addEventListener('input', function() {
         clearTimeout(searchTimeout);
         searchTimeout = setTimeout(() => {
-            const searchTerm = this.value.toLowerCase();
-            const filtered = prayerWall.filter(r =>
-                r.title.toLowerCase().includes(searchTerm) ||
-                r.request.toLowerCase().includes(searchTerm)
-            );
-            prayerWall = filtered;
+            const searchTerm = this.value.toLowerCase().trim();
+            if (searchTerm === '') {
+                prayerWall = [...originalPrayerWall];
+            } else {
+                prayerWall = originalPrayerWall.filter(r =>
+                    (r.title && r.title.toLowerCase().includes(searchTerm)) ||
+                    (r.request && r.request.toLowerCase().includes(searchTerm))
+                );
+            }
             renderPrayerWall();
         }, 300);
     });

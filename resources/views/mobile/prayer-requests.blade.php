@@ -108,6 +108,14 @@
 
 @push('scripts')
 <script>
+    // HTML escape helper to prevent XSS
+    function escapeHtml(text) {
+        if (text === null || text === undefined) return '';
+        const div = document.createElement('div');
+        div.textContent = String(text);
+        return div.innerHTML;
+    }
+
     let prayerRequests = [];
     let currentFilter = 'all';
 
@@ -180,13 +188,13 @@
             return `
                 <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
                     <div class="flex items-start justify-between mb-2">
-                        <h4 class="font-semibold text-gray-900 flex-1">${request.title}</h4>
+                        <h4 class="font-semibold text-gray-900 flex-1">${escapeHtml(request.title)}</h4>
                         <span class="px-2 py-1 rounded-full text-xs font-medium ${statusColors[request.status] || statusColors.pending}">
-                            ${request.status}
+                            ${escapeHtml(request.status)}
                         </span>
                     </div>
-                    <p class="text-sm text-gray-600 mb-3 line-clamp-2">${request.request}</p>
-                    ${request.category ? `<span class="inline-block px-2 py-1 bg-blue-50 text-blue-700 text-xs rounded-full mb-2">${request.category}</span>` : ''}
+                    <p class="text-sm text-gray-600 mb-3 line-clamp-2">${escapeHtml(request.request)}</p>
+                    ${request.category ? `<span class="inline-block px-2 py-1 bg-blue-50 text-blue-700 text-xs rounded-full mb-2">${escapeHtml(request.category)}</span>` : ''}
                     <div class="flex items-center justify-between text-xs text-gray-500 mt-3">
                         <span>${formattedDate}</span>
                         <div class="flex gap-2">

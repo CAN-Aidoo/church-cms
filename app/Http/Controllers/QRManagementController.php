@@ -6,6 +6,7 @@ use App\Repositories\QRCodeRepository;
 use App\Services\QRManagementService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class QRManagementController extends Controller
 {
@@ -68,9 +69,10 @@ class QRManagementController extends Controller
                 'data' => $result,
             ]);
         } catch (\Exception $e) {
+            Log::error('Failed to generate QR code', ['error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
             return response()->json([
                 'success' => false,
-                'message' => $e->getMessage(),
+                'message' => 'Failed to generate QR code. Please try again.',
             ], 400);
         }
     }
@@ -116,9 +118,10 @@ class QRManagementController extends Controller
                 'message' => 'QR code revoked successfully',
             ]);
         } catch (\Exception $e) {
+            Log::error('Failed to revoke QR code', ['id' => $id, 'error' => $e->getMessage()]);
             return response()->json([
                 'success' => false,
-                'message' => $e->getMessage(),
+                'message' => 'Failed to revoke QR code. Please try again.',
             ], 400);
         }
     }
@@ -140,9 +143,10 @@ class QRManagementController extends Controller
                 'message' => 'QR code expiration extended',
             ]);
         } catch (\Exception $e) {
+            Log::error('Failed to extend QR code', ['id' => $id, 'error' => $e->getMessage()]);
             return response()->json([
                 'success' => false,
-                'message' => $e->getMessage(),
+                'message' => 'Failed to extend QR code expiration. Please try again.',
             ], 400);
         }
     }
@@ -210,9 +214,10 @@ class QRManagementController extends Controller
                 'message' => 'Settings updated successfully',
             ]);
         } catch (\Exception $e) {
+            Log::error('Failed to update QR settings', ['error' => $e->getMessage()]);
             return response()->json([
                 'success' => false,
-                'message' => $e->getMessage(),
+                'message' => 'Failed to update settings. Please try again.',
             ], 400);
         }
     }
@@ -326,9 +331,10 @@ class QRManagementController extends Controller
                 'data' => $qrCodes,
             ]);
         } catch (\Exception $e) {
+            Log::error('Failed to generate batch QR codes', ['error' => $e->getMessage()]);
             return response()->json([
                 'success' => false,
-                'message' => $e->getMessage(),
+                'message' => 'Failed to generate QR codes. Please try again.',
             ], 400);
         }
     }
@@ -364,6 +370,92 @@ class QRManagementController extends Controller
                 ->header('Cache-Control', 'public, max-age=3600');
         } catch (\Exception $e) {
             abort(404);
+        }
+    }
+
+    /**
+     * Show edit form for QR code.
+     */
+    public function edit(string $id)
+    {
+        $qrCode = $this->repository->findById($id);
+
+        if (! $qrCode) {
+            abort(404);
+        }
+
+        // Only allow editing of active or scheduled QR codes
+        if (!in_array($qrCode['status'], ['active', 'scheduled'])) {
+            return redirect()->route('qr-management.show', $id)
+                ->with('error', 'Only active or scheduled QR codes can be edited.');
+        }
+
+        return view('qr-management.edit', compact('qrCode'));
+    }
+
+    /**
+     * Update QR code.
+     */
+    public function update(Request $request, string $id)
+    {
+        $qrCode = $this->repository->findById($id);
+
+        if (! $qrCode) {
+            abort(404);
+        }
+
+        // Only allow updating of active or scheduled QR codes
+        if (!in_array($qrCode['status'], ['active', 'scheduled'])) {
+            return redirect()->route('qr-management.show', $id)
+                ->with('error', 'Only active or scheduled QR codes can be updated.');
+        }
+
+        $validated = $request->validate([
+            'expiration_time' => 'nullable|date|after:now',
+            'max_scans' => 'nullable|integer|min:1',
+            'location_required' => 'boolean',
+            'location_radius' => 'nullable|integer|min:10|max:1000',
+            'metadata' => 'nullable|array',
+        ]);
+
+        try {
+            $this->repository->update($id, $validated);
+
+            return redirect()->route('qr-management.show', $id)
+                ->with('success', 'QR code updated successfully.');
+        } catch (\Exception $e) {
+            Log::error('Failed to update QR code', ['id' => $id, 'error' => $e->getMessage()]);
+            return redirect()->back()
+                ->with('error', 'Failed to update QR code. Please try again.');
+        }
+    }
+
+    /**
+     * Delete QR code.
+     */
+    public function destroy(string $id)
+    {
+        $qrCode = $this->repository->findById($id);
+
+        if (! $qrCode) {
+            abort(404);
+        }
+
+        // Only allow deletion of expired or revoked QR codes
+        if (!in_array($qrCode['status'], ['expired', 'revoked'])) {
+            return redirect()->back()
+                ->with('error', 'Only expired or revoked QR codes can be deleted. Please revoke active QR codes first.');
+        }
+
+        try {
+            $this->repository->delete($id);
+
+            return redirect()->route('qr-management.index')
+                ->with('success', 'QR code deleted successfully.');
+        } catch (\Exception $e) {
+            Log::error('Failed to delete QR code', ['id' => $id, 'error' => $e->getMessage()]);
+            return redirect()->back()
+                ->with('error', 'Failed to delete QR code. Please try again.');
         }
     }
 }

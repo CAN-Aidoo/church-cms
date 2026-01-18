@@ -381,6 +381,32 @@ class ChildrensMinistryController extends Controller
     }
 
     /**
+     * Delete event.
+     */
+    public function destroyEvent($event)
+    {
+        $event = ChildrensEvent::findOrFail($event);
+
+        // Only allow deletion of draft, completed, or cancelled events
+        if (!in_array($event->status, ['draft', 'completed', 'cancelled'])) {
+            return redirect()->back()
+                ->with('error', 'Only draft, completed, or cancelled events can be deleted. Events that are published or active should be cancelled first.');
+        }
+
+        // Check if there are registered participants
+        $registeredCount = $event->registrations()->count();
+        if ($registeredCount > 0) {
+            return redirect()->back()
+                ->with('error', "Cannot delete event with {$registeredCount} registered participant(s). Please cancel registrations first.");
+        }
+
+        $event->delete();
+
+        return redirect()->route('childrens-ministry.events')
+            ->with('success', 'Event deleted successfully.');
+    }
+
+    /**
      * Display reports.
      */
     public function reports(Request $request)

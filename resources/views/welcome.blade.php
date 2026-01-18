@@ -4,9 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <meta name="description" content="ChurchCMS - Empowering Ministry Through Technology. Comprehensive church management platform for member management, attendance tracking, financial management, and more. Built specifically for modern ministries.">
-    
-    <title>ChurchCMS - Empowering Ministry Through Technology</title>
+    <meta name="description" content="Sonlife Church - Empowering Ministry Through Technology. Comprehensive church management platform for member management, attendance tracking, financial management, and more. Built specifically for modern ministries.">
+
+    <title>Sonlife Church - Empowering Ministry Through Technology</title>
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -20,12 +20,6 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
     <style>
-        .glass {
-            @apply bg-white/80 backdrop-blur-xl border border-white/20;
-        }
-        .text-gradient-premium {
-            @apply bg-gradient-premium bg-clip-text text-transparent;
-        }
         .hero-pattern {
             background-color: #3b82f6;
             background-image: radial-gradient(circle at 2px 2px, rgba(255,255,255,0.15) 1px, transparent 0);
@@ -39,10 +33,10 @@
         <div class="container mx-auto px-6">
             <div class="glass rounded-2xl px-6 py-4 flex justify-between items-center shadow-soft">
                 <a href="/" class="flex items-center gap-3 group">
-                    <div class="w-10 h-10 bg-gradient-premium rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/20 group-hover:scale-110 transition-transform duration-300">
-                        <i class="fas fa-church text-white text-xl"></i>
-                    </div>
-                    <span class="text-2xl font-heading font-black tracking-tight text-slate-800">Church<span class="text-primary-600">CMS</span></span>
+                    <img src="{{ asset('images/sonlife-logo.png') }}"
+                         alt="Sonlife Church"
+                         class="h-10 w-auto group-hover:scale-110 transition-transform duration-300">
+                    <span class="text-2xl font-heading font-black tracking-tight text-slate-800">Sonlife Church</span>
                 </a>
 
                 <!-- Desktop Links -->
@@ -58,9 +52,23 @@
                 </div>
 
                 <!-- Mobile Toggle -->
-                <button class="md:hidden text-slate-600 hover:text-primary-600 transition-colors">
+                <button id="mobile-toggle" class="md:hidden text-slate-600 hover:text-primary-600 transition-colors" aria-label="Open mobile menu" aria-controls="mobile-menu" aria-expanded="false">
                     <i class="fas fa-bars text-xl"></i>
                 </button>
+            </div>
+
+            <!-- Mobile Menu -->
+            <div id="mobile-menu" class="hidden md:hidden mt-4 glass rounded-2xl px-6 py-4 shadow-soft">
+                <div class="flex flex-col gap-4">
+                    <a href="#features" class="text-sm font-semibold text-slate-600 hover:text-primary-600 transition-colors py-2">Features</a>
+                    <a href="#benefits" class="text-sm font-semibold text-slate-600 hover:text-primary-600 transition-colors py-2">Benefits</a>
+                    <a href="#about" class="text-sm font-semibold text-slate-600 hover:text-primary-600 transition-colors py-2">About</a>
+                    <div class="h-px bg-slate-200"></div>
+                    <a href="{{ route('login') }}" class="text-sm font-bold text-primary-600 hover:text-primary-700 transition-colors py-2">Sign In</a>
+                    <a href="{{ route('register') }}" class="btn btn-primary px-6 py-2.5 text-center">
+                        Start Now <i class="fas fa-arrow-right ml-2 text-xs"></i>
+                    </a>
+                </div>
             </div>
         </div>
     </nav>
@@ -89,7 +97,7 @@
                         Through <span class="text-gradient-premium">Technology</span>
                     </h1>
                     <p class="text-lg md:text-xl text-slate-600 leading-relaxed mb-10 max-w-xl">
-                        ChurchCMS is your complete management solution designed to help you focus on what matters most—building community and spreading faith. Streamline operations with intuitive tools.
+                        Sonlife Church is your complete management solution designed to help you focus on what matters most—building community and spreading faith. Streamline operations with intuitive tools.
                     </p>
                     <div class="flex flex-col sm:flex-row gap-4">
                         <a href="{{ route('register') }}" class="btn btn-primary px-8 py-4 text-lg">
@@ -250,7 +258,7 @@
     <section id="benefits" class="py-24 bg-slate-50">
         <div class="container mx-auto px-6">
             <div class="max-w-3xl mx-auto text-center mb-20">
-                <span class="badge badge-warning px-4 py-2 mb-6">Why ChurchCMS</span>
+                <span class="badge badge-warning px-4 py-2 mb-6">Why {{ config('app.name', 'Sonlife Church') }}</span>
                 <h2 class="text-4xl md:text-5xl font-heading font-black text-slate-900 mb-6">Built for Modern Ministries</h2>
                 <p class="text-lg text-slate-600">Experience the difference with our comprehensive, secure, and easy-to-use platform</p>
             </div>
@@ -289,7 +297,7 @@
         <div class="container mx-auto px-6 relative z-10 text-center text-white">
             <h2 class="text-4xl md:text-6xl font-heading font-black mb-8 animate-fade-in">Ready to Transform Your Ministry?</h2>
             <p class="text-xl md:text-2xl opacity-90 mb-12 max-w-3xl mx-auto leading-relaxed">
-                Join hundreds of churches worldwide using ChurchCMS to streamline operations and engage their communities more effectively
+                Join hundreds of churches worldwide using Sonlife Church to streamline operations and engage their communities more effectively
             </p>
             <div class="flex flex-col sm:flex-row gap-6 justify-center animate-slide-up">
                 <a href="{{ route('register') }}" class="btn bg-white text-primary-700 px-10 py-5 text-xl font-bold hover:bg-slate-50 hover:scale-105 transition-all shadow-2xl">
@@ -308,10 +316,10 @@
             <div class="grid lg:grid-cols-4 gap-16 mb-20">
                 <div class="lg:col-span-2">
                     <div class="flex items-center gap-3 mb-8">
-                        <div class="w-10 h-10 bg-primary-600 rounded-xl flex items-center justify-center">
-                            <i class="fas fa-church text-white text-xl"></i>
-                        </div>
-                        <span class="text-2xl font-heading font-black tracking-tight">Church<span class="text-primary-500">CMS</span></span>
+                        <img src="{{ asset('images/sonlife-logo.png') }}"
+                             alt="Sonlife Church"
+                             class="h-10 w-auto">
+                        <span class="text-2xl font-heading font-black tracking-tight">Sonlife Church</span>
                     </div>
                     <p class="text-slate-400 text-lg leading-relaxed max-w-md mb-8 italic">
                         "Empowering ministries through state-of-the-art technology, so you can focus on the mission that matters most."
@@ -341,13 +349,13 @@
                         <li><a href="#" class="text-slate-400 hover:text-primary-400 transition-colors">Help Center</a></li>
                         <li><a href="#" class="text-slate-400 hover:text-primary-400 transition-colors">Documentation</a></li>
                         <li><a href="#" class="text-slate-400 hover:text-primary-400 transition-colors">Privacy Policy</a></li>
-                        <li><a href="#" class="text-slate-400 hover:text-primary-400 transition-colors">Contact US</a></li>
+                        <li><a href="#" class="text-slate-400 hover:text-primary-400 transition-colors">Contact Us</a></li>
                     </ul>
                 </div>
             </div>
 
-            <div class="pt-12 border-t border-slate-900 flex flex-col md:row justify-between items-center gap-6">
-                <p class="text-slate-500 text-sm italic">&copy; {{ date('Y') }} ChurchCMS. Built with ❤️ for the Global Church.</p>
+            <div class="pt-12 border-t border-slate-900 flex flex-col md:flex-row justify-between items-center gap-6">
+                <p class="text-slate-500 text-sm italic">&copy; {{ date('Y') }} Sonlife Church. Built with ❤️ for the Global Church.</p>
                 <div class="flex items-center gap-8 text-xs font-bold text-slate-600 uppercase tracking-widest">
                     <a href="#">Status</a>
                     <a href="#">Terms</a>
@@ -369,6 +377,34 @@
                 navbar.querySelector('.container').classList.remove('max-w-7xl');
             }
         });
+
+        // Mobile menu toggle
+        const mobileToggle = document.getElementById('mobile-toggle');
+        const mobileMenu = document.getElementById('mobile-menu');
+
+        if (mobileToggle && mobileMenu) {
+            mobileToggle.addEventListener('click', function() {
+                const isExpanded = mobileToggle.getAttribute('aria-expanded') === 'true';
+                mobileToggle.setAttribute('aria-expanded', !isExpanded);
+                mobileMenu.classList.toggle('hidden');
+            });
+
+            // Close menu when clicking outside
+            document.addEventListener('click', function(e) {
+                if (!mobileToggle.contains(e.target) && !mobileMenu.contains(e.target)) {
+                    mobileToggle.setAttribute('aria-expanded', 'false');
+                    mobileMenu.classList.add('hidden');
+                }
+            });
+
+            // Close menu on window resize to desktop
+            window.addEventListener('resize', function() {
+                if (window.innerWidth >= 768) {
+                    mobileToggle.setAttribute('aria-expanded', 'false');
+                    mobileMenu.classList.add('hidden');
+                }
+            });
+        }
     </script>
 </body>
 </html>

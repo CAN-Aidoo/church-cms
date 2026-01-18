@@ -19,6 +19,14 @@
                 <a href="{{ route('equipment.edit', $equipment) }}" class="btn btn-secondary">
                     <i class="fas fa-edit mr-2"></i>Edit
                 </a>
+
+                <form action="{{ route('equipment.destroy', $equipment) }}" method="POST" class="inline" onsubmit="return confirm('Are you sure you want to delete this equipment? All maintenance records will be removed.')">
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-trash mr-2"></i>Delete
+                    </button>
+                </form>
                 @endcan
                 @if($equipment->status !== 'retired')
                 <a href="{{ route('equipment.maintenance.form', $equipment) }}" class="btn btn-primary">

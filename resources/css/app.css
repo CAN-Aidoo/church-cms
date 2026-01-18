@@ -20,6 +20,16 @@
 }
 
 @layer components {
+  /* Glass Effect */
+  .glass {
+    @apply bg-white/80 backdrop-blur-xl border border-white/20;
+  }
+
+  /* Text Gradient */
+  .text-gradient-premium {
+    @apply bg-gradient-premium bg-clip-text text-transparent;
+  }
+
   /* Premium Buttons */
   .btn {
     @apply inline-flex items-center justify-center px-5 py-2.5 rounded-xl font-medium transition-all duration-300 transform active:scale-95 focus:outline-none focus:ring-4 focus:ring-primary-100 disabled:opacity-60 disabled:cursor-not-allowed shadow-sm;

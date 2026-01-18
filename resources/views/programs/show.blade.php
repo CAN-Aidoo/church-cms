@@ -61,6 +61,14 @@
                 Edit
             </a>
 
+            <form action="{{ route('programs.destroy', $program) }}" method="POST" class="inline" onsubmit="return confirm('Are you sure you want to delete this program? All registrations and sessions will be removed.')">
+                @csrf
+                @method('DELETE')
+                <button type="submit" class="btn btn-danger">
+                    Delete
+                </button>
+            </form>
+
             @if(in_array($program->status, ['draft', 'published']))
                 <form action="{{ route('programs.cancel', $program) }}" method="POST" class="inline"
                       onsubmit="return confirm('Are you sure you want to cancel this program?');">

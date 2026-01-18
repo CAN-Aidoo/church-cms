@@ -166,10 +166,24 @@
                         </a>
 
                         @if($broadcast->status === 'scheduled' || $broadcast->status === 'draft')
+                        <a href="{{ route('sms.edit', $broadcast) }}" class="btn btn-sm btn-outline-primary whitespace-nowrap">
+                            <i class="fas fa-edit mr-1"></i>Edit
+                        </a>
+
                         <form method="POST" action="{{ route('sms.send', $broadcast) }}" class="inline">
                             @csrf
                             <button type="submit" class="btn btn-sm btn-primary w-full" onclick="return confirm('Send this broadcast now?')">
                                 <i class="fas fa-paper-plane mr-1"></i>Send Now
+                            </button>
+                        </form>
+                        @endif
+
+                        @if(in_array($broadcast->status, ['draft', 'failed', 'completed']))
+                        <form method="POST" action="{{ route('sms.destroy', $broadcast) }}" class="inline">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="btn btn-sm btn-danger w-full" onclick="return confirm('Delete this broadcast?')">
+                                <i class="fas fa-trash mr-1"></i>Delete
                             </button>
                         </form>
                         @endif

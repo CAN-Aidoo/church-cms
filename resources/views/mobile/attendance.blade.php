@@ -81,6 +81,29 @@
 
 @push('scripts')
 <script>
+    // HTML escape helper to prevent XSS
+    function escapeHtml(text) {
+        if (text === null || text === undefined) return '';
+        const div = document.createElement('div');
+        div.textContent = String(text);
+        return div.innerHTML;
+    }
+
+    // Safe date formatting helper
+    function formatDate(dateStr, options) {
+        if (!dateStr) return 'Unknown date';
+        const date = new Date(dateStr);
+        if (isNaN(date.getTime())) return 'Unknown date';
+        return date.toLocaleDateString('en-US', options);
+    }
+
+    function formatTime(dateStr) {
+        if (!dateStr) return 'Unknown time';
+        const date = new Date(dateStr);
+        if (isNaN(date.getTime())) return 'Unknown time';
+        return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+    }
+
     let attendanceData = [];
 
     async function loadAttendanceData() {
@@ -131,7 +154,7 @@
 
         chartContainer.innerHTML = monthlyData.map(month => `
             <div class="flex items-center gap-3">
-                <span class="text-xs text-gray-600 w-12 text-right">${month.month}</span>
+                <span class="text-xs text-gray-600 w-12 text-right">${escapeHtml(month.month)}</span>
                 <div class="flex-1 bg-gray-200 rounded-full h-6 overflow-hidden">
                     <div class="bg-gradient-to-r from-blue-500 to-blue-600 h-full flex items-center px-2 text-xs text-white font-medium transition-all duration-500"
                          style="width: ${(month.count / maxCount * 100)}%">
@@ -162,26 +185,23 @@
         }
 
         container.innerHTML = records.map(record => {
-            const date = new Date(record.date);
-            const formattedDate = date.toLocaleDateString('en-US', {
+            const formattedDate = formatDate(record.date, {
                 weekday: 'short',
                 month: 'short',
                 day: 'numeric',
                 year: 'numeric'
             });
+            const checkinTime = record.checked_in_at ? formatTime(record.checked_in_at) : null;
 
             return `
                 <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100 hover:shadow-md transition">
                     <div class="flex items-center justify-between">
                         <div class="flex-1">
-                            <p class="font-semibold text-gray-900">${record.service_type || 'Service'}</p>
-                            <p class="text-sm text-gray-500 mt-1">${formattedDate}</p>
-                            ${record.checked_in_at ? `
+                            <p class="font-semibold text-gray-900">${escapeHtml(record.service_type) || 'Service'}</p>
+                            <p class="text-sm text-gray-500 mt-1">${escapeHtml(formattedDate)}</p>
+                            ${checkinTime ? `
                                 <p class="text-xs text-gray-400 mt-1">
-                                    Checked in at ${new Date(record.checked_in_at).toLocaleTimeString('en-US', {
-                                        hour: '2-digit',
-                                        minute: '2-digit'
-                                    })}
+                                    Checked in at ${escapeHtml(checkinTime)}
                                 </p>
                             ` : ''}
                         </div>

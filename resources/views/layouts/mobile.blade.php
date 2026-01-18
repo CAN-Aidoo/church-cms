@@ -92,6 +92,14 @@
     <script>
         window.API_BASE_URL = '{{ url('/api/v1') }}';
         window.MOBILE_API_BASE_URL = '{{ url('/api/mobile/v1') }}';
+
+        // XSS protection helper - escapes HTML entities to prevent injection
+        window.escapeHtml = function(text) {
+            if (text === null || text === undefined) return '';
+            const div = document.createElement('div');
+            div.textContent = String(text);
+            return div.innerHTML;
+        };
     </script>
     <script src="{{ asset('js/mobile-app.js') }}"></script>
     <script>

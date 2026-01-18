@@ -55,6 +55,14 @@
 
 @push('scripts')
 <script>
+    // HTML escape helper to prevent XSS
+    function escapeHtml(text) {
+        if (text === null || text === undefined) return '';
+        const div = document.createElement('div');
+        div.textContent = String(text);
+        return div.innerHTML;
+    }
+
     let ministryData = {};
 
     async function loadMinistryData() {
@@ -126,12 +134,12 @@
             return `
                 <a href="{{ url('/mobile/service-unit/dashboard') }}" class="block bg-white rounded-xl p-4 shadow-sm border border-gray-100 hover:shadow-md transition">
                     <div class="flex items-center justify-between mb-2">
-                        <h4 class="font-semibold text-gray-900">${unit.name}</h4>
+                        <h4 class="font-semibold text-gray-900">${escapeHtml(unit.name)}</h4>
                         <span class="px-2 py-1 rounded-full text-xs font-medium ${roleColors[unit.role] || roleColors.member}">
-                            ${unit.role}
+                            ${escapeHtml(unit.role)}
                         </span>
                     </div>
-                    <p class="text-sm text-gray-600">${unit.description || 'No description'}</p>
+                    <p class="text-sm text-gray-600">${escapeHtml(unit.description) || 'No description'}</p>
                     <div class="flex items-center gap-4 mt-3 text-xs text-gray-500">
                         <span>${unit.member_count || 0} members</span>
                         <span>${unit.upcoming_duties || 0} upcoming duties</span>
@@ -165,8 +173,8 @@
                         </svg>
                     </div>
                     <div class="flex-1">
-                        <p class="font-medium text-gray-900">${duty.service_unit}</p>
-                        <p class="text-sm text-gray-600">${duty.duty_name}</p>
+                        <p class="font-medium text-gray-900">${escapeHtml(duty.service_unit)}</p>
+                        <p class="text-sm text-gray-600">${escapeHtml(duty.duty_name)}</p>
                         <p class="text-xs text-gray-500">${formattedDate}</p>
                     </div>
                 </div>

@@ -63,6 +63,14 @@
 
 @push('scripts')
 <script>
+    // HTML escape helper to prevent XSS
+    function escapeHtml(text) {
+        if (text === null || text === undefined) return '';
+        const div = document.createElement('div');
+        div.textContent = String(text);
+        return div.innerHTML;
+    }
+
     let conversations = [];
 
     async function loadConversations() {
@@ -125,14 +133,14 @@
                 <a href="{{ url('/mobile/messaging') }}/${conv.id}" class="block bg-white px-4 py-4 hover:bg-gray-50 transition">
                     <div class="flex items-center gap-3">
                         <div class="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold">
-                            ${conv.name ? conv.name.charAt(0).toUpperCase() : 'C'}
+                            ${conv.name ? escapeHtml(conv.name.charAt(0).toUpperCase()) : 'C'}
                         </div>
                         <div class="flex-1 min-w-0">
                             <div class="flex items-center justify-between mb-1">
-                                <h4 class="font-semibold text-gray-900 truncate">${conv.name || 'Conversation'}</h4>
+                                <h4 class="font-semibold text-gray-900 truncate">${escapeHtml(conv.name) || 'Conversation'}</h4>
                                 <span class="text-xs text-gray-500 flex-shrink-0">${timeAgo}</span>
                             </div>
-                            <p class="text-sm text-gray-600 truncate">${conv.last_message || 'No messages yet'}</p>
+                            <p class="text-sm text-gray-600 truncate">${escapeHtml(conv.last_message) || 'No messages yet'}</p>
                         </div>
                         ${unreadBadge}
                     </div>

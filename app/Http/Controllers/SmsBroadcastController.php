@@ -114,34 +114,38 @@ class SmsBroadcastController extends Controller
         $totalSms = $totalRecipients * $segmentsPerSms;
         $estimatedCost = $totalSms * 0.05;
 
-        // Create broadcast record
-        // Create broadcast record
-        $broadcast = SmsBroadcast::create([
-            'title' => $validated['title'],
-            'message' => $validated['message'],
-            'recipient_group' => $validated['recipient_type'],
-            // 'recipient_filter' is not in DB
-            'recipient_count' => $totalRecipients,
-            'status' => $validated['schedule_type'] === 'send_now' ? 'sending' : 'scheduled',
-            'scheduled_for' => $validated['schedule_type'] === 'schedule' ? $validated['scheduled_at'] : null,
-            'created_by' => Auth::id(),
-            'cost' => $estimatedCost,
-            // 'message_segments' is not in DB
-        ]);
+        // Create broadcast record and store recipients in a transaction
+        $broadcast = DB::transaction(function () use ($validated, $totalRecipients, $estimatedCost, $recipients) {
+            $broadcast = SmsBroadcast::create([
+                'title' => $validated['title'],
+                'message' => $validated['message'],
+                'recipient_group' => $validated['recipient_type'],
+                'recipient_count' => $totalRecipients,
+                'status' => $validated['schedule_type'] === 'send_now' ? 'sending' : 'scheduled',
+                'scheduled_for' => $validated['schedule_type'] === 'schedule' ? $validated['scheduled_at'] : null,
+                'created_by' => Auth::id(),
+                'cost' => $estimatedCost,
+            ]);
 
-        // Store recipients
-        $recipientData = $recipients->map(function ($member) use ($broadcast) {
-            return [
-                'broadcast_id' => $broadcast->id,
-                'member_id' => $member->id,
-                'phone_number' => $member->phone,
-                'status' => 'pending',
-                'created_at' => now(),
-                'updated_at' => now(),
-            ];
-        })->toArray();
+            // Store recipients
+            $recipientData = $recipients->map(function ($member) use ($broadcast) {
+                return [
+                    'broadcast_id' => $broadcast->id,
+                    'member_id' => $member->id,
+                    'phone_number' => $member->phone,
+                    'status' => 'pending',
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ];
+            })->toArray();
 
-        DB::table('sms_broadcast_recipients')->insert($recipientData);
+            // Insert in chunks to avoid memory issues with large recipient lists
+            foreach (array_chunk($recipientData, 500) as $chunk) {
+                DB::table('sms_broadcast_recipients')->insert($chunk);
+            }
+
+            return $broadcast;
+        });
 
         // If send now, dispatch to queue
         if ($validated['schedule_type'] === 'send_now') {
@@ -531,5 +535,75 @@ class SmsBroadcastController extends Controller
         }
 
         return $phone;
+    }
+
+    /**
+     * Show the form for editing a broadcast.
+     */
+    public function edit(SmsBroadcast $broadcast)
+    {
+        if (!in_array($broadcast->status, ['draft', 'scheduled'])) {
+            return redirect()->route('sms.show', $broadcast)
+                ->with('error', 'Only draft or scheduled broadcasts can be edited.');
+        }
+
+        $recipientOptions = [
+            'all_members' => Member::where('member_status', 'active')->count(),
+            'pending_members' => Member::where('member_status', 'pending')->count(),
+            'birthdays_today' => Member::whereDay('date_of_birth', today()->day)
+                ->whereMonth('date_of_birth', today()->month)
+                ->where('member_status', 'active')
+                ->count(),
+            'birthdays_this_week' => Member::whereRaw("DATE_FORMAT(date_of_birth, '%m-%d') BETWEEN ? AND ?", [
+                today()->startOfWeek()->format('m-d'),
+                today()->endOfWeek()->format('m-d'),
+            ])->where('member_status', 'active')->count(),
+        ];
+
+        $genders = Member::distinct()->pluck('gender');
+        $maritalStatuses = Member::distinct()->whereNotNull('marital_status')->pluck('marital_status');
+
+        return view('sms.edit', compact('broadcast', 'recipientOptions', 'genders', 'maritalStatuses'));
+    }
+
+    /**
+     * Update the specified broadcast.
+     */
+    public function update(Request $request, SmsBroadcast $broadcast)
+    {
+        if (!in_array($broadcast->status, ['draft', 'scheduled'])) {
+            return redirect()->route('sms.show', $broadcast)
+                ->with('error', 'Only draft or scheduled broadcasts can be updated.');
+        }
+
+        $validated = $request->validate([
+            'title' => 'required|string|max:255',
+            'message' => 'required|string|max:1600',
+            'scheduled_for' => 'nullable|date|after:now',
+        ]);
+
+        $broadcast->update($validated);
+
+        return redirect()->route('sms.show', $broadcast)
+            ->with('success', 'Broadcast updated successfully.');
+    }
+
+    /**
+     * Delete the specified broadcast.
+     */
+    public function destroy(SmsBroadcast $broadcast)
+    {
+        if (!in_array($broadcast->status, ['draft', 'failed', 'completed'])) {
+            return redirect()->back()
+                ->with('error', 'Cannot delete broadcast that is sending or scheduled. Cancel it first.');
+        }
+
+        DB::transaction(function () use ($broadcast) {
+            DB::table('sms_broadcast_recipients')->where('broadcast_id', $broadcast->id)->delete();
+            $broadcast->delete();
+        });
+
+        return redirect()->route('sms.index')
+            ->with('success', 'SMS broadcast deleted successfully.');
     }
 }

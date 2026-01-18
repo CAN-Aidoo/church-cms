@@ -12,13 +12,13 @@
         <div class="max-w-md w-full space-y-8">
             <!-- Logo and Header -->
             <div class="text-center">
-                <div class="mx-auto h-20 w-20 rounded-full bg-gradient-blue-gold flex items-center justify-center">
-                    <svg class="h-12 w-12 text-white" fill="currentColor" viewBox="0 0 20 20">
-                        <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"/>
-                    </svg>
+                <div class="mx-auto h-20 w-20 rounded-2xl bg-white shadow-lg flex items-center justify-center">
+                    <img src="{{ asset('images/sonlife-logo.png') }}"
+                         alt="Sonlife Church"
+                         class="h-16 w-auto">
                 </div>
                 <h2 class="mt-6 text-3xl font-bold text-gradient-blue-gold">
-                    {{ config('app.name') }}
+                    Sonlife Church
                 </h2>
                 <p class="mt-2 text-sm text-gray-600">
                     Create your account

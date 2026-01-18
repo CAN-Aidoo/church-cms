@@ -19,14 +19,9 @@
 
     <!-- Logo -->
     <div class="flex items-center justify-center mt-8 mb-8">
-        <div class="flex items-center gap-2">
-            <div class="p-2 bg-white/10 rounded-lg backdrop-blur-sm">
-                <svg class="w-6 h-6 text-white fill-current" viewBox="0 0 24 24">
-                    <path d="M12 2L2 7l10 5 10-5-10-5zm0 9l2.5-1.25L12 8.5l-2.5 1.25L12 11zm0 2.5l-5-2.5-5 2.5L12 22l10-8.5-5-2.5-5 2.5z"/>
-                </svg>
-            </div>
-            <span class="text-2xl font-bold text-white tracking-tight">CMS</span>
-        </div>
+        <img src="{{ asset('images/sonlife-logo.png') }}"
+             alt="Sonlife Church"
+             class="h-12 w-auto">
     </div>
 
     <nav class="px-4 pb-6">

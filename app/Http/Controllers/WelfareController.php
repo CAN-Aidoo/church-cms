@@ -7,6 +7,7 @@ use App\Models\WelfareProgram;
 use App\Repositories\WelfareRepository;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class WelfareController extends Controller
 {
@@ -348,13 +349,17 @@ class WelfareController extends Controller
             'notes' => 'nullable|string',
         ]);
 
-        $transaction = $this->repository->createTransaction($validated);
+        DB::transaction(function () use ($validated) {
+            $transaction = $this->repository->createTransaction($validated);
 
-        // If disbursement for a case, update case disbursed amount
-        if ($validated['type'] === 'disbursement' && $validated['case_id']) {
-            $case = WelfareCase::find($validated['case_id']);
-            $case->recordDisbursement($validated['amount']);
-        }
+            // If disbursement for a case, update case disbursed amount
+            if ($validated['type'] === 'disbursement' && !empty($validated['case_id'])) {
+                $case = WelfareCase::find($validated['case_id']);
+                if ($case) {
+                    $case->recordDisbursement($validated['amount']);
+                }
+            }
+        });
 
         return redirect()
             ->route('welfare.fund-transactions')
@@ -375,5 +380,45 @@ class WelfareController extends Controller
         );
 
         return view('welfare.reports', compact('report', 'startDate', 'endDate'));
+    }
+
+    /**
+     * Delete welfare case.
+     */
+    public function destroyCase($case)
+    {
+        $case = \App\Models\WelfareCase::findOrFail($case);
+
+        // Only allow deletion of closed or rejected cases
+        if (!in_array($case->status, ['closed', 'rejected'])) {
+            return redirect()->back()
+                ->with('error', 'Only closed or rejected cases can be deleted. Please close or reject the case first.');
+        }
+
+        $case->delete();
+
+        return redirect()->route('welfare.cases')
+            ->with('success', 'Welfare case deleted successfully.');
+    }
+
+    /**
+     * Delete welfare program.
+     */
+    public function destroyProgram($program)
+    {
+        $program = \App\Models\WelfareProgram::findOrFail($program);
+
+        // Check for active beneficiaries
+        $activeBeneficiaries = $program->beneficiaries()->whereNull('exit_date')->count();
+
+        if ($activeBeneficiaries > 0) {
+            return redirect()->back()
+                ->with('error', 'Cannot delete program with active beneficiaries. Please complete or transfer them first.');
+        }
+
+        $program->delete();
+
+        return redirect()->route('welfare.programs')
+            ->with('success', 'Welfare program deleted successfully.');
     }
 }
