@@ -34,11 +34,13 @@ docker-compose*.yml
 Homestead.yaml
 Vagrantfile
 
-# Logs and cache
-/storage/logs/*
-/storage/framework/cache/*
+# Logs and cache (keep .gitkeep files)
+/storage/logs/*.log
+/storage/framework/cache/data/*
 /storage/framework/sessions/*
+!/storage/framework/sessions/.gitkeep
 /storage/framework/views/*
+!/storage/framework/views/.gitkeep
 
 # Build artifacts
 /public/hot
