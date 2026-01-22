@@ -28,43 +28,54 @@ WORKDIR /var/www/html
 # Install Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# Copy application files
+# Copy composer files first for better caching
+COPY composer.json composer.lock ./
+RUN composer install --no-dev --optimize-autoloader --no-interaction --no-scripts
+
+# Copy package files
+COPY package.json package-lock.json ./
+RUN npm install
+
+# Copy rest of application
 COPY . .
 
-# Install PHP dependencies
-RUN composer install --no-dev --optimize-autoloader --no-interaction
+# Run composer scripts now that all files are present
+RUN composer dump-autoload --optimize
 
-# Install Node dependencies and build assets
-RUN npm install && npm run build
+# Build frontend assets
+RUN npm run build
 
 # Set permissions
 RUN chown -R www-data:www-data /var/www/html \
     && chmod -R 755 /var/www/html/storage \
     && chmod -R 755 /var/www/html/bootstrap/cache
 
-# Configure Apache
-RUN sed -i 's|/var/www/html|/var/www/html/public|g' /etc/apache2/sites-available/000-default.conf
+# Configure Apache document root
+ENV APACHE_DOCUMENT_ROOT=/var/www/html/public
+RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf
+RUN sed -ri -e 's!/var/www/!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf
+
+# Add AllowOverride for .htaccess
 RUN echo '<Directory /var/www/html/public>\n\
+    Options Indexes FollowSymLinks\n\
     AllowOverride All\n\
     Require all granted\n\
-</Directory>' >> /etc/apache2/sites-available/000-default.conf
+</Directory>' > /etc/apache2/conf-available/laravel.conf \
+    && a2enconf laravel
 
-# Cache Laravel config
-RUN php artisan config:cache || true
-RUN php artisan route:cache || true
-RUN php artisan view:cache || true
+# Cache Laravel config (will use runtime env vars)
 RUN php artisan storage:link || true
+RUN php artisan config:clear
+RUN php artisan route:clear
+RUN php artisan view:clear
 
-# Expose port (Render uses dynamic PORT)
+# Create startup script for dynamic PORT
+COPY docker-entrypoint.sh /docker-entrypoint.sh
+RUN chmod +x /docker-entrypoint.sh
+
+# Expose port
 EXPOSE 80
 
-# Create startup script to handle dynamic PORT from Render
-RUN echo '#!/bin/bash\n\
-if [ -n "$PORT" ]; then\n\
-    sed -i "s/80/$PORT/g" /etc/apache2/sites-available/000-default.conf\n\
-    sed -i "s/Listen 80/Listen $PORT/g" /etc/apache2/ports.conf\n\
-fi\n\
-apache2-foreground' > /start.sh && chmod +x /start.sh
-
-# Start Apache with dynamic port support
-CMD ["/start.sh"]
+# Use custom entrypoint
+ENTRYPOINT ["/docker-entrypoint.sh"]
+CMD ["apache2-foreground"]

@@ -3,7 +3,6 @@ services:
     name: church-cms
     runtime: docker
     plan: free
-    dockerfilePath: ./Dockerfile
     healthCheckPath: /
     envVars:
       - key: APP_NAME
@@ -43,8 +42,6 @@ services:
         value: database
       - key: QUEUE_CONNECTION
         value: database
-      # Note: Render uses ephemeral storage. For persistent file uploads,
-      # configure S3 or Cloudflare R2 and set FILESYSTEM_DISK=s3
       - key: FILESYSTEM_DISK
         value: local
       - key: MAIL_MAILER
