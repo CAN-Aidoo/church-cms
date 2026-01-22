@@ -32,10 +32,20 @@ The easiest way to deploy is using the included `render.yaml` blueprint:
 ### Step 1: Push to GitHub
 
 ```bash
-git add .
+# First, verify .gitignore includes .env and sensitive files
+git status
+
+# Stage files safely (choose one):
+git add -p                    # Interactive staging (recommended)
+# OR
+git add <specific-files>      # Explicit file paths
+
+# Commit and push
 git commit -m "Ready for Render deployment"
 git push origin master
 ```
+
+> **Warning**: Avoid `git add .` as it may include sensitive files. Always verify `.gitignore` is properly configured.
 
 ### Step 2: Set Up MySQL Database
 
@@ -66,10 +76,11 @@ Since Render doesn't have native MySQL, use one of these providers:
      ```bash
      composer install --no-dev --optimize-autoloader && npm install && npm run build && php artisan config:cache && php artisan route:cache && php artisan view:cache && php artisan storage:link || true
      ```
-   - **Start Command**:
+   - **Start Command** (Production):
      ```bash
-     php artisan serve --host=0.0.0.0 --port=$PORT
+     heroku-php-apache2 public/
      ```
+     > **Note**: `php artisan serve` is for local development only. Render's PHP runtime uses Apache/PHP-FPM via the Heroku PHP buildpack for production.
 
 ### Step 4: Configure Environment Variables
 

@@ -23,6 +23,11 @@ if exist "node_modules" (
     call npm run build
 ) else (
     call npm install
+    if errorlevel 1 (
+        echo Error: npm install failed. Please check your package.json and try again.
+        pause
+        exit /b 1
+    )
     call npm run build
 )
 
@@ -42,9 +47,12 @@ echo Application ready for deployment!
 echo ============================================
 echo.
 echo RENDER DEPLOYMENT:
-echo   1. Push to GitHub: git add . ^&^& git commit -m "Deploy" ^&^& git push
-echo   2. Create Web Service in Render dashboard
-echo   3. Set environment variables
+echo   1. Verify .gitignore includes .env and sensitive files
+echo   2. Review changes: git status
+echo   3. Stage files safely: git add -p (interactive) or git add ^<specific-files^>
+echo   4. Commit and push: git commit -m "Deploy" ^&^& git push
+echo   5. Create Web Service in Render dashboard
+echo   6. Set environment variables
 echo.
 echo See docs\deployment\DEPLOYMENT_GUIDE.md for full instructions
 echo.
