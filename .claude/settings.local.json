@@ -70,7 +70,10 @@
       "Bash(git checkout:*)",
       "Bash(git mv:*)",
       "Bash(git restore:*)",
-      "Bash(del /f /q tmpclaude-*)"
+      "Bash(del /f /q tmpclaude-*)",
+      "WebSearch",
+      "WebFetch(domain:help.alwaysdata.com)",
+      "Bash(composer run-script:*)"
     ],
     "deny": [],
     "ask": []

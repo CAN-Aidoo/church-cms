@@ -59,12 +59,9 @@ echo "━━━━━━━━━━━━━━━━━━━━━━━━�
 echo "CHECKING DEPLOYMENT FILES\n";
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n";
 
-check('Procfile exists', file_exists('Procfile'));
-check('railway.json exists', file_exists('railway.json'));
-check('nixpacks.toml exists', file_exists('nixpacks.toml'));
 check('.gitignore exists', file_exists('.gitignore'));
-check('DEPLOYMENT_GUIDE.md exists', file_exists('DEPLOYMENT_GUIDE.md'));
-check('QUICK_DEPLOY.md exists', file_exists('QUICK_DEPLOY.md'));
+check('.htaccess exists in public/', file_exists('public/.htaccess'));
+check('Deployment guide exists', file_exists('docs/deployment/DEPLOYMENT_GUIDE.md'), 'Missing deployment documentation', true);
 
 echo "\n";
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n";
@@ -194,7 +191,7 @@ if ($percentage >= 80 && count($errors) == 0) {
     echo "║  ✓ READY FOR DEPLOYMENT!                                  ║\n";
     echo "║                                                            ║\n";
     echo "║  Your application is ready for production deployment.     ║\n";
-    echo "║  See QUICK_DEPLOY.md for deployment instructions.         ║\n";
+    echo "║  See docs/deployment/DEPLOYMENT_GUIDE.md for instructions.║\n";
     echo "╚════════════════════════════════════════════════════════════╝\n";
 } elseif (count($errors) == 0) {
     echo "╔════════════════════════════════════════════════════════════╗\n";

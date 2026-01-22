@@ -1,537 +1,299 @@
-# Church CMS - Production Deployment Guide
+# Sonlife Church CMS - Render Deployment Guide
 
-## 🚀 Deployment to Railway.app with Free Domain
-
-This guide will walk you through deploying your Church CMS to production using Railway.app (free tier) and connecting a free custom domain from Freenom.
+Complete guide for deploying to Render.
 
 ---
 
 ## Prerequisites
 
-- Git installed on your computer
-- GitHub account
-- Railway.app account (sign up at https://railway.app)
-- Freenom account (for free domain at https://freenom.com)
+- GitHub account with this repository pushed
+- Render account (https://render.com)
+- External MySQL database (PlanetScale, Railway, or other provider)
+
+> **Note**: Render natively supports PostgreSQL. For MySQL, you'll need an external provider.
 
 ---
 
-## Step 1: Prepare Your Application
+## Quick Deploy with render.yaml
 
-### 1.1 Update Environment Configuration
+The easiest way to deploy is using the included `render.yaml` blueprint:
 
-The application is already configured for production. Key files created:
-- `Procfile` - Process configuration
-- `railway.json` - Railway deployment settings
-- `nixpacks.toml` - Build configuration
-
-### 1.2 Set APP_KEY
-
-Make sure your `.env` file has an APP_KEY. If not, generate one:
-
-```bash
-php artisan key:generate
-```
-
-Copy this key - you'll need it for production environment variables.
+1. Push your code to GitHub
+2. Go to https://dashboard.render.com
+3. Click **New** > **Blueprint**
+4. Connect your GitHub repository
+5. Render will detect `render.yaml` and create your service
+6. Fill in the secret environment variables when prompted
 
 ---
 
-## Step 2: Push to GitHub
+## Manual Deployment Steps
 
-### 2.1 Initialize Git Repository (if not done)
+### Step 1: Push to GitHub
 
 ```bash
-cd C:\xampp\htdocs\church-cms-docs
-git init
 git add .
-git commit -m "Initial commit - Church CMS ready for deployment"
+git commit -m "Ready for Render deployment"
+git push origin master
 ```
 
-### 2.2 Create GitHub Repository
+### Step 2: Set Up MySQL Database
 
-1. Go to https://github.com/new
-2. Create a new repository named `church-cms`
-3. Don't initialize with README (we already have files)
-4. Copy the repository URL
+Since Render doesn't have native MySQL, use one of these providers:
 
-### 2.3 Push to GitHub
+**Option A: PlanetScale (Recommended - Free tier available)**
+1. Go to https://planetscale.com
+2. Create a database
+3. Get your connection credentials
 
-```bash
-git remote add origin https://github.com/YOUR_USERNAME/church-cms.git
-git branch -M main
-git push -u origin main
-```
-
----
-
-## Step 3: Deploy to Railway.app
-
-### 3.1 Sign Up for Railway
-
+**Option B: Railway**
 1. Go to https://railway.app
-2. Click "Login" → Sign in with GitHub
-3. Authorize Railway to access your GitHub account
+2. Create a new MySQL database
+3. Get your connection credentials
 
-### 3.2 Create New Project
+**Option C: Other MySQL providers**
+- Aiven, DigitalOcean, AWS RDS, etc.
 
-1. Click "New Project"
-2. Select "Deploy from GitHub repo"
-3. Choose your `church-cms` repository
-4. Railway will automatically detect it's a Laravel app
+### Step 3: Create Web Service on Render
 
-### 3.3 Add MySQL Database
+1. Go to https://dashboard.render.com
+2. Click **New** > **Web Service**
+3. Connect your GitHub repository
+4. Configure:
+   - **Name**: `church-cms`
+   - **Runtime**: `PHP`
+   - **Build Command**:
+     ```bash
+     composer install --no-dev --optimize-autoloader && npm install && npm run build && php artisan config:cache && php artisan route:cache && php artisan view:cache && php artisan storage:link || true
+     ```
+   - **Start Command**:
+     ```bash
+     php artisan serve --host=0.0.0.0 --port=$PORT
+     ```
 
-1. In your Railway project, click "+ New"
-2. Select "Database" → "Add MySQL"
-3. Railway will provision a MySQL database
-4. Database credentials will be automatically available as environment variables
+### Step 4: Configure Environment Variables
 
-### 3.4 Configure Environment Variables
+In your web service > **Environment** tab, add these variables:
 
-Click on your web service → "Variables" tab → Add the following:
+#### Required Variables
 
-```env
-APP_NAME="Church CMS"
-APP_ENV=production
-APP_KEY=base64:YOUR_APP_KEY_HERE
-APP_DEBUG=false
-APP_URL=https://your-app.railway.app
+| Variable | Value | Notes |
+|----------|-------|-------|
+| `APP_NAME` | `Sonlife Church CMS` | |
+| `APP_ENV` | `production` | |
+| `APP_DEBUG` | `false` | |
+| `APP_KEY` | `base64:...` | Generate with `php artisan key:generate --show` |
+| `APP_URL` | `https://church-cms.onrender.com` | Your Render URL |
 
-DB_CONNECTION=mysql
-DB_HOST=${{MYSQL_HOST}}
-DB_PORT=${{MYSQL_PORT}}
-DB_DATABASE=${{MYSQL_DATABASE}}
-DB_USERNAME=${{MYSQL_USER}}
-DB_PASSWORD=${{MYSQL_PASSWORD}}
+#### Database Variables
 
-SESSION_DRIVER=database
-QUEUE_CONNECTION=database
-CACHE_DRIVER=database
+| Variable | Value | Notes |
+|----------|-------|-------|
+| `DB_CONNECTION` | `mysql` | |
+| `DB_HOST` | Your database host | From your MySQL provider |
+| `DB_PORT` | `3306` | |
+| `DB_DATABASE` | Your database name | |
+| `DB_USERNAME` | Your database user | |
+| `DB_PASSWORD` | Your database password | |
 
-MAIL_MAILER=log
-MAIL_FROM_ADDRESS=noreply@churchcms.com
-MAIL_FROM_NAME="${APP_NAME}"
+#### Session & Cache Variables
 
-# SMS Configuration (Optional - configure later)
-TWILIO_SID=your_twilio_sid
-TWILIO_TOKEN=your_twilio_token
-TWILIO_PHONE=+233XXXXXXXXX
+| Variable | Value |
+|----------|-------|
+| `SESSION_DRIVER` | `database` |
+| `CACHE_DRIVER` | `database` |
+| `QUEUE_CONNECTION` | `database` |
 
-# Church Configuration
-CHURCH_NAME="My Church"
-CHURCH_ADDRESS="123 Church Street"
-CHURCH_PHONE="+233XXXXXXXXX"
-CHURCH_EMAIL="info@mychurch.com"
-```
+#### Logging Variables
 
-**Important Variables to Update:**
-- `APP_KEY` - Use the key from your local `.env`
-- `APP_URL` - Will update after getting custom domain
-- Database variables - Use Railway's MySQL variables (shown above)
+| Variable | Value | Notes |
+|----------|-------|-------|
+| `LOG_CHANNEL` | `stderr` | Required for Render logs |
+| `LOG_LEVEL` | `error` | Or `warning` for more detail |
 
-### 3.5 Deploy
+#### Mail Variables (Optional)
 
-1. Railway will automatically deploy after you set variables
-2. Watch the deployment logs in the "Deployments" tab
-3. Wait for "SUCCESS" status (usually 3-5 minutes)
-4. You'll get a URL like: `https://church-cms-production-xxxx.up.railway.app`
+| Variable | Value |
+|----------|-------|
+| `MAIL_MAILER` | `smtp` |
+| `MAIL_HOST` | Your SMTP host |
+| `MAIL_PORT` | `587` |
+| `MAIL_USERNAME` | Your SMTP username |
+| `MAIL_PASSWORD` | Your SMTP password |
+| `MAIL_ENCRYPTION` | `tls` |
+| `MAIL_FROM_ADDRESS` | `noreply@yourchurch.com` |
+| `MAIL_FROM_NAME` | `Sonlife Church` |
 
----
+### Step 5: Deploy
 
-## Step 4: Run Database Migrations
+1. Click **Create Web Service**
+2. Wait for the build to complete (5-10 minutes first time)
+3. Check the logs for any errors
 
-### 4.1 Access Railway CLI (Option 1 - Recommended)
+### Step 6: Run Migrations
 
-Install Railway CLI:
-```bash
-npm i -g @railway/cli
-```
+After the first successful deployment:
 
-Login and link to your project:
-```bash
-railway login
-railway link
-```
-
-Run migrations:
-```bash
-railway run php artisan migrate --force
-railway run php artisan db:seed --force
-```
-
-### 4.2 Use Railway Dashboard (Option 2)
-
-1. Go to your Railway project
-2. Click on your web service
-3. Go to "Settings" tab
-4. Scroll to "Custom Start Command"
-5. Temporarily set: `php artisan migrate --force && php artisan db:seed && php artisan serve --host=0.0.0.0 --port=$PORT`
-6. Redeploy
-7. After deployment succeeds, remove the migration commands
-
----
-
-## Step 5: Get Free Custom Domain from Freenom
-
-### 5.1 Register Domain
-
-1. Go to https://www.freenom.com
-2. Search for your desired domain name (e.g., `mychurch`)
-3. Select a free TLD: `.tk`, `.ml`, `.ga`, `.cf`, or `.gq`
-4. Click "Get it now" and proceed to checkout
-5. Sign up/login to Freenom
-6. Complete domain registration (FREE for 12 months)
-
-**Example:** `mychurch.tk`, `gracechurch.ml`, `hopechurch.ga`
-
-### 5.2 Configure DNS Settings
-
-1. In Freenom, go to "Services" → "My Domains"
-2. Click "Manage Domain" next to your new domain
-3. Go to "Management Tools" → "Nameservers"
-4. Select "Use custom nameservers"
-5. We'll add Railway's nameservers in next step
-
----
-
-## Step 6: Connect Domain to Railway
-
-### 6.1 Add Custom Domain in Railway
-
-1. Go to your Railway project
-2. Click on your web service
-3. Go to "Settings" tab
-4. Scroll to "Domains"
-5. Click "Add Custom Domain"
-6. Enter your Freenom domain (e.g., `mychurch.tk`)
-7. Railway will provide DNS settings
-
-### 6.2 Update Freenom DNS
-
-Railway will show you either:
-
-**Option A: CNAME Record**
-- Go back to Freenom DNS settings
-- Add CNAME record:
-  - Name: `www` or `@`
-  - Target: `your-app.up.railway.app`
-  - TTL: 3600
-
-**Option B: A Record**
-- Add A record with Railway's IP address
-- Set TTL to 3600
-
-### 6.3 Wait for DNS Propagation
-
-- DNS changes take 5 minutes to 48 hours (usually 10-30 minutes)
-- Check status at: https://dnschecker.org
-- Railway will automatically provision SSL certificate once DNS resolves
-
----
-
-## Step 7: Update Application URL
-
-### 7.1 Update Environment Variable
-
-1. In Railway → Your service → Variables
-2. Update `APP_URL` to your custom domain:
-   ```env
-   APP_URL=https://mychurch.tk
+**Option A: Using Render Shell**
+1. Go to your service > **Shell** tab
+2. Run:
+   ```bash
+   php artisan migrate --force
+   php artisan db:seed --class=AdminUserSeeder --force
    ```
-3. Redeploy the service
 
-### 7.2 Update Session Cookie Domain
+**Option B: One-time Job**
+1. Go to **New** > **Job**
+2. Connect same repository
+3. Set command: `php artisan migrate --force && php artisan db:seed --force`
+4. Run once and delete
 
-Add to Railway environment variables:
-```env
-SESSION_DOMAIN=.mychurch.tk
-SANCTUM_STATEFUL_DOMAINS=mychurch.tk,www.mychurch.tk
-```
+### Step 7: Verify Deployment
 
----
-
-## Step 8: Create Admin User
-
-### 8.1 Using Railway CLI
-
-```bash
-railway run php artisan tinker
-```
-
-Then run:
-```php
-$user = new App\Models\User();
-$user->full_name = 'Admin User';
-$user->email = 'admin@mychurch.tk';
-$user->password = Hash::make('SecurePassword123!');
-$user->role = 'admin';
-$user->is_active = true;
-$user->save();
-exit
-```
-
-### 8.2 Or Create Seeder Command
-
-Add this to environment variables in Railway:
-```env
-ADMIN_EMAIL=admin@mychurch.tk
-ADMIN_PASSWORD=SecurePassword123!
-```
-
-Then run via CLI:
-```bash
-railway run php artisan db:seed --class=AdminUserSeeder
-```
+1. Visit your app URL: `https://church-cms.onrender.com`
+2. Test login at `/login`
+3. Test mobile interface at `/mobile`
 
 ---
 
-## Step 9: Test Your Production Site
+## Default Admin Credentials
 
-### 9.1 Access Your Site
+After seeding, login with:
+- **Email**: `admin@sonlifechurch.com`
+- **Password**: `password`
 
-Visit: `https://mychurch.tk` (or your chosen domain)
-
-### 9.2 Test Key Features
-
-- ✅ Homepage loads
-- ✅ Admin login works (`/login`)
-- ✅ Mobile app works (`/mobile/login`)
-- ✅ Database connections work
-- ✅ SSL certificate is active (🔒 in browser)
-
-### 9.3 Test Admin Panel
-
-1. Login at: `https://mychurch.tk/login`
-2. Use admin credentials created in Step 8
-3. Verify dashboard loads
-4. Test creating a member
-5. Test attendance marking
-
-### 9.4 Test Mobile App
-
-1. Go to: `https://mychurch.tk/mobile/login`
-2. Login with test member account
-3. Test registration flow
-4. Test visitor registration
+> **Important**: Change this password immediately after first login!
 
 ---
 
-## Step 10: Production Optimizations
+## Custom Domain Setup
 
-### 10.1 Enable Caching
-
-Add to Railway variables:
-```env
-CACHE_DRIVER=redis
-SESSION_DRIVER=redis
-QUEUE_CONNECTION=redis
-```
-
-Then add Redis to your Railway project:
-1. Click "+ New" → "Database" → "Add Redis"
-2. Redis credentials auto-configure
-
-### 10.2 Set Up Queue Worker
-
-Add a new service in Railway:
-1. Click "+ New" → "Empty Service"
-2. Link same GitHub repo
-3. Set start command: `php artisan queue:work --sleep=3 --tries=3 --max-time=3600`
-4. Use same environment variables
-
-### 10.3 Enable Scheduled Tasks (Cron)
-
-Add another service for scheduler:
-1. Click "+ New" → "Empty Service"
-2. Link same GitHub repo
-3. Set start command: `while true; do php artisan schedule:run; sleep 60; done`
+1. Go to your service > **Settings**
+2. Scroll to **Custom Domains**
+3. Click **Add Custom Domain**
+4. Enter your domain (e.g., `cms.yourchurch.com`)
+5. Add the DNS records shown to your domain provider
+6. Wait for SSL certificate provisioning
 
 ---
 
-## Step 11: Monitoring & Maintenance
+## Automatic Deployments
 
-### 11.1 Monitor Logs
+By default, Render auto-deploys when you push to your connected branch.
 
-- Railway Dashboard → Your service → "Deployments" → Click deployment → View logs
-- Check for errors and warnings
-
-### 11.2 Database Backups
-
-Railway doesn't auto-backup on free tier. Set up manual backups:
-
-```bash
-# Download database backup
-railway run mysqldump -u \$MYSQL_USER -p\$MYSQL_PASSWORD \$MYSQL_DATABASE > backup.sql
-```
-
-Schedule weekly backups locally or use a cron job.
-
-### 11.3 Update Application
-
-When you make changes:
-
-```bash
-git add .
-git commit -m "Update description"
-git push origin main
-```
-
-Railway auto-deploys on every push to main branch.
+To disable:
+1. Go to **Settings** > **Build & Deploy**
+2. Toggle off **Auto-Deploy**
 
 ---
 
-## Alternative Free Domain Options
+## Environment-Specific Notes
 
-If Freenom is unavailable:
+### Free Tier Limitations
 
-### Option 1: Subdomain Providers
-- **is-a.dev** (developers subdomain) - https://is-a.dev
-- **eu.org** (free .eu.org domains) - https://nic.eu.org
-- **Afraid.org** (free DNS service) - https://freedns.afraid.org
+- Service spins down after 15 minutes of inactivity
+- Cold starts take 30-60 seconds
+- 750 hours/month of free usage
 
-### Option 2: Use Railway's Free Domain
-- Keep using `your-app.up.railway.app`
-- Add custom subdomain via Railway's domain settings
+### Upgrading for Production
+
+For production use, consider:
+- **Starter plan** ($7/month): Always-on, no spin-down
+- **Standard plan** ($25/month): More resources, better performance
 
 ---
 
 ## Troubleshooting
 
-### Issue: "500 Internal Server Error"
+### Build Fails
 
-**Solution:**
-1. Check Railway logs for specific error
-2. Ensure `APP_KEY` is set correctly
-3. Verify database credentials
-4. Run: `railway run php artisan config:clear`
+**Check:**
+- `composer.json` and `package.json` are committed
+- No syntax errors in PHP files
+- Check build logs for specific errors
 
-### Issue: "Database Connection Failed"
+**Common fixes:**
+```bash
+# Locally, run:
+composer install
+npm install
+npm run build
+# Fix any errors before pushing
+```
 
-**Solution:**
-1. Verify MySQL service is running in Railway
-2. Check `DB_*` environment variables match MySQL service
-3. Ensure Railway references are correct: `${{MYSQL_HOST}}`
+### 500 Server Error
 
-### Issue: "Assets Not Loading (CSS/JS)"
+**Check:**
+- `APP_KEY` is set correctly
+- Database credentials are correct
+- Run `php artisan config:clear` in Render shell
 
-**Solution:**
-1. Ensure `APP_URL` matches your domain
-2. Check `public` folder is accessible
-3. Run: `railway run php artisan storage:link`
+**View logs:**
+1. Go to service > **Logs** tab
+2. Look for PHP errors
 
-### Issue: "Domain Not Resolving"
+### Database Connection Errors
 
-**Solution:**
-1. Wait 30 minutes for DNS propagation
-2. Check DNS at: https://dnschecker.org
-3. Verify CNAME points to correct Railway URL
-4. Clear browser cache (Ctrl+Shift+R)
+**Check:**
+- Database allows external connections
+- Credentials are correct
+- SSL mode if required (add `?sslmode=require` to connection)
 
-### Issue: "Free Domain Expired"
+For PlanetScale, add to your `.env`:
+```
+MYSQL_ATTR_SSL_CA=/etc/ssl/certs/ca-certificates.crt
+```
 
-**Solution:**
-- Freenom free domains expire after 12 months
-- Renew 15 days before expiration in Freenom dashboard
-- Set calendar reminder to renew annually
+### Slow Performance / Timeouts
 
----
+**For free tier:**
+- First request after inactivity will be slow (cold start)
+- Consider upgrading to Starter plan for production
 
-## Security Checklist
+**For all tiers:**
+- Enable caching in production
+- Optimize database queries
+- Check for N+1 queries in logs
 
-Before going live:
+### Storage/File Upload Issues
 
-- [ ] `APP_DEBUG=false` in production
-- [ ] Strong `APP_KEY` generated and set
-- [ ] `APP_ENV=production`
-- [ ] Database credentials secure
-- [ ] Admin password is strong
-- [ ] HTTPS enabled (automatic with Railway)
-- [ ] CSRF protection enabled (Laravel default)
-- [ ] Rate limiting configured (Laravel default)
-- [ ] File upload validation in place
-- [ ] Session timeout configured
-- [ ] Regular backups scheduled
-
----
-
-## Cost Breakdown
-
-### Free Tier Limits (Railway.app)
-
-- **Hobby Plan**: $5/month worth of resources FREE
-- **Includes**:
-  - 500 hours/month execution time
-  - Shared CPU (1GB RAM)
-  - Shared MySQL database
-  - Custom domain + SSL
-  - 100GB outbound bandwidth
-
-**Note**: Perfect for small to medium churches (100-500 members). For larger churches, upgrade to Pro plan ($20/month).
-
-### Domain Cost
-
-- **Freenom**: FREE for 12 months (.tk, .ml, .ga, .cf, .gq)
-- **Renewal**: FREE if renewed before expiration
-- **Alternative**: Buy custom .com domain for $10-15/year (Namecheap, Google Domains)
-
-**Total First Year Cost**: $0 (completely free!)
+Render uses ephemeral storage. For persistent file storage:
+1. Use a cloud storage provider (AWS S3, Cloudflare R2)
+2. Update `FILESYSTEM_DISK` to `s3`
+3. Add S3 credentials to environment
 
 ---
 
-## Production Checklist
+## Useful Commands
 
-Before announcing to church members:
+Run these in Render Shell:
 
-- [ ] Application deployed and accessible
-- [ ] Custom domain connected and working
-- [ ] SSL certificate active (HTTPS)
-- [ ] Admin account created
-- [ ] Test member accounts created
-- [ ] Sample data added (for demo)
-- [ ] Mobile app tested on real devices
-- [ ] Email notifications working
-- [ ] SMS integration configured (optional)
-- [ ] Database backed up
-- [ ] User documentation prepared
-- [ ] Training session planned for staff
+```bash
+# Clear all caches
+php artisan cache:clear
+php artisan config:clear
+php artisan route:clear
+php artisan view:clear
 
----
+# Re-cache for production
+php artisan config:cache
+php artisan route:cache
+php artisan view:cache
 
-## Support & Resources
+# Run migrations
+php artisan migrate --force
 
-- **Railway Documentation**: https://docs.railway.app
-- **Laravel Deployment**: https://laravel.com/docs/deployment
-- **Freenom Help**: https://www.freenom.com/en/support.html
-- **DNS Checker**: https://dnschecker.org
+# Check application status
+php artisan about
 
----
-
-## Next Steps After Deployment
-
-1. **Customize Church Info**: Update church name, logo, contact details
-2. **Add Initial Members**: Import or manually add church members
-3. **Configure SMS**: Set up Twilio account for SMS notifications
-4. **Set Up Email**: Configure email provider (SendGrid, Mailgun)
-5. **Train Staff**: Conduct training for pastors and staff
-6. **Launch Mobile App**: Share mobile app URL with members
-7. **Monitor Usage**: Check logs and usage patterns
-8. **Gather Feedback**: Collect user feedback and iterate
+# View logs
+php artisan log:tail
+```
 
 ---
 
-## Congratulations! 🎉
+## Support Resources
 
-Your Church Management System is now live in production with a custom domain, completely free!
-
-**Your Production URLs:**
-- Admin Panel: `https://mychurch.tk/login`
-- Mobile App: `https://mychurch.tk/mobile`
-- Public Website: `https://mychurch.tk`
-
-**Credentials:**
-- Admin Email: admin@mychurch.tk
-- Password: [Set during Step 8]
-
----
-
-**Need Help?** Create an issue on GitHub or contact your developer.
+- **Render Docs**: https://render.com/docs
+- **Laravel Docs**: https://laravel.com/docs
+- **PlanetScale Docs**: https://planetscale.com/docs
