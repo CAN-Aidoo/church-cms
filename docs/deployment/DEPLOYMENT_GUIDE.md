@@ -8,9 +8,9 @@ Complete guide for deploying to Render.
 
 - GitHub account with this repository pushed
 - Render account (https://render.com)
-- External MySQL database (PlanetScale, Railway, or other provider)
+- Google Cloud account with Cloud SQL (MySQL) instance
 
-> **Note**: Render natively supports PostgreSQL. For MySQL, you'll need an external provider.
+> **Note**: This guide uses Google Cloud SQL for MySQL database and Render for web hosting.
 
 ---
 
@@ -47,22 +47,31 @@ git push origin master
 
 > **Warning**: Avoid `git add .` as it may include sensitive files. Always verify `.gitignore` is properly configured.
 
-### Step 2: Set Up MySQL Database
+### Step 2: Set Up Google Cloud SQL (MySQL)
 
-Since Render doesn't have native MySQL, use one of these providers:
-
-**Option A: PlanetScale (Recommended - Free tier available)**
-1. Go to https://planetscale.com
-2. Create a database
-3. Get your connection credentials
-
-**Option B: Railway**
-1. Go to https://railway.app
-2. Create a new MySQL database
-3. Get your connection credentials
-
-**Option C: Other MySQL providers**
-- Aiven, DigitalOcean, AWS RDS, etc.
+1. Go to https://console.cloud.google.com
+2. Navigate to **SQL** > **Create Instance** > **MySQL**
+3. Configure your instance:
+   - **Instance ID**: `church-cms-db`
+   - **Password**: Set a strong root password
+   - **Region**: Choose closest to your users
+   - **Machine type**: Start with `db-f1-micro` (free tier eligible)
+4. After creation, go to **Connections**:
+   - Enable **Public IP**
+   - Under **Authorized networks**, add `0.0.0.0/0` (or Render's IP ranges for better security)
+5. Create a database:
+   - Go to **Databases** > **Create database**
+   - Name: `church_management`
+6. Create a user:
+   - Go to **Users** > **Add user account**
+   - Username: `church_app`
+   - Password: Generate a strong password
+   - Host: `%` (allow from any host)
+7. Note your credentials:
+   - **DB_HOST**: Your instance's Public IP (e.g., `34.xxx.xxx.xxx`)
+   - **DB_DATABASE**: `church_management`
+   - **DB_USERNAME**: `church_app`
+   - **DB_PASSWORD**: Your user password
 
 ### Step 3: Create Web Service on Render
 
@@ -246,14 +255,19 @@ npm run build
 ### Database Connection Errors
 
 **Check:**
-- Database allows external connections
+- Google Cloud SQL instance is running
+- Public IP is enabled on the instance
+- Render's IP is in the authorized networks (or `0.0.0.0/0` for testing)
 - Credentials are correct
-- SSL mode if required (add `?sslmode=require` to connection)
+- Database and user exist
 
-For PlanetScale, add to your `.env`:
-```
-MYSQL_ATTR_SSL_CA=/etc/ssl/certs/ca-certificates.crt
-```
+**For Google Cloud SQL:**
+1. Verify the Public IP in Cloud Console > SQL > Your Instance > Overview
+2. Check authorized networks in Connections tab
+3. Test connection locally first:
+   ```bash
+   mysql -h YOUR_PUBLIC_IP -u church_app -p church_management
+   ```
 
 ### Slow Performance / Timeouts
 
@@ -307,4 +321,4 @@ php artisan log:tail
 
 - **Render Docs**: https://render.com/docs
 - **Laravel Docs**: https://laravel.com/docs
-- **PlanetScale Docs**: https://planetscale.com/docs
+- **Google Cloud SQL Docs**: https://cloud.google.com/sql/docs/mysql

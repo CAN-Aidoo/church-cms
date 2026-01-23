@@ -60,3 +60,33 @@ services:
         sync: false
       - key: MAIL_FROM_NAME
         value: "Sonlife Church"
+      # Church Configuration
+      - key: CHURCH_NAME
+        value: "Sonlife City Church"
+      - key: CHURCH_ADDRESS
+        value: "Opposite Residency Street, Sunyani, Ghana"
+      - key: CHURCH_PHONE
+        value: "+233240271064"
+      - key: CHURCH_EMAIL
+        value: "info@sonlifechurch.com"
+      # Twilio SMS
+      - key: TWILIO_SID
+        sync: false
+      - key: TWILIO_TOKEN
+        sync: false
+      - key: TWILIO_PHONE
+        sync: false
+      - key: TWILIO_ENABLED
+        value: "true"
+      # Financial Settings
+      - key: CURRENCY
+        value: "GHS"
+      - key: DUAL_APPROVAL_THRESHOLD
+        value: "5000"
+      # Feature Flags
+      - key: ENABLE_SMS_BROADCASTS
+        value: "true"
+      - key: ENABLE_ONLINE_GIVING
+        value: "false"
+      - key: ENABLE_TWO_FACTOR_AUTH
+        value: "false"
