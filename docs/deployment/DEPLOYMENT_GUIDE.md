@@ -1,6 +1,6 @@
 # Sonlife Church CMS - Render Deployment Guide
 
-Complete guide for deploying to Render.
+Complete guide for deploying to Render with TiDB Cloud.
 
 ---
 
@@ -8,9 +8,9 @@ Complete guide for deploying to Render.
 
 - GitHub account with this repository pushed
 - Render account (https://render.com)
-- Google Cloud account with Cloud SQL (MySQL) instance
+- TiDB Cloud account (https://tidbcloud.com)
 
-> **Note**: This guide uses Google Cloud SQL for MySQL database and Render for web hosting.
+> **Note**: This guide uses TiDB Cloud for MySQL-compatible database and Render for web hosting.
 
 ---
 
@@ -47,31 +47,23 @@ git push origin master
 
 > **Warning**: Avoid `git add .` as it may include sensitive files. Always verify `.gitignore` is properly configured.
 
-### Step 2: Set Up Google Cloud SQL (MySQL)
+### Step 2: Set Up TiDB Cloud
 
-1. Go to https://console.cloud.google.com
-2. Navigate to **SQL** > **Create Instance** > **MySQL**
-3. Configure your instance:
-   - **Instance ID**: `church-cms-db`
-   - **Password**: Set a strong root password
+1. Go to https://tidbcloud.com and sign in
+2. Click **Create Cluster** > **Serverless** (free tier)
+3. Configure your cluster:
+   - **Cluster Name**: `church-cms-db`
+   - **Cloud Provider**: AWS or GCP
    - **Region**: Choose closest to your users
-   - **Machine type**: Start with `db-f1-micro` (free tier eligible)
-4. After creation, go to **Connections**:
-   - Enable **Public IP**
-   - Under **Authorized networks**, add `0.0.0.0/0` (or Render's IP ranges for better security)
-5. Create a database:
-   - Go to **Databases** > **Create database**
-   - Name: `church_management`
-6. Create a user:
-   - Go to **Users** > **Add user account**
-   - Username: `church_app`
-   - Password: Generate a strong password
-   - Host: `%` (allow from any host)
-7. Note your credentials:
-   - **DB_HOST**: Your instance's Public IP (e.g., `34.xxx.xxx.xxx`)
-   - **DB_DATABASE**: `church_management`
-   - **DB_USERNAME**: `church_app`
-   - **DB_PASSWORD**: Your user password
+4. After creation, click **Connect** > **General**
+5. Note your connection details:
+   - **DB_HOST**: Your cluster endpoint (e.g., `gateway01.us-east-1.prod.aws.tidbcloud.com`)
+   - **DB_PORT**: `4000`
+   - **DB_USERNAME**: Your username (e.g., `xxxxxx.root`)
+   - **DB_PASSWORD**: Generate and copy the password
+6. Create your database:
+   - Go to **SQL Editor** in TiDB Cloud Console
+   - Run: `CREATE DATABASE church_management;`
 
 ### Step 3: Create Web Service on Render
 
@@ -80,16 +72,9 @@ git push origin master
 3. Connect your GitHub repository
 4. Configure:
    - **Name**: `church-cms`
-   - **Runtime**: `PHP`
-   - **Build Command**:
-     ```bash
-     composer install --no-dev --optimize-autoloader && npm install && npm run build && php artisan config:cache && php artisan route:cache && php artisan view:cache && php artisan storage:link || true
-     ```
-   - **Start Command** (Production):
-     ```bash
-     heroku-php-apache2 public/
-     ```
-     > **Note**: `php artisan serve` is for local development only. Render's PHP runtime uses Apache/PHP-FPM via the Heroku PHP buildpack for production.
+   - **Runtime**: `Docker`
+   - **Build Command**: (handled by Dockerfile)
+   - **Start Command**: (handled by Dockerfile)
 
 ### Step 4: Configure Environment Variables
 
@@ -105,16 +90,17 @@ In your web service > **Environment** tab, add these variables:
 | `APP_KEY` | `base64:...` | Generate with `php artisan key:generate --show` |
 | `APP_URL` | `https://church-cms.onrender.com` | Your Render URL |
 
-#### Database Variables
+#### Database Variables (TiDB Cloud)
 
 | Variable | Value | Notes |
 |----------|-------|-------|
-| `DB_CONNECTION` | `mysql` | |
-| `DB_HOST` | Your database host | From your MySQL provider |
-| `DB_PORT` | `3306` | |
-| `DB_DATABASE` | Your database name | |
-| `DB_USERNAME` | Your database user | |
-| `DB_PASSWORD` | Your database password | |
+| `DB_CONNECTION` | `mysql` | TiDB is MySQL-compatible |
+| `DB_HOST` | Your TiDB host | From TiDB Cloud Connect dialog |
+| `DB_PORT` | `4000` | TiDB default port |
+| `DB_DATABASE` | `church_management` | Your database name |
+| `DB_USERNAME` | Your TiDB username | Usually `xxxxx.root` format |
+| `DB_PASSWORD` | Your TiDB password | |
+| `MYSQL_ATTR_SSL_CA` | `/etc/ssl/certs/ca-certificates.crt` | Required for TiDB SSL |
 
 #### Session & Cache Variables
 
@@ -147,7 +133,7 @@ In your web service > **Environment** tab, add these variables:
 ### Step 5: Deploy
 
 1. Click **Create Web Service**
-2. Wait for the build to complete (5-10 minutes first time)
+2. Wait for the build to complete
 3. Check the logs for any errors
 
 ### Step 6: Run Migrations
@@ -179,7 +165,7 @@ After the first successful deployment:
 ## Default Admin Credentials
 
 After seeding, login with:
-- **Email**: `admin@sonlifechurch.com`
+- **Email**: `admin@church.com`
 - **Password**: `password`
 
 > **Important**: Change this password immediately after first login!
@@ -211,15 +197,21 @@ To disable:
 
 ### Free Tier Limitations
 
+**Render:**
 - Service spins down after 15 minutes of inactivity
 - Cold starts take 30-60 seconds
 - 750 hours/month of free usage
 
+**TiDB Cloud Serverless:**
+- 5GB storage free
+- 50 million Request Units/month free
+- Auto-scales based on usage
+
 ### Upgrading for Production
 
 For production use, consider:
-- **Starter plan** ($7/month): Always-on, no spin-down
-- **Standard plan** ($25/month): More resources, better performance
+- **Render Starter plan** ($7/month): Always-on, no spin-down
+- **TiDB Cloud**: Serverless tier is usually sufficient for small-medium churches
 
 ---
 
@@ -255,19 +247,15 @@ npm run build
 ### Database Connection Errors
 
 **Check:**
-- Google Cloud SQL instance is running
-- Public IP is enabled on the instance
-- Render's IP is in the authorized networks (or `0.0.0.0/0` for testing)
-- Credentials are correct
-- Database and user exist
+- TiDB Cloud cluster is active (not paused)
+- Credentials are correct (copy from TiDB Connect dialog)
+- `MYSQL_ATTR_SSL_CA` is set to `/etc/ssl/certs/ca-certificates.crt`
+- Port is `4000` (not `3306`)
 
-**For Google Cloud SQL:**
-1. Verify the Public IP in Cloud Console > SQL > Your Instance > Overview
-2. Check authorized networks in Connections tab
-3. Test connection locally first:
-   ```bash
-   mysql -h YOUR_PUBLIC_IP -u church_app -p church_management
-   ```
+**Test connection locally:**
+```bash
+mysql -h YOUR_TIDB_HOST -P 4000 -u YOUR_USERNAME -p --ssl-mode=VERIFY_IDENTITY
+```
 
 ### Slow Performance / Timeouts
 
@@ -321,4 +309,4 @@ php artisan log:tail
 
 - **Render Docs**: https://render.com/docs
 - **Laravel Docs**: https://laravel.com/docs
-- **Google Cloud SQL Docs**: https://cloud.google.com/sql/docs/mysql
+- **TiDB Cloud Docs**: https://docs.pingcap.com/tidbcloud
