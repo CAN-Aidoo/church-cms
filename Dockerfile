@@ -1,4 +1,4 @@
-# Sonlife Church CMS - Production Dockerfile
+# Sonlife City Church CMS - Production Dockerfile
 FROM php:8.2-apache
 
 # Install system dependencies

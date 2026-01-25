@@ -20,7 +20,7 @@
     <!-- Logo -->
     <div class="flex items-center justify-center mt-8 mb-8">
         <img src="{{ asset('images/sonlife-logo.png') }}"
-             alt="Sonlife Church"
+             alt="Sonlife City Church"
              class="h-12 w-auto">
     </div>
 

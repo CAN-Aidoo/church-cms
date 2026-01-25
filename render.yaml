@@ -6,7 +6,7 @@ services:
     healthCheckPath: /
     envVars:
       - key: APP_NAME
-        value: "Sonlife Church CMS"
+        value: "Sonlife City Church CMS"
       - key: APP_ENV
         value: production
       - key: APP_DEBUG
@@ -65,7 +65,7 @@ services:
       - key: MAIL_FROM_ADDRESS
         sync: false
       - key: MAIL_FROM_NAME
-        value: "Sonlife Church"
+        value: "Sonlife City Church"
       # Church Configuration
       - key: CHURCH_NAME
         value: "Sonlife City Church"

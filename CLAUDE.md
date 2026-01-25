@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Sonlife Church CMS - A comprehensive Laravel 10 church management platform with 26+ modules including member management, QR-based attendance, financial tracking, SMS broadcasting, and a mobile PWA.
+Sonlife City Church CMS - A comprehensive Laravel 10 church management platform with 26+ modules including member management, QR-based attendance, financial tracking, SMS broadcasting, and a mobile PWA.
 
 ## Development Commands
 

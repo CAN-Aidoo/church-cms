@@ -24,7 +24,7 @@
             <div class="flex justify-center mb-8">
                 <div class="w-20 h-20 bg-white rounded-2xl shadow-lg flex items-center justify-center">
                     <img src="{{ asset('images/sonlife-logo.png') }}"
-                         alt="Sonlife Church"
+                         alt="Sonlife City Church"
                          class="h-16 w-auto">
                 </div>
             </div>

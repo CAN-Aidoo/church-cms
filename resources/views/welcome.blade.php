@@ -4,9 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <meta name="description" content="Sonlife Church - Empowering Ministry Through Technology. Comprehensive church management platform for member management, attendance tracking, financial management, and more. Built specifically for modern ministries.">
+    <meta name="description" content="Sonlife City Church - Empowering Ministry Through Technology. Comprehensive church management platform for member management, attendance tracking, financial management, and more. Built specifically for modern ministries.">
 
-    <title>Sonlife Church - Empowering Ministry Through Technology</title>
+    <title>Sonlife City Church - Empowering Ministry Through Technology</title>
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -34,9 +34,9 @@
             <div class="glass rounded-2xl px-6 py-4 flex justify-between items-center shadow-soft">
                 <a href="/" class="flex items-center gap-3 group">
                     <img src="{{ asset('images/sonlife-logo.png') }}"
-                         alt="Sonlife Church"
+                         alt="Sonlife City Church"
                          class="h-10 w-auto group-hover:scale-110 transition-transform duration-300">
-                    <span class="text-2xl font-heading font-black tracking-tight text-slate-800">Sonlife Church</span>
+                    <span class="text-2xl font-heading font-black tracking-tight text-slate-800">Sonlife City Church</span>
                 </a>
 
                 <!-- Desktop Links -->
@@ -97,7 +97,7 @@
                         Through <span class="text-gradient-premium">Technology</span>
                     </h1>
                     <p class="text-lg md:text-xl text-slate-600 leading-relaxed mb-10 max-w-xl">
-                        Sonlife Church is your complete management solution designed to help you focus on what matters most—building community and spreading faith. Streamline operations with intuitive tools.
+                        Sonlife City Church is your complete management solution designed to help you focus on what matters most—building community and spreading faith. Streamline operations with intuitive tools.
                     </p>
                     <div class="flex flex-col sm:flex-row gap-4">
                         <a href="{{ route('register') }}" class="btn btn-primary px-8 py-4 text-lg">
@@ -258,7 +258,7 @@
     <section id="benefits" class="py-24 bg-slate-50">
         <div class="container mx-auto px-6">
             <div class="max-w-3xl mx-auto text-center mb-20">
-                <span class="badge badge-warning px-4 py-2 mb-6">Why {{ config('app.name', 'Sonlife Church') }}</span>
+                <span class="badge badge-warning px-4 py-2 mb-6">Why {{ config('app.name', 'Sonlife City Church') }}</span>
                 <h2 class="text-4xl md:text-5xl font-heading font-black text-slate-900 mb-6">Built for Modern Ministries</h2>
                 <p class="text-lg text-slate-600">Experience the difference with our comprehensive, secure, and easy-to-use platform</p>
             </div>
@@ -297,7 +297,7 @@
         <div class="container mx-auto px-6 relative z-10 text-center text-white">
             <h2 class="text-4xl md:text-6xl font-heading font-black mb-8 animate-fade-in">Ready to Transform Your Ministry?</h2>
             <p class="text-xl md:text-2xl opacity-90 mb-12 max-w-3xl mx-auto leading-relaxed">
-                Join hundreds of churches worldwide using Sonlife Church to streamline operations and engage their communities more effectively
+                Join hundreds of churches worldwide using Sonlife City Church to streamline operations and engage their communities more effectively
             </p>
             <div class="flex flex-col sm:flex-row gap-6 justify-center animate-slide-up">
                 <a href="{{ route('register') }}" class="btn bg-white text-primary-700 px-10 py-5 text-xl font-bold hover:bg-slate-50 hover:scale-105 transition-all shadow-2xl">
@@ -317,9 +317,9 @@
                 <div class="lg:col-span-2">
                     <div class="flex items-center gap-3 mb-8">
                         <img src="{{ asset('images/sonlife-logo.png') }}"
-                             alt="Sonlife Church"
+                             alt="Sonlife City Church"
                              class="h-10 w-auto">
-                        <span class="text-2xl font-heading font-black tracking-tight">Sonlife Church</span>
+                        <span class="text-2xl font-heading font-black tracking-tight">Sonlife City Church</span>
                     </div>
                     <p class="text-slate-400 text-lg leading-relaxed max-w-md mb-8 italic">
                         "Empowering ministries through state-of-the-art technology, so you can focus on the mission that matters most."
@@ -355,7 +355,7 @@
             </div>
 
             <div class="pt-12 border-t border-slate-900 flex flex-col md:flex-row justify-between items-center gap-6">
-                <p class="text-slate-500 text-sm italic">&copy; {{ date('Y') }} Sonlife Church. Built with ❤️ for the Global Church.</p>
+                <p class="text-slate-500 text-sm italic">&copy; {{ date('Y') }} Sonlife City Church. Built with ❤️ for the Global Church.</p>
                 <div class="flex items-center gap-8 text-xs font-bold text-slate-600 uppercase tracking-widest">
                     <a href="#">Status</a>
                     <a href="#">Terms</a>

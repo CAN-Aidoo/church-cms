@@ -1,4 +1,4 @@
-# Sonlife Church CMS - Render Deployment Guide
+# Sonlife City Church CMS - Render Deployment Guide
 
 Complete guide for deploying to Render with TiDB Cloud.
 
@@ -84,7 +84,7 @@ In your web service > **Environment** tab, add these variables:
 
 | Variable | Value | Notes |
 |----------|-------|-------|
-| `APP_NAME` | `Sonlife Church CMS` | |
+| `APP_NAME` | `Sonlife City Church CMS` | |
 | `APP_ENV` | `production` | |
 | `APP_DEBUG` | `false` | |
 | `APP_KEY` | `base64:...` | Generate with `php artisan key:generate --show` |
@@ -128,7 +128,7 @@ In your web service > **Environment** tab, add these variables:
 | `MAIL_PASSWORD` | Your SMTP password |
 | `MAIL_ENCRYPTION` | `tls` |
 | `MAIL_FROM_ADDRESS` | `noreply@yourchurch.com` |
-| `MAIL_FROM_NAME` | `Sonlife Church` |
+| `MAIL_FROM_NAME` | `Sonlife City Church` |
 
 ### Step 5: Deploy
 

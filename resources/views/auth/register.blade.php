@@ -14,11 +14,11 @@
             <div class="text-center">
                 <div class="mx-auto h-20 w-20 rounded-2xl bg-white shadow-lg flex items-center justify-center">
                     <img src="{{ asset('images/sonlife-logo.png') }}"
-                         alt="Sonlife Church"
+                         alt="Sonlife City Church"
                          class="h-16 w-auto">
                 </div>
                 <h2 class="mt-6 text-3xl font-bold text-gradient-blue-gold">
-                    Sonlife Church
+                    Sonlife City Church
                 </h2>
                 <p class="mt-2 text-sm text-gray-600">
                     Create your account
