@@ -358,60 +358,64 @@ document.getElementById('profileForm').addEventListener('submit', async (e) => {
     ChurchApp.showLoading(true);
 
     try {
-        // Prepare form data
-        const formData = new FormData();
+        // Submit profile text fields as JSON
+        const profilePayload = {
+            first_name: document.getElementById('firstName').value,
+            last_name: document.getElementById('lastName').value,
+            email: document.getElementById('email').value,
+            phone: document.getElementById('phone').value,
+            date_of_birth: document.getElementById('dateOfBirth').value,
+            gender: document.getElementById('gender').value,
+            marital_status: document.getElementById('maritalStatus').value,
+            address: document.getElementById('address').value,
+            city: document.getElementById('city').value,
+            region: document.getElementById('region').value,
+            digital_address: document.getElementById('digitalAddress').value,
+            emergency_contact_name: document.getElementById('emergencyName').value,
+            emergency_contact_relationship: document.getElementById('emergencyRelationship').value,
+            emergency_contact_phone: document.getElementById('emergencyPhone').value,
+            occupation: document.getElementById('occupation').value,
+            skills: document.getElementById('skills').value,
+        };
 
-        // Personal information
-        formData.append('first_name', document.getElementById('firstName').value);
-        formData.append('last_name', document.getElementById('lastName').value);
-        formData.append('email', document.getElementById('email').value);
-        formData.append('phone', document.getElementById('phone').value);
-        formData.append('date_of_birth', document.getElementById('dateOfBirth').value);
-        formData.append('gender', document.getElementById('gender').value);
-        formData.append('marital_status', document.getElementById('maritalStatus').value);
-
-        // Address
-        formData.append('address', document.getElementById('address').value);
-        formData.append('city', document.getElementById('city').value);
-        formData.append('region', document.getElementById('region').value);
-        formData.append('digital_address', document.getElementById('digitalAddress').value);
-
-        // Emergency contact
-        formData.append('emergency_contact_name', document.getElementById('emergencyName').value);
-        formData.append('emergency_contact_relationship', document.getElementById('emergencyRelationship').value);
-        formData.append('emergency_contact_phone', document.getElementById('emergencyPhone').value);
-
-        // Additional info
-        formData.append('occupation', document.getElementById('occupation').value);
-        formData.append('skills', document.getElementById('skills').value);
-
-        // Photo handling
-        if (newPhotoFile) {
-            formData.append('photo', newPhotoFile);
-        } else if (removePhotoFlag) {
-            formData.append('remove_photo', '1');
-        }
-
-        // Submit update
         const result = await fetch('/api/v1/my/profile', {
-            method: 'POST',
+            method: 'PUT',
             headers: {
-                'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
+                'Content-Type': 'application/json',
                 'Accept': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                'X-Requested-With': 'XMLHttpRequest',
             },
-            body: formData
+            credentials: 'same-origin',
+            body: JSON.stringify(profilePayload),
         });
 
         const data = await result.json();
 
-        if (data.success) {
-            ChurchApp.showToast('Profile updated successfully', 'success');
-            setTimeout(() => {
-                window.location.href = '{{ url('/mobile/profile') }}';
-            }, 1500);
-        } else {
+        if (!data.success && !result.ok) {
             throw new Error(data.message || 'Update failed');
         }
+
+        // Upload photo separately if changed
+        if (newPhotoFile) {
+            const photoForm = new FormData();
+            photoForm.append('photo', newPhotoFile);
+            await fetch('/api/mobile/v1/my/photo', {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'application/json',
+                },
+                credentials: 'same-origin',
+                body: photoForm,
+            });
+        }
+
+        ChurchApp.showToast('Profile updated successfully', 'success');
+        setTimeout(() => {
+            window.location.href = '{{ url('/mobile/profile') }}';
+        }, 1500);
     } catch (error) {
         console.error('Update error:', error);
         ChurchApp.showToast(error.message || 'Failed to update profile', 'error');

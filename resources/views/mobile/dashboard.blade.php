@@ -66,6 +66,17 @@
             </div>
         </div>
 
+        <!-- Onboarding Checklist (shown until all steps dismissed) -->
+        <div id="onboardingCard" class="hidden bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200 rounded-2xl p-4">
+            <div class="flex items-center justify-between mb-3">
+                <h3 class="text-sm font-bold text-blue-900">Get started</h3>
+                <button onclick="dismissOnboarding()" class="text-blue-400 hover:text-blue-600 text-xs font-medium">Dismiss</button>
+            </div>
+            <div class="space-y-2" id="onboardingSteps">
+                <!-- Steps rendered by JS -->
+            </div>
+        </div>
+
         <!-- Ministry & Services -->
         <div>
             <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Ministry & Services</h3>
@@ -292,7 +303,62 @@
         touchStart = 0;
     });
 
+    // Onboarding checklist
+    const ONBOARDING_KEY = 'onboarding_dismissed';
+    const onboardingSteps = [
+        { id: 'photo', label: 'Add your profile photo', url: '/mobile/profile-edit', icon: '📷' },
+        { id: 'checkin', label: 'Check in to a service', url: '/mobile/check-in', icon: '✅' },
+        { id: 'giving', label: 'Set up your giving', url: '/mobile/give', icon: '🙏' },
+        { id: 'qr', label: 'Save your personal QR code', url: '/mobile/profile', icon: '🔑' },
+    ];
+
+    function renderOnboarding() {
+        const dismissed = JSON.parse(localStorage.getItem(ONBOARDING_KEY) || '{}');
+        const remaining = onboardingSteps.filter(s => !dismissed[s.id]);
+
+        if (remaining.length === 0) return; // all done
+
+        const card = document.getElementById('onboardingCard');
+        const stepsContainer = document.getElementById('onboardingSteps');
+
+        stepsContainer.innerHTML = remaining.map(step => `
+            <div class="flex items-center gap-3 bg-white rounded-xl px-3 py-2.5 shadow-sm border border-blue-100">
+                <span class="text-lg">${step.icon}</span>
+                <a href="${step.url}" class="flex-1 text-sm font-medium text-slate-700">${step.label}</a>
+                <button onclick="completeOnboardingStep('${step.id}')" class="text-blue-400 hover:text-blue-600 flex-shrink-0" title="Mark done">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                    </svg>
+                </button>
+            </div>
+        `).join('');
+
+        card.classList.remove('hidden');
+    }
+
+    function completeOnboardingStep(id) {
+        const dismissed = JSON.parse(localStorage.getItem(ONBOARDING_KEY) || '{}');
+        dismissed[id] = true;
+        localStorage.setItem(ONBOARDING_KEY, JSON.stringify(dismissed));
+        renderOnboarding();
+        // Hide card if all done
+        const remaining = onboardingSteps.filter(s => !dismissed[s.id]);
+        if (remaining.length === 0) {
+            document.getElementById('onboardingCard').classList.add('hidden');
+        }
+    }
+
+    function dismissOnboarding() {
+        const dismissed = {};
+        onboardingSteps.forEach(s => dismissed[s.id] = true);
+        localStorage.setItem(ONBOARDING_KEY, JSON.stringify(dismissed));
+        document.getElementById('onboardingCard').classList.add('hidden');
+    }
+
     // Init
-    document.addEventListener('DOMContentLoaded', initDashboard);
+    document.addEventListener('DOMContentLoaded', () => {
+        initDashboard();
+        renderOnboarding();
+    });
 </script>
 @endpush

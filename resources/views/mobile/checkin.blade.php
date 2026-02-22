@@ -64,6 +64,26 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
                     </svg>
                 </button>
+
+                <!-- I'm Here (Self-Report) — shown only during service hours -->
+                <div id="selfReportCard" class="hidden">
+                    <button onclick="selfReportCheckIn()" class="w-full bg-gradient-to-r from-green-600 to-green-700 text-white p-4 rounded-xl shadow-md flex items-center justify-between hover:from-green-700 hover:to-green-800 transition">
+                        <div class="flex items-center">
+                            <div class="bg-white/20 p-3 rounded-lg mr-4">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                </svg>
+                            </div>
+                            <div class="text-left">
+                                <p class="font-semibold">I'm Here</p>
+                                <p class="text-sm text-green-100">No QR needed — tap to check in</p>
+                            </div>
+                        </div>
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                        </svg>
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -478,10 +498,65 @@ async function loadAttendanceStats() {
     }
 }
 
+// Self-Report Check-in
+async function selfReportCheckIn() {
+    ChurchApp.showLoading(true);
+    try {
+        const payload = {};
+        // Optionally capture GPS
+        if (navigator.geolocation) {
+            await new Promise((resolve) => {
+                navigator.geolocation.getCurrentPosition(
+                    (pos) => {
+                        payload.latitude = pos.coords.latitude;
+                        payload.longitude = pos.coords.longitude;
+                        resolve();
+                    },
+                    () => resolve(), // continue without GPS if denied
+                    { timeout: 4000 }
+                );
+            });
+        }
+
+        const res = await ChurchApp.apiCall('/api/mobile/v1/check-in/self-report', 'POST', payload);
+
+        if (res.success) {
+            ChurchApp.showToast('Checked in successfully!', 'success');
+            loadCheckInHistory();
+            loadAttendanceStats();
+        } else {
+            ChurchApp.showToast(res.message || 'Check-in failed', 'error');
+        }
+    } catch (e) {
+        ChurchApp.showToast(e.message || 'Check-in failed', 'error');
+    } finally {
+        ChurchApp.showLoading(false);
+    }
+}
+
+// Show "I'm Here" button only during service windows
+function checkServiceHours() {
+    const now = new Date();
+    const day = now.getDay(); // 0=Sun, 3=Wed, 5=Fri
+    const hour = now.getHours();
+
+    const windows = {
+        0: { start: 5, end: 14 },
+        3: { start: 15, end: 22 },
+        5: { start: 15, end: 22 },
+    };
+
+    const card = document.getElementById('selfReportCard');
+    if (card && windows[day] && hour >= windows[day].start && hour < windows[day].end) {
+        card.classList.remove('hidden');
+    }
+}
+
 // Initialize on page load
 document.addEventListener('DOMContentLoaded', () => {
     loadCheckInHistory();
     loadAttendanceStats();
+    checkServiceHours();
 });
 </script>
 @endpush

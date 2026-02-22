@@ -362,10 +362,12 @@ Route::prefix('mobile/v1')->group(function () {
         Route::post('/check-in/member', [MobileCheckInController::class, 'memberCheckIn']);
         Route::post('/check-in/service', [MobileCheckInController::class, 'serviceCheckIn']);
         Route::post('/check-in/family', [MobileCheckInController::class, 'familyCheckIn']);
+        Route::post('/check-in/self-report', [MobileCheckInController::class, 'selfReport']);
 
         // Member Portal APIs
         Route::get('/my/profile', [MemberController::class, 'getMyProfile']);
         Route::put('/my/profile', [MemberController::class, 'updateMyProfile']);
+        Route::post('/my/photo', [MobileRegistrationController::class, 'uploadPhoto']);
         Route::get('/my/attendance', [MemberController::class, 'getMyAttendance']);
         Route::get('/my/contributions', [MemberController::class, 'getMyContributions']);
         Route::get('/my/ministry-involvement', [MemberController::class, 'getMyMinistryInvolvement']);

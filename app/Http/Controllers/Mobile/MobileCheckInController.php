@@ -213,6 +213,95 @@ class MobileCheckInController extends Controller
     }
 
     /**
+     * Self-report attendance without scanning a QR code.
+     * Only allowed during configured service windows.
+     */
+    public function selfReport(Request $request)
+    {
+        $validated = $request->validate([
+            'latitude' => 'nullable|numeric',
+            'longitude' => 'nullable|numeric',
+        ]);
+
+        $member = $request->user()->member;
+
+        if (! $member) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Member profile not linked to this user account.',
+            ], 404);
+        }
+
+        // Determine service type from current day/time
+        $now = now()->timezone(config('app.timezone', 'Africa/Accra'));
+        $dayOfWeek = $now->dayOfWeek; // 0=Sunday, 3=Wednesday, 5=Friday
+        $hour = $now->hour;
+
+        $serviceWindows = [
+            0 => ['start' => 5, 'end' => 14, 'type' => 'sunday_service'],   // Sunday 5 AM – 2 PM
+            3 => ['start' => 15, 'end' => 22, 'type' => 'midweek_service'],  // Wednesday 3 PM – 10 PM
+            5 => ['start' => 15, 'end' => 22, 'type' => 'friday_service'],   // Friday 3 PM – 10 PM
+        ];
+
+        if (! isset($serviceWindows[$dayOfWeek])) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Self-check-in is only available on service days (Sunday, Wednesday, Friday).',
+            ], 422);
+        }
+
+        $window = $serviceWindows[$dayOfWeek];
+
+        if ($hour < $window['start'] || $hour >= $window['end']) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Self-check-in is only available during service hours.',
+            ], 422);
+        }
+
+        $serviceType = $window['type'];
+        $serviceDate = $now->toDateString();
+
+        // Prevent duplicate check-in
+        $existing = Attendance::where('member_id', $member->id)
+            ->where('service_date', $serviceDate)
+            ->where('service_type', $serviceType)
+            ->first();
+
+        if ($existing) {
+            return response()->json([
+                'success' => false,
+                'message' => 'You have already checked in for this service.',
+            ], 400);
+        }
+
+        $attendance = Attendance::create([
+            'member_id' => $member->id,
+            'service_date' => $serviceDate,
+            'service_type' => $serviceType,
+            'check_in_time' => $now->toTimeString(),
+            'status' => 'present',
+            'check_in_method' => 'self_reported',
+            'latitude' => $validated['latitude'] ?? null,
+            'longitude' => $validated['longitude'] ?? null,
+        ]);
+
+        broadcast(new AttendanceRecorded($attendance))->toOthers();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Check-in recorded successfully.',
+            'data' => [
+                'member_name' => $member->first_name.' '.$member->last_name,
+                'service_type' => $serviceType,
+                'service_date' => $serviceDate,
+                'check_in_time' => $attendance->check_in_time,
+                'method' => 'self_reported',
+            ],
+        ]);
+    }
+
+    /**
      * Generate personal QR code for member.
      */
     public function generatePersonalQr(Request $request)

@@ -6,18 +6,21 @@ use App\Http\Controllers\Controller;
 use App\Models\Member;
 use App\Models\User;
 use App\Models\Visitor;
+use App\Services\FileUploadService;
 use App\Services\NotificationService;
 use App\Services\SmsService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 
 class MobileRegistrationController extends Controller
 {
     public function __construct(
         protected SmsService $smsService,
-        protected NotificationService $notificationService
+        protected NotificationService $notificationService,
+        protected FileUploadService $fileUploadService
     ) {}
 
     /**
@@ -124,14 +127,14 @@ class MobileRegistrationController extends Controller
         try {
             DB::beginTransaction();
 
-            // Create user account with LIMITED access
+            // Create user account — auto-verified after OTP confirmation
             $user = User::create([
                 'name' => $validated['first_name'].' '.$validated['last_name'],
                 'email' => $validated['email'] ?? $validated['phone'].'@mobile.church.local',
                 'phone' => $validated['phone'],
                 'password' => Hash::make($validated['password']),
-                'role' => 'member', // Mobile member role
-                'is_verified' => false, // Not verified by admin yet
+                'role' => 'member',
+                'is_verified' => true, // Auto-verified via phone OTP
                 'phone_verified_at' => now(),
                 'email_verified_at' => isset($validated['email']) ? now() : null,
             ]);
@@ -139,7 +142,7 @@ class MobileRegistrationController extends Controller
             // Generate unique member ID
             $memberCode = 'M-'.date('Y').'-'.str_pad(Member::count() + 1, 6, '0', STR_PAD_LEFT);
 
-            // Create member profile
+            // Create member profile — active immediately
             $member = Member::create([
                 'user_id' => $user->id,
                 'member_id' => $memberCode,
@@ -150,7 +153,7 @@ class MobileRegistrationController extends Controller
                 'date_of_birth' => $validated['date_of_birth'] ?? null,
                 'gender' => $validated['gender'] ?? null,
                 'address' => $validated['address'] ?? null,
-                'member_status' => 'pending', // Pending admin verification
+                'member_status' => 'active', // Active after phone verification
                 'membership_date' => now(),
                 'source' => 'mobile_self_registration',
             ]);
@@ -168,7 +171,7 @@ class MobileRegistrationController extends Controller
 
             return response()->json([
                 'success' => true,
-                'message' => 'Registration successful! Your account is pending admin verification.',
+                'message' => 'Registration successful! Welcome to the church family.',
                 'data' => [
                     'user' => [
                         'id' => $user->id,
@@ -187,10 +190,11 @@ class MobileRegistrationController extends Controller
                     'permissions' => [
                         'can_view_announcements' => true,
                         'can_update_profile' => true,
-                        'can_checkin_as_visitor' => true,
-                        'can_make_contributions' => false, // Requires verification
-                        'can_register_for_programs' => false, // Requires verification
-                        'can_access_directory' => false, // Requires verification
+                        'can_checkin' => true,
+                        'can_make_contributions' => true,
+                        'can_register_for_programs' => true,
+                        'can_submit_prayer_requests' => true,
+                        'can_use_messaging' => true,
                     ],
                 ],
             ], 201);
@@ -352,6 +356,54 @@ class MobileRegistrationController extends Controller
     }
 
     /**
+     * Upload profile photo for the authenticated member.
+     */
+    public function uploadPhoto(Request $request)
+    {
+        $request->validate([
+            'photo' => 'required|file|mimes:jpeg,jpg,png,webp|max:5120',
+        ]);
+
+        $member = $request->user()->member;
+
+        if (! $member) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No member profile found.',
+            ], 404);
+        }
+
+        try {
+            // Delete old photo if it exists
+            if ($member->photo_url) {
+                Storage::disk('public')->delete($member->photo_url);
+            }
+
+            $path = $this->fileUploadService->uploadFile(
+                $request->file('photo'),
+                'member-photos',
+                'image',
+                5120
+            );
+
+            $member->update(['photo_url' => $path]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Photo uploaded successfully.',
+                'data' => [
+                    'photo_url' => asset('storage/'.$path),
+                ],
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], 422);
+        }
+    }
+
+    /**
      * Check registration status (for pending members).
      */
     public function checkStatus(Request $request)
@@ -386,8 +438,8 @@ class MobileRegistrationController extends Controller
                     'can_use_messaging' => $isVerified,
                 ],
                 'message' => $isVerified
-                    ? 'Your account is fully verified!'
-                    : 'Your account is pending admin verification. Some features are limited.',
+                    ? 'Your account is active and verified.'
+                    : 'Your account is being reviewed. Contact admin if features are unavailable.',
             ],
         ]);
     }
