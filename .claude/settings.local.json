@@ -73,7 +73,10 @@
       "Bash(del /f /q tmpclaude-*)",
       "WebSearch",
       "WebFetch(domain:help.alwaysdata.com)",
-      "Bash(composer run-script:*)"
+      "Bash(composer run-script:*)",
+      "Bash(cmd.exe /c \"dir \"\"C:\\\\Users\\\\Clement Nana Aidoo\\\\Downloads\\\\cms\"\"\")",
+      "Bash(powershell -Command \"Get-ChildItem ''C:\\\\Users\\\\Clement Nana Aidoo\\\\Downloads\\\\cms'' -ErrorAction SilentlyContinue | Select-Object Name, Length, Extension\")",
+      "Bash(cmd.exe /c \"grep /ministry routes\\\\web.php & grep /id-card routes\\\\web.php\")"
     ],
     "deny": [],
     "ask": []

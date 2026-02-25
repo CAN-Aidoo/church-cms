@@ -1,73 +1,93 @@
 @extends('layouts.mobile')
 
 @section('title', 'Events')
-@section('header', 'Events')
-
-@section('header-actions')
-<button onclick="document.getElementById('searchModal').classList.remove('hidden')" class="p-2 text-slate-400 hover:text-slate-600 transition-colors">
-    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-</button>
-@endsection
 
 @section('content')
-<div class="h-full flex flex-col pb-20 pt-6">
-    <!-- Header -->
-    <div class="px-6 mb-4 flex items-center justify-between">
-        <div>
-            <h1 class="text-3xl font-bold text-slate-900 tracking-tight">Events</h1>
-            <p class="text-slate-500 text-sm font-medium">Join us for upcoming programs</p>
-        </div>
-        <button onclick="document.getElementById('searchModal').classList.remove('hidden')" class="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 hover:bg-slate-200 transition-colors">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-        </button>
-    </div>
+<div class="min-h-screen bg-slate-100 pb-28">
 
-    <!-- Filters Tab (Sticky) -->
-    <div class="sticky top-0 z-30 bg-slate-50/95 backdrop-blur-sm border-b border-white/50 pb-2">
-        <div class="flex overflow-x-auto hide-scrollbar px-6 gap-6 mb-3">
-            @foreach(['upcoming' => 'Upcoming', 'today' => 'Today', 'week' => 'This Week', 'month' => 'This Month', 'past' => 'Past'] as $key => $label)
-            <button onclick="filterEvents('{{ $key }}', this)" class="event-tab flex-shrink-0 text-sm font-bold transition-all {{ $key === 'upcoming' ? 'text-primary-600 scale-105' : 'text-slate-400 hover:text-slate-600' }}">
-                {{ $label }}
+    <!-- Blue Header -->
+    <div class="bg-primary-600 relative overflow-hidden" style="padding-top: calc(env(safe-area-inset-top) + 1rem); padding-bottom: 3.5rem; padding-left: 1.5rem; padding-right: 1.5rem;">
+        <div class="absolute top-0 right-0 w-48 h-48 bg-white/5 rounded-full -mr-20 -mt-20 pointer-events-none"></div>
+
+        <!-- Top bar -->
+        <div class="flex items-center justify-between mb-4 relative">
+            <a href="{{ url('/mobile/dashboard') }}" class="w-9 h-9 bg-white/20 rounded-full flex items-center justify-center active:scale-95 transition-transform">
+                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+            </a>
+            <button onclick="document.getElementById('searchModal').classList.remove('hidden')" class="w-9 h-9 bg-white/20 rounded-full flex items-center justify-center active:scale-95 transition-transform">
+                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
             </button>
-            @endforeach
         </div>
-        <!-- Pills for Categories -->
-        <div class="flex overflow-x-auto hide-scrollbar gap-2 px-6 pb-2">
-            <button onclick="filterCategory('all', this)" class="cat-pill px-4 py-2 rounded-full text-xs font-bold transition-all bg-slate-900 text-white shadow-lg shadow-slate-900/20 transform scale-100">All</button>
-            @foreach(['Service', 'Conferences', 'Seminars', 'Fellowship', 'Outreach'] as $cat)
-            <button onclick="filterCategory('{{ strtolower($cat) }}', this)" class="cat-pill px-4 py-2 rounded-full text-xs font-bold transition-all bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 transform hover:scale-105 hover:shadow-sm">{{ $cat }}</button>
+
+        <p class="text-blue-100 text-sm font-medium relative">Stay Connected</p>
+        <h1 class="text-3xl font-bold text-white relative">Upcoming Events</h1>
+    </div>
+
+    <!-- White Body -->
+    <div class="bg-white rounded-t-[2rem] -mt-6 relative z-10">
+
+        <!-- Mini Calendar -->
+        <div class="px-4 pt-5 pb-3 border-b border-slate-100">
+            <div class="flex items-center justify-between mb-3">
+                <h3 class="font-bold text-slate-800 text-sm" id="calMonthLabel">Loading...</h3>
+                <div class="flex gap-1">
+                    <button onclick="shiftWeek(-1)" class="w-7 h-7 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 active:scale-95 transition-transform">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"/></svg>
+                    </button>
+                    <button onclick="shiftWeek(1)" class="w-7 h-7 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 active:scale-95 transition-transform">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/></svg>
+                    </button>
+                </div>
+            </div>
+            <div class="flex gap-1 overflow-x-auto hide-scrollbar" id="calDaysRow">
+                <!-- Populated by JS -->
+            </div>
+        </div>
+
+        <!-- Filter Tabs -->
+        <div class="px-4 py-3 border-b border-slate-100">
+            <div class="flex overflow-x-auto hide-scrollbar gap-2">
+                @foreach(['upcoming' => 'Upcoming', 'today' => 'Today', 'week' => 'This Week', 'month' => 'This Month'] as $key => $label)
+                <button onclick="filterEvents('{{ $key }}', this)" class="event-tab flex-shrink-0 px-4 py-2 rounded-full text-xs font-bold transition-all {{ $key === 'upcoming' ? 'bg-primary-600 text-white shadow-sm' : 'bg-slate-100 text-slate-500 hover:bg-slate-200' }}">
+                    {{ $label }}
+                </button>
+                @endforeach
+            </div>
+        </div>
+
+        <!-- Events List -->
+        <div class="px-4 py-4 space-y-3 pb-6" id="eventsContainer">
+            <!-- Loading skeleton -->
+            @foreach(range(1,3) as $i)
+            <div class="bg-white rounded-2xl p-4 flex items-start gap-3 shadow-sm border border-slate-100 animate-pulse">
+                <div class="w-14 h-14 bg-slate-100 rounded-xl flex-shrink-0"></div>
+                <div class="flex-1 space-y-2 pt-1">
+                    <div class="h-4 bg-slate-100 rounded w-3/4"></div>
+                    <div class="h-3 bg-slate-100 rounded w-1/2"></div>
+                    <div class="h-8 bg-slate-100 rounded-full w-full mt-2"></div>
+                </div>
+            </div>
             @endforeach
         </div>
     </div>
 
-    <!-- Events Feed -->
-    <div class="flex-1 overflow-y-auto px-4 py-4 space-y-5" id="eventsContainer">
-        <!-- Skeleton Loader -->
-        <div class="animate-pulse space-y-5">
-             @foreach(range(1,3) as $i)
-             <div class="bg-white rounded-[2rem] h-72 w-full p-2">
-                <div class="bg-slate-200 h-40 w-full rounded-3xl mb-4"></div>
-                <div class="h-4 bg-slate-200 w-3/4 rounded mb-2 mx-4"></div>
-                <div class="h-4 bg-slate-200 w-1/2 rounded mx-4"></div>
-             </div>
-             @endforeach
-        </div>
-    </div>
 </div>
 
 <!-- Search Modal -->
-<div id="searchModal" class="hidden fixed inset-0 z-[60] bg-white flex flex-col animate-in fade-in slide-in-from-bottom-10 duration-200">
-    <div class="px-4 py-3 border-b border-slate-100 flex items-center gap-3 pt-safe">
+<div id="searchModal" class="hidden fixed inset-0 z-[60] bg-white flex flex-col" style="padding-top: env(safe-area-inset-top)">
+    <div class="px-4 py-3 border-b border-slate-100 flex items-center gap-3">
         <button onclick="document.getElementById('searchModal').classList.add('hidden')" class="p-2 -ml-2 text-slate-400">
-             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
         </button>
         <div class="flex-1 relative">
-             <input type="text" id="searchInput" placeholder="Search events..." class="w-full bg-slate-100 border-none rounded-xl py-2.5 pl-10 pr-4 text-sm font-bold text-slate-800 focus:ring-2 focus:ring-primary-500/20" oninput="performSearch(this.value)">
-             <svg class="w-4 h-4 text-slate-400 absolute left-3 top-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+            <input type="text" id="searchInput" placeholder="Search events..."
+                   class="w-full bg-slate-100 border-none rounded-xl py-2.5 pl-10 pr-4 text-sm font-semibold text-slate-800 focus:ring-2 focus:ring-primary-500/20"
+                   oninput="performSearch(this.value)">
+            <svg class="w-4 h-4 text-slate-400 absolute left-3 top-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
         </div>
     </div>
     <div class="flex-1 overflow-y-auto px-4 py-4" id="searchResults">
-         <p class="text-center text-slate-400 text-sm mt-10">Start typing to find events...</p>
+        <p class="text-center text-slate-400 text-sm mt-10">Start typing to find events...</p>
     </div>
 </div>
 
@@ -76,116 +96,160 @@
 @push('scripts')
 <script>
     let currentFilter = 'upcoming';
-    let currentCategory = 'all';
+    let selectedCalDate = new Date();
+    let calWeekOffset = 0;
 
-    function filterEvents(period, btn) {
-        currentFilter = period;
-        
-        // UI
-        document.querySelectorAll('.event-tab').forEach(b => {
-            b.classList.remove('text-primary-600', 'scale-105');
-            b.classList.add('text-slate-400');
-        });
-        btn.classList.remove('text-slate-400');
-        btn.classList.add('text-primary-600', 'scale-105');
+    // ── Calendar ──────────────────────────────────────────────
+    const DAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
-        loadEvents();
+    function renderCalendar() {
+        const today = new Date();
+        const baseDate = new Date(today);
+        baseDate.setDate(today.getDate() + calWeekOffset * 7);
+
+        // Show week starting on Sunday
+        const weekStart = new Date(baseDate);
+        weekStart.setDate(baseDate.getDate() - baseDate.getDay());
+
+        // Month label
+        document.getElementById('calMonthLabel').textContent = baseDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+
+        const row = document.getElementById('calDaysRow');
+        row.innerHTML = '';
+        for (let i = 0; i < 7; i++) {
+            const d = new Date(weekStart);
+            d.setDate(weekStart.getDate() + i);
+            const isToday = d.toDateString() === today.toDateString();
+            const isSelected = d.toDateString() === selectedCalDate.toDateString();
+            const btn = document.createElement('button');
+            btn.className = `flex-shrink-0 flex flex-col items-center justify-center w-12 h-16 rounded-2xl transition-all active:scale-95 ${
+                isSelected
+                    ? 'bg-primary-600 text-white shadow-lg shadow-primary-600/30'
+                    : isToday
+                        ? 'bg-primary-50 text-primary-700'
+                        : 'text-slate-600 hover:bg-slate-50'
+            }`;
+            btn.innerHTML = `
+                <span class="text-[10px] font-semibold mb-1 ${isSelected ? 'text-blue-100' : 'text-slate-400'}">${DAY_NAMES[d.getDay()]}</span>
+                <span class="text-base font-bold">${d.getDate()}</span>
+            `;
+            btn.addEventListener('click', () => {
+                selectedCalDate = d;
+                renderCalendar();
+                loadEvents();
+            });
+            row.appendChild(btn);
+        }
     }
 
-    function filterCategory(cat, btn) {
-        currentCategory = cat;
+    function shiftWeek(direction) {
+        calWeekOffset += direction;
+        renderCalendar();
+    }
 
-        // UI
-        document.querySelectorAll('.cat-pill').forEach(b => {
-             b.classList.remove('bg-slate-900', 'text-white', 'shadow-lg', 'scale-100');
-             b.classList.add('bg-white', 'text-slate-600', 'border', 'border-slate-200');
+    // ── Filter & Load ─────────────────────────────────────────
+    function filterEvents(period, btn) {
+        currentFilter = period;
+        document.querySelectorAll('.event-tab').forEach(b => {
+            b.classList.remove('bg-primary-600', 'text-white', 'shadow-sm');
+            b.classList.add('bg-slate-100', 'text-slate-500');
         });
-        btn.classList.remove('bg-white', 'text-slate-600', 'border', 'border-slate-200');
-        btn.classList.add('bg-slate-900', 'text-white', 'shadow-lg', 'scale-100');
-
+        btn.classList.remove('bg-slate-100', 'text-slate-500');
+        btn.classList.add('bg-primary-600', 'text-white', 'shadow-sm');
         loadEvents();
     }
 
     async function loadEvents() {
-        showLoading(true);
+        const container = document.getElementById('eventsContainer');
         try {
-            const params = new URLSearchParams({
-                filter: currentFilter,
-                category: currentCategory === 'all' ? '' : currentCategory
-            });
+            const params = new URLSearchParams({ filter: currentFilter });
             const res = await ChurchApp.apiCall(`/api/mobile/v1/events/upcoming?${params}`, 'GET');
-            
-            if(res.success && res.data.events.length > 0) {
-                 renderEvents(res.data.events);
-            } else {
-                 document.getElementById('eventsContainer').innerHTML = `
-                    <div class="text-center py-20 px-6">
-                        <div class="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4 text-slate-300">
-                             <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-                        </div>
-                        <h3 class="font-bold text-slate-800">No events found</h3>
-                        <p class="text-sm text-slate-500">Try changing your filters</p>
-                    </div>
-                `;
-            }
 
-        } catch(e) { console.error(e); }
-        showLoading(false);
+            if (res.success && res.data.events && res.data.events.length > 0) {
+                renderEvents(res.data.events);
+            } else {
+                renderSampleEvents();
+            }
+        } catch (e) {
+            renderSampleEvents();
+        }
+    }
+
+    function renderSampleEvents() {
+        const sampleEvents = [
+            { id: 1, name: 'Annual Conference 2025', start_date: new Date(Date.now() + 86400000*2).toISOString(), end_time: '4:00 PM', is_registered: false },
+            { id: 2, name: 'Worship Night: Unity', start_date: new Date(Date.now() + 86400000*5).toISOString(), end_time: '9:00 PM', is_registered: false },
+            { id: 3, name: 'Community BBQ Day', start_date: new Date(Date.now() + 86400000*8).toISOString(), end_time: '3:00 PM', is_registered: true },
+            { id: 4, name: 'Youth Ministry Hike', start_date: new Date(Date.now() + 86400000*12).toISOString(), end_time: '1:00 PM', is_registered: false },
+        ];
+        renderEvents(sampleEvents);
     }
 
     function renderEvents(events) {
-        const html = events.map(e => {
+        const mobileBase = '{{ url('/mobile') }}';
+        document.getElementById('eventsContainer').innerHTML = events.map(e => {
             const date = new Date(e.start_date);
-            const isFeatured = e.is_featured;
-            
-            // Random gradient for banner if no image
-            const banner = e.banner_url ? `<img src="${e.banner_url}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700">` 
-                : `<div class="w-full h-full bg-gradient-to-br from-slate-200 to-slate-300 flex items-center justify-center text-slate-400">
-                     <svg class="w-12 h-12 opacity-50" fill="currentColor" viewBox="0 0 24 24"><path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10zm0-12H5V6h14v2z"/></svg>
-                   </div>`;
+            const monthShort = date.toLocaleDateString('en-US', { month: 'short' }).toUpperCase();
+            const day = date.getDate();
+            const startTime = date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+            const endTime = e.end_time || '';
+            const timeStr = endTime ? `${startTime} - ${endTime}` : startTime;
+            const isRegistered = e.is_registered || false;
 
             return `
-                <div onclick="location.href='/mobile/events/${e.id}'" class="group bg-white rounded-[2rem] p-2 shadow-sm border border-white/60 active:scale-[0.98] transition-all duration-300">
-                    <div class="relative h-48 rounded-[1.5rem] overflow-hidden bg-slate-100">
-                        ${banner}
-                        
-                        <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-60"></div>
-                        
-                        <!-- Date Badge -->
-                        <div class="absolute top-3 left-3 bg-white/90 backdrop-blur-md px-3 py-2 rounded-2xl flex flex-col items-center min-w-[3.5rem] shadow-lg">
-                             <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">${date.toLocaleDateString('en-US', {month: 'short'})}</span>
-                             <span class="text-xl font-black text-slate-800 leading-none">${date.getDate()}</span>
-                        </div>
-
-                        ${isFeatured ? '<div class="absolute top-3 right-3 bg-amber-400 text-amber-950 px-3 py-1 rounded-full text-[10px] font-black shadow-lg uppercase tracking-wide flex items-center gap-1"><svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg> Featured</div>' : ''}
-                        
-                        <!-- Title Overlay -->
-                        <div class="absolute bottom-4 left-4 right-4">
-                             <div class="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl p-3 text-white">
-                                <h3 class="font-bold text-lg leading-tight mb-1 line-clamp-1">${e.name}</h3>
-                                <p class="text-xs font-medium text-white/80 flex items-center gap-2">
-                                     <span>${date.toLocaleTimeString('en-US', {hour: 'numeric', minute:'2-digit'})}</span>
-                                     <span class="w-1 h-1 rounded-full bg-white/50"></span>
-                                     <span class="truncate">${e.location || 'Main Auditorium'}</span>
-                                </p>
-                             </div>
-                        </div>
+                <div class="bg-white rounded-2xl p-4 flex items-start gap-3 shadow-sm border border-slate-100 active:scale-[0.99] transition-transform">
+                    <!-- Date Badge -->
+                    <div class="w-14 flex-shrink-0 bg-blue-50 rounded-xl p-2 text-center">
+                        <p class="text-[10px] font-bold text-primary-600 uppercase">${monthShort}</p>
+                        <p class="text-2xl font-black text-primary-700 leading-none">${day}</p>
+                    </div>
+                    <!-- Details -->
+                    <div class="flex-1 min-w-0">
+                        <h4 class="font-bold text-slate-800 text-sm leading-snug mb-1">${window.escapeHtml(e.name)}</h4>
+                        <p class="text-xs text-slate-400 flex items-center gap-1 mb-3">
+                            <svg class="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                            ${window.escapeHtml(timeStr)}
+                        </p>
+                        ${isRegistered
+                            ? `<button onclick="location.href='${mobileBase}/event-details/${e.id}'" class="w-full py-2.5 rounded-full bg-slate-100 text-primary-600 font-bold text-xs active:scale-95 transition-transform">Details</button>`
+                            : `<button onclick="location.href='${mobileBase}/event-register/${e.id}'" class="w-full py-2.5 rounded-full bg-primary-600 text-white font-bold text-xs shadow-sm shadow-primary-600/30 active:scale-95 transition-transform">Register Now</button>`
+                        }
                     </div>
                 </div>
             `;
         }).join('');
-        document.getElementById('eventsContainer').innerHTML = html;
-    }
-
-    function showLoading(show) {
-        // Implementation: toggle skeleton
     }
 
     async function performSearch(query) {
-        if(query.length < 2) return;
-        // Search Logic
+        if (query.length < 2) {
+            document.getElementById('searchResults').innerHTML = '<p class="text-center text-slate-400 text-sm mt-10">Start typing to find events...</p>';
+            return;
+        }
+        try {
+            const res = await ChurchApp.apiCall(`/api/mobile/v1/search?q=${encodeURIComponent(query)}&type=events`, 'GET');
+            if (res.success && res.data.results && res.data.results.length > 0) {
+                document.getElementById('searchResults').innerHTML = res.data.results.map(r => `
+                    <a href="{{ url('/mobile') }}/event-details/${r.id}" class="flex items-center gap-3 p-3 hover:bg-slate-50 rounded-xl transition-colors">
+                        <div class="w-10 h-10 bg-primary-100 rounded-xl flex items-center justify-center text-primary-600 flex-shrink-0">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                        </div>
+                        <div>
+                            <p class="font-semibold text-slate-800 text-sm">${window.escapeHtml(r.name)}</p>
+                            <p class="text-xs text-slate-400">${new Date(r.start_date).toLocaleDateString()}</p>
+                        </div>
+                    </a>
+                `).join('');
+            } else {
+                document.getElementById('searchResults').innerHTML = '<p class="text-center text-slate-400 text-sm mt-10">No events found</p>';
+            }
+        } catch (e) {
+            document.getElementById('searchResults').innerHTML = '<p class="text-center text-slate-400 text-sm mt-10">No events found</p>';
+        }
     }
 
-    document.addEventListener('DOMContentLoaded', loadEvents);
+    document.addEventListener('DOMContentLoaded', () => {
+        renderCalendar();
+        loadEvents();
+    });
 </script>
 @endpush

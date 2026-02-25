@@ -913,4 +913,8 @@ Route::prefix('mobile')->name('mobile.')->middleware(['auth'])->group(function (
             return view('mobile.service-unit.duty-tasks');
         })->name('duty-tasks');
     });
+
+    // Ministry Units & ID Card
+    Route::get('/ministry', fn() => view('mobile.ministry'))->name('ministry');
+    Route::get('/id-card', fn() => view('mobile.id-card'))->name('id-card');
 });

@@ -1,562 +1,351 @@
 @extends('layouts.mobile')
 
-@section('title', 'Check In - Church App')
-@section('header', 'Check In')
+@section('title', 'Service Check In')
 
 @section('content')
-<div class="bg-gray-50 min-h-screen pb-20">
-    <!-- Check-in Methods -->
-    <div class="bg-white shadow-sm">
-        <div class="px-4 py-6">
-            <h2 class="text-xl font-bold text-gray-900 mb-4">How would you like to check in?</h2>
+<div class="min-h-screen bg-slate-100">
 
-            <div class="space-y-3">
-                <!-- Scan Service QR -->
-                <button onclick="openQRScanner()" class="w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white p-4 rounded-xl shadow-md flex items-center justify-between hover:from-blue-700 hover:to-blue-800 transition">
-                    <div class="flex items-center">
-                        <div class="bg-white/20 p-3 rounded-lg mr-4">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"/>
-                            </svg>
-                        </div>
-                        <div class="text-left">
-                            <p class="font-semibold">Scan Service QR Code</p>
-                            <p class="text-sm text-blue-100">Scan QR at church entrance</p>
-                        </div>
-                    </div>
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-                    </svg>
-                </button>
+    <!-- Blue Header with Current Event -->
+    <div class="bg-primary-600 relative overflow-hidden" style="padding-top: calc(env(safe-area-inset-top) + 1rem); padding-bottom: 3.5rem; padding-left: 1.5rem; padding-right: 1.5rem;">
+        <div class="absolute top-0 right-0 w-48 h-48 bg-white/5 rounded-full -mr-20 -mt-20 pointer-events-none"></div>
 
-                <!-- Show My QR -->
-                <button onclick="showMyQR()" class="w-full bg-white border-2 border-blue-600 text-blue-600 p-4 rounded-xl shadow-sm flex items-center justify-between hover:bg-blue-50 transition">
-                    <div class="flex items-center">
-                        <div class="bg-blue-100 p-3 rounded-lg mr-4">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2"/>
-                            </svg>
-                        </div>
-                        <div class="text-left">
-                            <p class="font-semibold">Show My QR Code</p>
-                            <p class="text-sm text-gray-500">For usher to scan</p>
-                        </div>
-                    </div>
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-                    </svg>
-                </button>
+        <!-- Top bar -->
+        <div class="flex items-center justify-center mb-5 relative">
+            <a href="{{ url('/mobile/dashboard') }}" class="absolute left-0 w-9 h-9 bg-white/20 rounded-full flex items-center justify-center active:scale-95 transition-transform">
+                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+            </a>
+            <h1 class="text-lg font-bold text-white">Service Check In</h1>
+        </div>
 
-                <!-- Family Check-in -->
-                <button onclick="showFamilyCheckIn()" class="w-full bg-white border-2 border-gray-300 text-gray-700 p-4 rounded-xl shadow-sm flex items-center justify-between hover:bg-gray-50 transition">
-                    <div class="flex items-center">
-                        <div class="bg-gray-100 p-3 rounded-lg mr-4">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
-                            </svg>
-                        </div>
-                        <div class="text-left">
-                            <p class="font-semibold">Family Check-in</p>
-                            <p class="text-sm text-gray-500">Check in entire family</p>
-                        </div>
-                    </div>
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-                    </svg>
-                </button>
-
-                <!-- I'm Here (Self-Report) — shown only during service hours -->
-                <div id="selfReportCard" class="hidden">
-                    <button onclick="selfReportCheckIn()" class="w-full bg-gradient-to-r from-green-600 to-green-700 text-white p-4 rounded-xl shadow-md flex items-center justify-between hover:from-green-700 hover:to-green-800 transition">
-                        <div class="flex items-center">
-                            <div class="bg-white/20 p-3 rounded-lg mr-4">
-                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-                                </svg>
-                            </div>
-                            <div class="text-left">
-                                <p class="font-semibold">I'm Here</p>
-                                <p class="text-sm text-green-100">No QR needed — tap to check in</p>
-                            </div>
-                        </div>
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-                        </svg>
-                    </button>
-                </div>
-            </div>
+        <!-- Current Event -->
+        <div class="text-center relative">
+            <p class="text-blue-200 text-xs font-bold uppercase tracking-widest mb-1">Current Event</p>
+            <h2 class="text-xl font-bold text-white" id="currentEventName">Sunday Morning Worship</h2>
+            <p class="text-blue-200 text-sm mt-1" id="currentEventMeta">10:30 AM &bull; Main Sanctuary</p>
         </div>
     </div>
 
-    <!-- Recent Check-ins -->
-    <div class="px-4 py-6">
-        <div class="flex items-center justify-between mb-4">
-            <h3 class="text-lg font-bold text-gray-900">Recent Check-ins</h3>
-            <button onclick="loadCheckInHistory()" class="text-blue-600 text-sm font-medium">
-                View All
+    <!-- White Body -->
+    <div class="bg-white rounded-t-[2rem] -mt-6 relative z-10 px-4 pt-6 pb-8">
+
+        <!-- QR Scanner Card -->
+        <div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden mb-6">
+            <!-- Camera viewport -->
+            <div class="relative bg-slate-900 aspect-square w-full overflow-hidden" id="scannerWrapper">
+                <!-- Camera feed mounts here -->
+                <div id="qrScanner" class="w-full h-full"></div>
+
+                <!-- Blue corner brackets overlay -->
+                <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+                    <div class="relative w-56 h-56">
+                        <!-- Top-left -->
+                        <span class="absolute top-0 left-0 w-8 h-8 border-t-4 border-l-4 border-primary-500 rounded-tl-lg"></span>
+                        <!-- Top-right -->
+                        <span class="absolute top-0 right-0 w-8 h-8 border-t-4 border-r-4 border-primary-500 rounded-tr-lg"></span>
+                        <!-- Bottom-left -->
+                        <span class="absolute bottom-0 left-0 w-8 h-8 border-b-4 border-l-4 border-primary-500 rounded-bl-lg"></span>
+                        <!-- Bottom-right -->
+                        <span class="absolute bottom-0 right-0 w-8 h-8 border-b-4 border-r-4 border-primary-500 rounded-br-lg"></span>
+                        <!-- Center QR icon (shown until camera starts) -->
+                        <div id="scannerPlaceholder" class="absolute inset-0 flex items-center justify-center">
+                            <svg class="w-16 h-16 text-primary-400 opacity-60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"/>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Scanning status bar at bottom of camera -->
+                <div class="absolute bottom-0 left-0 right-0 py-2 bg-gradient-to-t from-black/60 to-transparent">
+                    <p class="text-center text-xs text-white/80 font-medium" id="scanStatusBar">Starting camera...</p>
+                </div>
+            </div>
+
+            <div class="px-4 py-4 text-center">
+                <p class="text-primary-600 font-bold text-base" id="scanningLabel">Scanning...</p>
+                <p class="text-slate-400 text-xs mt-1">Point at the service QR code shown on the screen or in your program.</p>
+            </div>
+        </div>
+
+        <!-- Or Enter Manually -->
+        <div class="flex items-center gap-3 mb-4">
+            <div class="flex-1 h-px bg-slate-200"></div>
+            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Or Enter Manually</span>
+            <div class="flex-1 h-px bg-slate-200"></div>
+        </div>
+
+        <div class="flex gap-2">
+            <input type="text"
+                   id="manualCodeInput"
+                   placeholder="Enter Check-in Code"
+                   class="flex-1 bg-white border-2 border-slate-200 rounded-2xl py-4 px-5 text-sm font-semibold text-slate-700 placeholder-slate-300 focus:ring-0 focus:border-primary-500 transition-colors">
+            <button onclick="submitManualCode()"
+                    class="bg-primary-600 text-white font-bold px-6 py-4 rounded-2xl shadow-sm shadow-primary-600/30 active:scale-95 transition-transform">
+                Join
             </button>
         </div>
 
-        <div id="recentCheckIns" class="space-y-3">
-            <!-- Will be populated by JavaScript -->
-            <div class="text-center py-8 text-gray-500">
-                <svg class="w-12 h-12 mx-auto mb-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                </svg>
-                <p>Loading check-in history...</p>
-            </div>
+        <!-- Quick alternatives -->
+        <div class="mt-5 grid grid-cols-2 gap-3">
+            <button onclick="showMyQRModal()" class="flex items-center gap-2 p-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-semibold text-slate-700 active:scale-95 transition-transform">
+                <svg class="w-5 h-5 text-primary-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2"/></svg>
+                <span>My QR Code</span>
+            </button>
+            <button onclick="showFamilyCheckIn()" class="flex items-center gap-2 p-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-semibold text-slate-700 active:scale-95 transition-transform">
+                <svg class="w-5 h-5 text-primary-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                <span>Family Check-in</span>
+            </button>
         </div>
     </div>
 
-    <!-- Attendance Stats -->
-    <div class="px-4 pb-6">
-        <h3 class="text-lg font-bold text-gray-900 mb-4">My Attendance</h3>
-
-        <div class="bg-gradient-to-br from-blue-600 to-blue-800 rounded-xl p-6 text-white shadow-lg">
-            <div class="grid grid-cols-2 gap-4">
-                <div class="text-center">
-                    <p class="text-3xl font-bold" id="monthlyAttendance">--</p>
-                    <p class="text-sm text-blue-100 mt-1">This Month</p>
-                </div>
-                <div class="text-center border-l border-blue-400 pl-4">
-                    <p class="text-3xl font-bold" id="yearlyAttendance">--</p>
-                    <p class="text-sm text-blue-100 mt-1">This Year</p>
-                </div>
-            </div>
-
-            <div class="mt-6 pt-6 border-t border-blue-400">
-                <div class="flex items-center justify-between text-sm">
-                    <span class="text-blue-100">Attendance Rate</span>
-                    <span class="font-bold" id="attendanceRate">--%</span>
-                </div>
-                <div class="w-full bg-blue-900/30 rounded-full h-2 mt-2">
-                    <div id="attendanceBar" class="bg-white rounded-full h-2 transition-all duration-500" style="width: 0%"></div>
-                </div>
-            </div>
+    <!-- Custom bottom nav for scanner page (4 tabs, no FAB) -->
+    <nav class="fixed bottom-0 left-0 right-0 glass border-t border-slate-200/50 pb-safe z-50">
+        <div class="flex justify-around items-center h-16 px-2">
+            <a href="{{ url('/mobile/dashboard') }}" class="flex flex-col items-center justify-center w-full h-full gap-1">
+                <svg class="w-6 h-6 text-primary-600" fill="currentColor" viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+                <span class="text-[10px] font-bold text-primary-600">Home</span>
+            </a>
+            <a href="{{ url('/mobile/give') }}" class="flex flex-col items-center justify-center w-full h-full gap-1">
+                <svg class="w-6 h-6 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                <span class="text-[10px] font-medium text-slate-400">Give</span>
+            </a>
+            <a href="{{ url('/mobile/events') }}" class="flex flex-col items-center justify-center w-full h-full gap-1">
+                <svg class="w-6 h-6 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                <span class="text-[10px] font-medium text-slate-400">Events</span>
+            </a>
+            <a href="{{ url('/mobile/profile') }}" class="flex flex-col items-center justify-center w-full h-full gap-1">
+                <svg class="w-6 h-6 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                <span class="text-[10px] font-medium text-slate-400">Profile</span>
+            </a>
         </div>
-    </div>
+    </nav>
 </div>
 
-<!-- QR Scanner Modal -->
-<div id="qrScannerModal" class="hidden fixed inset-0 bg-black bg-opacity-75 z-50 flex items-center justify-center">
-    <div class="bg-white rounded-xl max-w-md w-full mx-4">
-        <div class="p-6">
-            <div class="flex items-center justify-between mb-4">
-                <h3 class="text-xl font-bold text-gray-900">Scan QR Code</h3>
-                <button onclick="closeQRScanner()" class="text-gray-500 hover:text-gray-700">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                    </svg>
-                </button>
-            </div>
-
-            <!-- QR Scanner Container -->
-            <div id="qrScanner" class="bg-gray-100 rounded-lg overflow-hidden aspect-square mb-4">
-                <div class="flex items-center justify-center h-full">
-                    <p class="text-gray-500">Camera loading...</p>
-                </div>
-            </div>
-
-            <p class="text-sm text-gray-600 text-center">
-                Position the QR code within the frame to scan
-            </p>
+<!-- My QR Modal -->
+<div id="myQRModal" class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-end">
+    <div class="bg-white w-full rounded-t-3xl p-6 pb-safe">
+        <div class="w-10 h-1 bg-slate-200 rounded-full mx-auto mb-5"></div>
+        <h3 class="text-lg font-bold text-slate-800 text-center mb-4">My QR Code</h3>
+        <div class="text-center mb-4">
+            <p class="font-bold text-slate-800" id="qrMemberName">Loading...</p>
+            <p class="text-sm text-slate-500" id="qrMemberPhone"></p>
         </div>
-    </div>
-</div>
-
-<!-- My QR Code Modal -->
-<div id="myQRModal" class="hidden fixed inset-0 bg-black bg-opacity-75 z-50 flex items-center justify-center">
-    <div class="bg-white rounded-xl max-w-md w-full mx-4">
-        <div class="p-6">
-            <div class="flex items-center justify-between mb-4">
-                <h3 class="text-xl font-bold text-gray-900">My QR Code</h3>
-                <button onclick="closeMyQR()" class="text-gray-500 hover:text-gray-700">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                    </svg>
-                </button>
-            </div>
-
-            <!-- Member Name -->
-            <div class="text-center mb-4">
-                <p class="text-lg font-semibold text-gray-900" id="qrMemberName">Loading...</p>
-                <p class="text-sm text-gray-500" id="qrMemberPhone"></p>
-            </div>
-
-            <!-- QR Code Display -->
-            <div id="myQRCode" class="bg-white p-6 rounded-lg border-2 border-gray-200 mb-4">
-                <!-- QR code will be inserted here -->
-            </div>
-
-            <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                <p class="text-sm text-blue-800">
-                    <svg class="w-5 h-5 inline mr-1" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
-                    </svg>
-                    Show this QR code to an usher to check in
-                </p>
+        <div id="myQRCode" class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm mb-4 flex items-center justify-center min-h-[200px]">
+            <div class="animate-pulse text-slate-300">
+                <svg class="w-16 h-16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"/></svg>
             </div>
         </div>
+        <p class="text-xs text-center text-slate-400 mb-5">Show this to an usher or volunteer to check in</p>
+        <button onclick="closeMyQRModal()" class="w-full py-3.5 rounded-2xl border-2 border-slate-200 text-slate-600 font-bold text-sm">Close</button>
     </div>
 </div>
 
 <!-- Family Check-in Modal -->
-<div id="familyCheckInModal" class="hidden fixed inset-0 bg-black bg-opacity-75 z-50 flex items-center justify-center overflow-y-auto">
-    <div class="bg-white rounded-xl max-w-md w-full mx-4 my-8">
-        <div class="p-6">
-            <div class="flex items-center justify-between mb-4">
-                <h3 class="text-xl font-bold text-gray-900">Family Check-in</h3>
-                <button onclick="closeFamilyCheckIn()" class="text-gray-500 hover:text-gray-700">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                    </svg>
-                </button>
+<div id="familyModal" class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-end">
+    <div class="bg-white w-full rounded-t-3xl p-6 pb-safe max-h-[85vh] overflow-y-auto">
+        <div class="w-10 h-1 bg-slate-200 rounded-full mx-auto mb-5"></div>
+        <h3 class="text-lg font-bold text-slate-800 mb-4">Family Check-in</h3>
+        <form id="familyCheckInForm">
+            <div class="mb-4">
+                <label class="text-xs font-bold text-slate-400 uppercase tracking-widest block mb-2">Service</label>
+                <select name="service_type" class="w-full px-4 py-3 border border-slate-200 rounded-xl text-sm font-semibold text-slate-700 focus:ring-2 focus:ring-primary-500 focus:border-primary-500" required>
+                    <option value="">Select service...</option>
+                    <option value="sunday_first">Sunday 1st Service</option>
+                    <option value="sunday_second">Sunday 2nd Service</option>
+                    <option value="midweek">Midweek Service</option>
+                    <option value="prayer_meeting">Prayer Meeting</option>
+                </select>
             </div>
-
-            <form id="familyCheckInForm" class="space-y-4">
-                <div>
-                    <label class="block text-gray-700 font-medium mb-2">Service Type</label>
-                    <select name="service_type" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required>
-                        <option value="">Select service type</option>
-                        <option value="sunday_first">Sunday First Service</option>
-                        <option value="sunday_second">Sunday Second Service</option>
-                        <option value="midweek">Midweek Service</option>
-                        <option value="prayer_meeting">Prayer Meeting</option>
-                        <option value="special">Special Service</option>
-                    </select>
+            <div class="mb-5">
+                <label class="text-xs font-bold text-slate-400 uppercase tracking-widest block mb-2">Family Members</label>
+                <div id="familyMembersList" class="space-y-2">
+                    <p class="text-slate-400 text-sm text-center py-4">Loading family members...</p>
                 </div>
-
-                <div>
-                    <label class="block text-gray-700 font-medium mb-2">Select Family Members</label>
-                    <div id="familyMembersList" class="space-y-2 max-h-64 overflow-y-auto">
-                        <!-- Will be populated by JavaScript -->
-                        <p class="text-gray-500 text-center py-4">Loading family members...</p>
-                    </div>
-                </div>
-
-                <button type="submit" class="w-full bg-blue-600 text-white font-semibold py-3 px-4 rounded-lg hover:bg-blue-700 transition duration-200">
-                    Check In Family
-                </button>
-            </form>
-        </div>
+            </div>
+            <div class="flex gap-3">
+                <button type="button" onclick="closeFamilyModal()" class="flex-1 py-3.5 rounded-2xl border-2 border-slate-200 text-slate-600 font-bold text-sm">Cancel</button>
+                <button type="submit" class="flex-1 py-3.5 rounded-2xl bg-primary-600 text-white font-bold text-sm">Check In</button>
+            </div>
+        </form>
     </div>
 </div>
+
 @endsection
 
 @push('scripts')
 <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
 <script>
-let html5QrCode = null;
+    let html5QrCode = null;
+    let scannerStarted = false;
 
-// QR Scanner Functions
-async function openQRScanner() {
-    document.getElementById('qrScannerModal').classList.remove('hidden');
-    
-    // Initialize Scanner if not already
-    if (!html5QrCode) {
-        html5QrCode = new Html5Qrcode("qrScanner");
-    }
-
-    const config = { fps: 10, qrbox: { width: 250, height: 250 } };
-    
-    try {
-        await html5QrCode.start(
-            { facingMode: "environment" },
-            config,
-            onScanSuccess,
-            onScanFailure // optional
-        );
-        document.getElementById('qrScanner').classList.remove('bg-gray-100');
-    } catch (err) {
-        console.error("Error starting scanner", err);
-        ChurchApp.showToast("Camera access failed. Please ensure permissions are granted.", "error");
-    }
-}
-
-async function onScanSuccess(decodedText, decodedResult) {
-    // Stop scanning
-    if(html5QrCode) {
-        await html5QrCode.stop();
-        document.getElementById('qrScannerModal').classList.add('hidden');
-    }
-    
-    // Process Check-in
-    handleCheckIn(decodedText);
-}
-
-function onScanFailure(error) {
-    // console.warn(`Code scan error = ${error}`);
-}
-
-async function handleCheckIn(qrData) {
-    ChurchApp.showLoading(true);
-    try {
-        let token = qrData;
-        let endpoint = '/api/mobile/v1/check-in/service'; // Default
-        
-        // Try to parse JSON data if it's a JSON string
+    // ── Current Event ──────────────────────────────────────────
+    async function loadCurrentEvent() {
         try {
-            const data = JSON.parse(qrData);
-            if (data.token) {
-                token = data.token;
+            const res = await ChurchApp.getUpcomingEvents();
+            if (res.success && res.data.events && res.data.events.length > 0) {
+                const ev = res.data.events[0];
+                document.getElementById('currentEventName').textContent = ev.name || 'Sunday Morning Worship';
+                const date = new Date(ev.start_date);
+                const time = date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+                document.getElementById('currentEventMeta').textContent = `${time} \u2022 ${ev.location || 'Main Sanctuary'}`;
             }
-            
-            // Determine endpoint based on type if available
-            if (data.type === 'member_checkin') {
-                endpoint = '/api/mobile/v1/check-in/member';
-            } else if (data.type === 'service_checkin') {
-                endpoint = '/api/mobile/v1/check-in/service';
+        } catch (e) { /* keep default */ }
+    }
+
+    // ── QR Scanner ────────────────────────────────────────────
+    async function startScanner() {
+        if (scannerStarted) return;
+        try {
+            if (!html5QrCode) {
+                html5QrCode = new Html5Qrcode('qrScanner');
+            }
+            await html5QrCode.start(
+                { facingMode: 'environment' },
+                { fps: 10, qrbox: { width: 220, height: 220 }, aspectRatio: 1.0 },
+                onScanSuccess,
+                () => {}
+            );
+            scannerStarted = true;
+            document.getElementById('scannerPlaceholder').style.display = 'none';
+            document.getElementById('scanStatusBar').textContent = 'Camera active — align QR code';
+            document.getElementById('scanningLabel').textContent = 'Scanning...';
+        } catch (err) {
+            console.warn('Camera error:', err);
+            document.getElementById('scanStatusBar').textContent = 'Camera unavailable';
+            document.getElementById('scanningLabel').textContent = 'Use manual entry below';
+            document.getElementById('scanningLabel').classList.replace('text-primary-600', 'text-slate-400');
+        }
+    }
+
+    async function onScanSuccess(decodedText) {
+        if (html5QrCode && scannerStarted) {
+            await html5QrCode.stop();
+            scannerStarted = false;
+        }
+        document.getElementById('scanningLabel').textContent = 'Processing...';
+        handleCheckIn(decodedText);
+    }
+
+    async function handleCheckIn(qrData) {
+        ChurchApp.showLoading(true);
+        try {
+            let token = qrData;
+            let endpoint = '/api/mobile/v1/check-in/service';
+            try {
+                const data = JSON.parse(qrData);
+                if (data.token) token = data.token;
+                if (data.type === 'member_checkin') endpoint = '/api/mobile/v1/check-in/member';
+            } catch (e) { /* raw token */ }
+
+            const res = await ChurchApp.apiCall(endpoint, 'POST', { token });
+            if (res.success) {
+                ChurchApp.showToast(res.message || 'Check-in Successful!', 'success');
+                document.getElementById('scanningLabel').textContent = 'Check-in complete!';
+                setTimeout(() => {
+                    document.getElementById('scanningLabel').textContent = 'Scanning...';
+                    startScanner();
+                }, 3000);
+            } else {
+                throw new Error(res.message || 'Check-in failed');
             }
         } catch (e) {
-            // Not JSON, treat as raw token
-            console.log('Scanned data is not JSON, using as raw token');
+            ChurchApp.showToast(e.message || 'Invalid QR Code', 'error');
+            document.getElementById('scanningLabel').textContent = 'Scanning...';
+            startScanner();
+        } finally {
+            ChurchApp.showLoading(false);
         }
-
-        const res = await ChurchApp.apiCall(endpoint, 'POST', { token: token });
-        
-        if(res.success) {
-            ChurchApp.showToast(res.message || 'Check-in Successful!', 'success');
-            loadCheckInHistory(); // Refresh history
-        } else {
-            throw new Error(res.message || 'Check-in failed');
-        }
-    } catch(e) {
-        ChurchApp.showToast(e.message || 'Invalid QR Code', 'error');
-    } finally {
-        ChurchApp.showLoading(false);
     }
-}
 
-async function closeQRScanner() {
-    document.getElementById('qrScannerModal').classList.add('hidden');
-    if (html5QrCode) {
+    // ── Manual Code ───────────────────────────────────────────
+    async function submitManualCode() {
+        const code = document.getElementById('manualCodeInput').value.trim();
+        if (!code) {
+            ChurchApp.showToast('Please enter a check-in code', 'error');
+            return;
+        }
+        document.getElementById('manualCodeInput').value = '';
+        handleCheckIn(code);
+    }
+
+    document.getElementById('manualCodeInput').addEventListener('keydown', e => {
+        if (e.key === 'Enter') submitManualCode();
+    });
+
+    // ── My QR Modal ───────────────────────────────────────────
+    async function showMyQRModal() {
+        document.getElementById('myQRModal').classList.remove('hidden');
         try {
-            await html5QrCode.stop();
-        } catch(e) { console.log(e); }
-    }
-}
-
-// My QR Code Functions
-async function showMyQR() {
-    document.getElementById('myQRModal').classList.remove('hidden');
-
-    try {
-        const result = await ChurchApp.getMyQRCode();
-
-        if (result.success) {
-            document.getElementById('qrMemberName').textContent = result.data.member.full_name;
-            document.getElementById('qrMemberPhone').textContent = result.data.member.phone;
-
-            // Display QR code (assuming QR code comes as data URL or SVG)
-            document.getElementById('myQRCode').innerHTML = result.data.qr_code;
+            const result = await ChurchApp.getMyQRCode();
+            if (result.success) {
+                document.getElementById('qrMemberName').textContent = result.data.member.full_name;
+                document.getElementById('qrMemberPhone').textContent = result.data.member.phone || '';
+                document.getElementById('myQRCode').innerHTML = result.data.qr_code;
+            }
+        } catch (err) {
+            ChurchApp.showToast('Failed to load QR code', 'error');
+            closeMyQRModal();
         }
-    } catch (error) {
-        ChurchApp.showToast('Failed to load QR code', 'error');
-        closeMyQR();
-    }
-}
-
-function closeMyQR() {
-    document.getElementById('myQRModal').classList.add('hidden');
-}
-
-// Family Check-in Functions
-async function showFamilyCheckIn() {
-    document.getElementById('familyCheckInModal').classList.remove('hidden');
-
-    try {
-        const result = await ChurchApp.getFamilyMembers();
-
-        if (result.success && result.data.length > 0) {
-            const listHTML = result.data.map(member => `
-                <label class="flex items-center p-3 bg-gray-50 rounded-lg hover:bg-gray-100 cursor-pointer">
-                    <input type="checkbox" name="family_members[]" value="${member.id}"
-                           class="rounded border-gray-300 text-blue-600 focus:ring-blue-500 mr-3" checked>
-                    <div class="flex-1">
-                        <p class="font-medium text-gray-900">${member.full_name}</p>
-                        <p class="text-sm text-gray-500">${member.relationship || 'Family Member'}</p>
-                    </div>
-                </label>
-            `).join('');
-
-            document.getElementById('familyMembersList').innerHTML = listHTML;
-        } else {
-            document.getElementById('familyMembersList').innerHTML = `
-                <p class="text-gray-500 text-center py-4">No family members found</p>
-            `;
-        }
-    } catch (error) {
-        ChurchApp.showToast('Failed to load family members', 'error');
-    }
-}
-
-function closeFamilyCheckIn() {
-    document.getElementById('familyCheckInModal').classList.add('hidden');
-}
-
-// Family Check-in Form Submission
-document.getElementById('familyCheckInForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
-
-    const formData = new FormData(e.target);
-    const serviceType = formData.get('service_type');
-    const familyMembers = formData.getAll('family_members[]');
-
-    if (familyMembers.length === 0) {
-        ChurchApp.showToast('Please select at least one family member', 'error');
-        return;
     }
 
-    ChurchApp.showLoading(true);
-
-    try {
-        const result = await ChurchApp.checkInFamily(serviceType, familyMembers);
-
-        if (result.success) {
-            ChurchApp.showToast(`Checked in ${result.data.count} family member(s)!`, 'success');
-            closeFamilyCheckIn();
-            loadCheckInHistory();
-        }
-    } catch (error) {
-        ChurchApp.showToast(error.message || 'Family check-in failed', 'error');
-    } finally {
-        ChurchApp.showLoading(false);
+    function closeMyQRModal() {
+        document.getElementById('myQRModal').classList.add('hidden');
     }
-});
 
-// Load Recent Check-ins
-async function loadCheckInHistory() {
-    try {
-        const result = await ChurchApp.getCheckInHistory(5); // Last 5 check-ins
-
-        if (result.success && result.data.length > 0) {
-            const historyHTML = result.data.map(checkIn => {
-                const date = new Date(checkIn.check_in_time);
-                const formattedDate = date.toLocaleDateString('en-US', {
-                    month: 'short',
-                    day: 'numeric',
-                    year: 'numeric'
-                });
-                const formattedTime = date.toLocaleTimeString('en-US', {
-                    hour: '2-digit',
-                    minute: '2-digit'
-                });
-
-                return `
-                    <div class="bg-white rounded-lg p-4 shadow-sm border border-gray-200">
-                        <div class="flex items-center justify-between">
-                            <div class="flex items-center">
-                                <div class="bg-blue-100 p-2 rounded-lg mr-3">
-                                    <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                                    </svg>
-                                </div>
-                                <div>
-                                    <p class="font-semibold text-gray-900">${checkIn.service_type_label || checkIn.service_type}</p>
-                                    <p class="text-sm text-gray-500">${formattedDate} at ${formattedTime}</p>
-                                </div>
-                            </div>
-                            ${checkIn.location ? `<span class="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded">${checkIn.location}</span>` : ''}
+    // ── Family Check-in ───────────────────────────────────────
+    async function showFamilyCheckIn() {
+        document.getElementById('familyModal').classList.remove('hidden');
+        try {
+            const result = await ChurchApp.getFamilyMembers();
+            if (result.success && result.data.length > 0) {
+                document.getElementById('familyMembersList').innerHTML = result.data.map(m => `
+                    <label class="flex items-center gap-3 p-3 bg-slate-50 rounded-xl cursor-pointer active:bg-slate-100 transition-colors">
+                        <input type="checkbox" name="family_members[]" value="${m.id}" checked
+                               class="rounded border-slate-300 text-primary-600 focus:ring-primary-500">
+                        <div>
+                            <p class="font-semibold text-slate-800 text-sm">${window.escapeHtml(m.full_name)}</p>
+                            <p class="text-xs text-slate-400">${window.escapeHtml(m.relationship || 'Family Member')}</p>
                         </div>
-                    </div>
-                `;
-            }).join('');
-
-            document.getElementById('recentCheckIns').innerHTML = historyHTML;
-        } else {
-            document.getElementById('recentCheckIns').innerHTML = `
-                <div class="text-center py-8 text-gray-500">
-                    <svg class="w-12 h-12 mx-auto mb-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                    </svg>
-                    <p>No check-in history yet</p>
-                </div>
-            `;
+                    </label>
+                `).join('');
+            } else {
+                document.getElementById('familyMembersList').innerHTML = '<p class="text-slate-400 text-sm text-center py-4">No family members found</p>';
+            }
+        } catch (e) {
+            ChurchApp.showToast('Failed to load family members', 'error');
         }
-    } catch (error) {
-        console.error('Failed to load check-in history:', error);
     }
-}
 
-// Load Attendance Stats
-async function loadAttendanceStats() {
-    try {
-        const result = await ChurchApp.getAttendanceStats();
+    function closeFamilyModal() {
+        document.getElementById('familyModal').classList.add('hidden');
+    }
 
-        if (result.success) {
-            const stats = result.data;
-
-            document.getElementById('monthlyAttendance').textContent = stats.monthly_count || 0;
-            document.getElementById('yearlyAttendance').textContent = stats.yearly_count || 0;
-
-            const rate = stats.attendance_rate || 0;
-            document.getElementById('attendanceRate').textContent = `${rate}%`;
-            document.getElementById('attendanceBar').style.width = `${rate}%`;
+    document.getElementById('familyCheckInForm').addEventListener('submit', async e => {
+        e.preventDefault();
+        const formData = new FormData(e.target);
+        const serviceType = formData.get('service_type');
+        const familyMembers = formData.getAll('family_members[]');
+        if (!serviceType) { ChurchApp.showToast('Please select a service', 'error'); return; }
+        if (familyMembers.length === 0) { ChurchApp.showToast('Select at least one family member', 'error'); return; }
+        ChurchApp.showLoading(true);
+        try {
+            const result = await ChurchApp.checkInFamily(serviceType, familyMembers);
+            if (result.success) {
+                ChurchApp.showToast(`Checked in ${result.data.count} family member(s)!`, 'success');
+                closeFamilyModal();
+            }
+        } catch (err) {
+            ChurchApp.showToast(err.message || 'Family check-in failed', 'error');
+        } finally {
+            ChurchApp.showLoading(false);
         }
-    } catch (error) {
-        console.error('Failed to load attendance stats:', error);
-    }
-}
+    });
 
-// Self-Report Check-in
-async function selfReportCheckIn() {
-    ChurchApp.showLoading(true);
-    try {
-        const payload = {};
-        // Optionally capture GPS
-        if (navigator.geolocation) {
-            await new Promise((resolve) => {
-                navigator.geolocation.getCurrentPosition(
-                    (pos) => {
-                        payload.latitude = pos.coords.latitude;
-                        payload.longitude = pos.coords.longitude;
-                        resolve();
-                    },
-                    () => resolve(), // continue without GPS if denied
-                    { timeout: 4000 }
-                );
-            });
-        }
-
-        const res = await ChurchApp.apiCall('/api/mobile/v1/check-in/self-report', 'POST', payload);
-
-        if (res.success) {
-            ChurchApp.showToast('Checked in successfully!', 'success');
-            loadCheckInHistory();
-            loadAttendanceStats();
-        } else {
-            ChurchApp.showToast(res.message || 'Check-in failed', 'error');
-        }
-    } catch (e) {
-        ChurchApp.showToast(e.message || 'Check-in failed', 'error');
-    } finally {
-        ChurchApp.showLoading(false);
-    }
-}
-
-// Show "I'm Here" button only during service windows
-function checkServiceHours() {
-    const now = new Date();
-    const day = now.getDay(); // 0=Sun, 3=Wed, 5=Fri
-    const hour = now.getHours();
-
-    const windows = {
-        0: { start: 5, end: 14 },
-        3: { start: 15, end: 22 },
-        5: { start: 15, end: 22 },
-    };
-
-    const card = document.getElementById('selfReportCard');
-    if (card && windows[day] && hour >= windows[day].start && hour < windows[day].end) {
-        card.classList.remove('hidden');
-    }
-}
-
-// Initialize on page load
-document.addEventListener('DOMContentLoaded', () => {
-    loadCheckInHistory();
-    loadAttendanceStats();
-    checkServiceHours();
-});
+    // ── Init ──────────────────────────────────────────────────
+    document.addEventListener('DOMContentLoaded', () => {
+        loadCurrentEvent();
+        // Small delay so layout settles before camera starts
+        setTimeout(startScanner, 400);
+    });
 </script>
 @endpush
