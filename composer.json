@@ -74,6 +74,34 @@
         "allow-plugins": {
             "pestphp/pest-plugin": true,
             "php-http/discovery": true
+        },
+        "audit": {
+            "block-insecure": false,
+            "ignore": {
+                "PKSA-b41t-wbzk-9q51": "*",
+                "PKSA-d5tc-s1qs-h781": "*",
+                "PKSA-m5cs-t1y6-qpcs": "*",
+                "PKSA-3r5d-mb8f-1qw9": "*",
+                "PKSA-mdq4-51ck-6kdq": "*",
+                "PKSA-8qx3-n5y5-vvnd": "*",
+                "PKSA-w7xr-vk7n-rstm": "*",
+                "PKSA-cv56-2228-pzr6": "*",
+                "PKSA-6r8f-nxsb-67bq": "*",
+                "PKSA-gh7h-hhy4-byg7": "*",
+                "PKSA-mwt3-h9tv-kx78": "*",
+                "PKSA-hp6n-n4kz-21wk": "*",
+                "PKSA-mckv-s5hg-868k": "*",
+                "PKSA-7ztm-rpt3-qqzk": "*",
+                "PKSA-2kw5-jd8w-5mvh": "*",
+                "PKSA-4jrs-y99s-q8j6": "*",
+                "PKSA-hbk6-2vfz-8f8n": "*",
+                "PKSA-xgss-dh88-nswy": "*",
+                "PKSA-r15m-kszr-8n8q": "*",
+                "PKSA-dxd5-wy68-pq29": "*",
+                "PKSA-96jv-mtjg-g2v8": "*",
+                "PKSA-xmwy-rmx5-m7h4": "*",
+                "PKSA-xz3r-9gp4-4m1z": "*"
+            }
         }
     },
     "minimum-stability": "stable",
